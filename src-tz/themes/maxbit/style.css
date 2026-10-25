@@ -1,0 +1,10 @@
+/*
+Theme Name: MAXBIT
+Description: Лёгкая собственная тема сайта MAXBIT. Оформление, шаблоны и паттерны; содержание — в записях и модуле maxbit-core.
+Version: 0.5.2
+Requires at least: 6.6
+Requires PHP: 8.1
+Author: MAXBIT
+Text Domain: maxbit
+*/
+/* Стили подключаются из assets/style.css (см. functions.php). */

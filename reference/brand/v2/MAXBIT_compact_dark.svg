@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 766 110" width="766" height="110" role="img" aria-label="MAXBIT">
+  <title>MAXBIT</title>
+  <desc>MAXBIT, вариант №1: тёмная &gt; поверх синей &lt;, в инверсии белая &gt; поверх синей &lt;. Только горизонтальное положение X скорректировано: +3.5 единицы. Контуры, пропорции, цвета, остальные элементы и их позиции сохранены.</desc>
+  <g fill="#FFFFFF">
+<path d="M0 0H35L76 51L117 0H152V110H119V44L89 82H63L33 44V110H0Z" />
+<path d="M160 110L216 0H252L308 110H272L234 39L196 110Z" /><path d="M205 69H263V87H205Z" />
+</g>
+  <g id="X-layer-order" transform="translate(3.5 0)"><path d="M410 0H449L399 55L449 110H410L360 55Z" fill="#2563EB" id="X-blue-chevron" />
+<path d="M310 0H349L399 55L349 110H310L360 55Z" fill="#FFFFFF" id="X-dark-chevron" /></g><g fill="#2563EB">
+<path fill-rule="evenodd" d="M458 0H539C573 0 589 10 589 29C589 42 582 50 569 54C586 59 594 67 594 83C594 101 579 110 547 110H458Z M493 24V44H539C550 44 555 41 555 34C555 27 550 24 539 24Z M493 66V86H545C556 86 560 83 560 76C560 69 556 66 545 66Z" />
+<path d="M604 0H638V110H604Z" />
+<path d="M647 0H766V27H723V110H689V27H647Z" />
+</g>
+  </svg>

@@ -1,0 +1,30 @@
+# Локальные данные и секреты — никогда в репозиторий
+site/wp-config-local.php
+site/wp-content/database/
+site/wp-content/uploads/
+logs/
+vendor/wordpress-*.tar.gz
+vendor/sq*.tar.gz
+vendor/sqlite-src/
+# Внутренние источники — вне публичной части проекта (см. docs/03)
+sources_private/
+
+# Публичный репозиторий (с 25.10.2026): в Git — только код темы/модуля, скрипты и служебные отчёты.
+site/*
+!site/wp-config.php
+vendor/
+dist/*.zip
+dist/installed/
+dist/launch-bundle/
+reports/**/*.png
+reports/**/*.jpg
+reports/**/*.webp
+reports/**/*.zip
+reports/**/*.html
+reports/diff/
+docs/
+reference/design_v2/
+reference/visual-02/
+scripts/.private-names
+src-tz/plugins/
+reports/test-logs/
