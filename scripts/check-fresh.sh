@@ -22,6 +22,13 @@ $WP eval-file scripts/seed.php >/tmp/mb_fresh_seed.log 2>&1 && ok "seed.php пе
 [ "$($WP post get 2 --field=post_status 2>/dev/null)" = trash ] && ok "образец ядра #2 в корзине (не удалён безвозвратно)" || fail "образец ядра: $($WP post get 2 --field=post_status 2>/dev/null)"
 $WP eval-file scripts/seed.php >/tmp/mb_fresh_seed2.log 2>&1; grep -q "создано" /tmp/mb_fresh_seed2.log && fail "повторный seed что-то создал" || ok "повторный seed ничего не создал и не удалил"
 [ "$($WP option get permalink_structure)" = "/praktika/%postname%/" ] && ok "пермалинки /praktika/%postname%/" || fail "пермалинки: $($WP option get permalink_structure)"
+# Содержание v4 (как на стенде): комплект из logs/v4 (локальный, не в Git); без него v4-проверки будут красными.
+if [ -f "$ROOT/logs/v4/content-v4.bin" ] && [ -f "$ROOT/logs/v4/content-v4.key" ]; then
+  $WP maxbit v4 --bundle="$ROOT/logs/v4/content-v4.bin" --key="$(cat "$ROOT/logs/v4/content-v4.key")" --apply >/tmp/mb_fresh_v4.log 2>&1 && ok "комплект содержания v4 применён: $(tail -1 /tmp/mb_fresh_v4.log)" || fail "комплект v4: $(tail -2 /tmp/mb_fresh_v4.log)"
+  $WP eval-file scripts/seed.php >/tmp/mb_fresh_seed3.log 2>&1; grep -q "обновлено до текущей версии: page-home" /tmp/mb_fresh_seed3.log && fail "seed после v4 вернул старую главную" || ok "seed после v4 не трогает содержание v4"
+else
+  echo "  INFO  комплект v4 не найден в logs/v4 — проверки v4 будут красными"
+fi
 MAXBIT_CHECK_PORT=8093 bash scripts/check.sh > /tmp/mb_fresh_check.log 2>&1; tail -1 /tmp/mb_fresh_check.log | grep -q "FAIL=0" && ok "check.sh на чистой копии: $(tail -1 /tmp/mb_fresh_check.log)" || fail "check.sh: $(grep FAIL /tmp/mb_fresh_check.log | head -3)"
 MAXBIT_CHECK_PORT=8093 bash scripts/check-leads.sh > /tmp/mb_fresh_leads.log 2>&1; tail -1 /tmp/mb_fresh_leads.log | grep -q "FAIL=0" && ok "check-leads.sh: $(tail -1 /tmp/mb_fresh_leads.log)" || fail "check-leads: $(grep FAIL /tmp/mb_fresh_leads.log | head -3)"
 bash scripts/check-delivery.sh > /tmp/mb_fresh_deliv.log 2>&1; tail -1 /tmp/mb_fresh_deliv.log | grep -q "FAIL=0" && ok "check-delivery.sh: $(tail -1 /tmp/mb_fresh_deliv.log)" || fail "check-delivery: $(grep FAIL /tmp/mb_fresh_deliv.log | head -3)"

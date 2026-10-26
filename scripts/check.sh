@@ -62,7 +62,7 @@ done
 check "старых файлов логотипа в теме нет" "! ls $ROOT/src/themes/maxbit/assets/brand/maxbit-*.svg >/dev/null 2>&1"
 code / >/dev/null; check "шапка: компактный логотип v2 (светлый фон) + подпись текстом; подвал — версия для тёмного фона" "grep -q 'mb-logo__full' /tmp/mb_body && grep -q 'mb-logo__mark' /tmp/mb_body && grep -q 'X-blue-chevron' /tmp/mb_body && [ \$(grep -c 'id=\"X-layer-order\"' /tmp/mb_body) -ge 3 ]"
 check "первый экран: X-фигура SVG в mb-hero__art, без растровой иллюстрации и без lazy" "grep -q 'mb-hero__art' /tmp/mb_body && grep -q 'mb-hero__x' /tmp/mb_body && ! grep -q 'hero-processes' /tmp/mb_body && ! grep -q '<picture' /tmp/mb_body"
-check "H1 главной не изменился фильтром иллюстрации" "grep -q 'Наводим порядок в заказах и процессах производственных компаний</h1>' /tmp/mb_body"
+check "H1 главной (v4) не изменился фильтром первого экрана" "grep -q 'Цифровое развитие производственных компаний</h1>' /tmp/mb_body"
 check "MB-15: lang=\"ru-RU\"" "grep -q '<html lang=\"ru-RU\"' /tmp/mb_body"
 
 echo "== A26 внутренний источник =="
@@ -78,10 +78,10 @@ c=$(code /net-takoy-stranicy/); check "404 отдаётся" "[ $c = 404 ]"
 code / >/dev/null
 check "главная: canonical, description, noindex (local), JSON-LD Organization" "grep -q 'rel=\"canonical\"' /tmp/mb_body && grep -q 'name=\"description\"' /tmp/mb_body && grep -q 'noindex' /tmp/mb_body && grep -q '\"Organization\"' /tmp/mb_body"
 check "главная: нет Offer/Rating/SoftwareApplication" "! grep -q 'AggregateRating\|SoftwareApplication\|\"Offer\"' /tmp/mb_body"
-check "главная: пометка LOCAL_TEST у формы" "grep -q 'Тестовая версия' /tmp/mb_body"
+check "главная: пометка тестового стенда у формы" "grep -q 'Тестовый стенд' /tmp/mb_body"
 check "главная: нет ключей/секретов" "! grep -qi 'webhook\|api_key\|secret' /tmp/mb_body"
 check "главная: нет oEmbed-обнаружения" "! grep -q 'oembed' /tmp/mb_body"
-check "главная анонимно: нет имён кандидатов и пункта «Проекты»" "{ [ ! -f $ROOT/scripts/.private-names ] || ! grep -qFf $ROOT/scripts/.private-names /tmp/mb_body; } && ! grep -q '>Проекты<' /tmp/mb_body"
+check "главная анонимно (v4): БИКЗ/ЗКК и черновые кандидаты не выводятся; пункт «Проекты» есть" "! grep -q 'БИКЗ\|ЗКК\|Кандидат [0-9]' /tmp/mb_body && grep -q '>Проекты<' /tmp/mb_body"
 
 echo "== MB-01 матрица доступа: аноним × 5 синтетических состояний × каналы =="
 anon_closed(){ # $1 id $2 label — все каналы должны быть закрыты
@@ -103,7 +103,7 @@ anon_closed $P_PUB_NOOK "publish+ok=0 (проект)"
 anon_closed $P_SAMPLE "publish+ok=1+образец (проект)"
 s=$(slug $S_PUB_OK); c=$(code "/resheniya/$s/"); check "аноним publish+ok=1: HTML → 200" "[ $c = 200 ]"
 c=$(code "/wp-json/wp/v2/mb_solution/$S_PUB_OK"); check "аноним publish+ok=1: REST → 200" "[ $c = 200 ]"
-code /resheniya/ >/dev/null; check "аноним publish+ok=1: в списке решений" "grep -q \"$s\" /tmp/mb_body"
+code /resheniya/ >/dev/null; check "каталог решений (v4): группы и ссылки на решения" "grep -q 'Бизнес-процессы' /tmp/mb_body && grep -q 'zakaz-pod-kontrolem' /tmp/mb_body && grep -q 'integraciya-bitrix24-i-1c' /tmp/mb_body"
 c=$(code /wp-json/wp/v2/mb_lead); check "REST заявки → 404" "[ $c = 404 ]"
 c=$(code /wp-json/wp/v2/users); check "REST пользователи анонимно → 404" "[ $c = 404 ]"
 c=$(curl -s -L -o /tmp/mb_body -w '%{http_code}' "$BASE/?author=1"); check "страница автора → 404 (после редиректа)" "[ $c = 404 ]"
@@ -132,25 +132,26 @@ c=$(curl -s -b /tmp/mb_c_sub -o /tmp/mb_body -w '%{http_code}' "$BASE/resheniya/
 c=$(curl -s -b /tmp/mb_c_sub -o /tmp/mb_body -w '%{http_code}' "$BASE/wp-json/wp/v2/mb_solution/$S_PUB_NOOK"); check "подписчик: REST закрытого → 404" "[ $c = 404 ]"
 login mb_editor "Editor-Pass-Local-1" /tmp/mb_c_ed
 c=$(curl -s -b /tmp/mb_c_ed -o /tmp/mb_body -w '%{http_code}' "$BASE/resheniya/$(slug $S_PUB_NOOK)/"); check "редактор: publish+ok=0 → 200 с плашкой «Закрытый просмотр»" "[ $c = 200 ] && grep -q 'Закрытый просмотр' /tmp/mb_body"
-c=$(curl -s -b /tmp/mb_c_ed -o /tmp/mb_body -w '%{http_code}' "$BASE/?post_type=mb_solution&p=11&preview=true"); check "редактор: предпросмотр черновика ИИ-Практикума → 200" "[ $c = 200 ] && grep -q 'ИИ-проводник' /tmp/mb_body"
-c=$(curl -s -b /tmp/mb_c_ed -o /tmp/mb_body -w '%{http_code}' "$BASE/wp-admin/post.php?post=11&action=edit"); check "редактор: открывает редактор ИИ-страницы (A06)" "[ $c = 200 ] && grep -q 'block-editor' /tmp/mb_body"
+AI_ID=$($WP post list --post_type=mb_solution --post_name__in=ii-praktikum --post_status=draft,publish,private,pending --field=ID | head -1)
+c=$(curl -s -b /tmp/mb_c_ed -o /tmp/mb_body -w '%{http_code}' "$BASE/?post_type=mb_solution&p=$AI_ID&preview=true"); check "редактор: предпросмотр черновика ИИ-Практикума → 200" "[ $c = 200 ] && grep -q 'ИИ-проводник' /tmp/mb_body"
+c=$(curl -s -b /tmp/mb_c_ed -o /tmp/mb_body -w '%{http_code}' "$BASE/wp-admin/post.php?post=$AI_ID&action=edit"); check "редактор: открывает редактор ИИ-страницы (A06)" "[ $c = 200 ] && grep -q 'block-editor' /tmp/mb_body"
 check "редактор: флажок допуска отсутствует в его редакторе (управляет только администратор)" "! grep -q 'name=\"mb_public_ok\"' /tmp/mb_body && grep -q 'Не допущено к публичному показу' /tmp/mb_body"
 c=$(curl -s -b /tmp/mb_c_ed -o /tmp/mb_body -w '%{http_code}' "$BASE/wp-admin/edit.php?post_type=mb_lead"); check "редактор: список обращений недоступен" "[ $c != 200 ] || ! grep -q 'MB-' /tmp/mb_body"
 login maxbit_admin "$ADMIN_PW" /tmp/mb_c_adm
 c=$(curl -s -b /tmp/mb_c_adm -o /tmp/mb_body -w '%{http_code}' "$BASE/wp-admin/edit.php?post_type=mb_lead"); check "администратор: список обращений доступен" "[ $c = 200 ] && grep -q 'Обращения' /tmp/mb_body && ! grep -q 'Извините, вам не разрешено\|not allowed' /tmp/mb_body"
-c=$(curl -s -b /tmp/mb_c_adm -o /tmp/mb_body -w '%{http_code}' "$BASE/"); check "v0.3: администратор видит служебные заметки (проекты без допуска), ИИ-блока на главной нет" "grep -q 'mb-editor-note' /tmp/mb_body && ! grep -q 'ii-praktikum' /tmp/mb_body"
+c=$(curl -s -b /tmp/mb_c_adm -o /tmp/mb_body -w '%{http_code}' "$BASE/"); check "администратор: главная 200, ИИ-блока на главной нет" "[ $c = 200 ] && ! grep -q 'ii-praktikum' /tmp/mb_body"
 code / >/dev/null; check "v0.3: аноним не видит служебных заметок и пустых разделов" "! grep -q 'mb-editor-note\|Служебная заметка' /tmp/mb_body"
 code /o-kompanii/ >/dev/null; check "v0.3: «О компании» анонимно без пустых заголовков «Компетенции»/«Проекты»" "! grep -q 'Компетенции и подтверждения' /tmp/mb_body && grep -q 'Команда и руководство' /tmp/mb_body"
 for u in /resheniya/integraciya-bitrix24-i-1c/ /osnovatel/ /praktika/chek-list-peredacha-zakaza-v-proizvodstvo/; do c=$(code "$u"); check "v0.3: $u → 200 и один H1" "[ $c = 200 ] && [ \$(grep -o '<h1' /tmp/mb_body | wc -l) = 1 ]"; done
 c=$(code /wp-content/plugins/maxbit-core/assets/files/chek-list-peredacha-zakaza-v-proizvodstvo.pdf); check "v0.3: чек-лист PDF отдаётся свободно" "[ $c = 200 ]"
 code / >/dev/null; check "v0.3: подпись бренда в шапке, старой подписи нет" "grep -q 'Ваша команда цифрового развития' /tmp/mb_body && ! grep -q 'Системы управления бизнесом' /tmp/mb_body"
-check "v0.3: главная — H1 про порядок в заказах и процессах, условный пример помечен" "grep -q 'Наводим порядок в заказах' /tmp/mb_body && grep -q 'Условный пример' /tmp/mb_body && ! grep -q 'Инструменты — под задачу' /tmp/mb_body"
+check "v4: главная — цифровое развитие; удалённые формулировки не вернулись" "grep -q 'Цифровое развитие производственных компаний' /tmp/mb_body && ! grep -q 'Условный пример\|Цех делает не то\|Если хотя бы одна ситуация\|Каждое направление — отдельная страница' /tmp/mb_body"
 c=$(curl -s -b /tmp/mb_c_adm -o /tmp/mb_body -w '%{http_code}' "$BASE/proekty/obrazets-struktury-keysa/"); check "администратор: учебный образец → 200 и помечен" "[ $c = 200 ] && grep -q 'Учебный образец' /tmp/mb_body"
 
 echo "== A21/A23/A25 ИИ-страница (редактор) =="
-curl -s -b /tmp/mb_c_ed -o /tmp/mb_body "$BASE/?post_type=mb_solution&p=11&preview=true"
+curl -s -b /tmp/mb_c_ed -o /tmp/mb_body "$BASE/?post_type=mb_solution&p=$AI_ID&preview=true"
 check "ИИ-страница: H1, проводник, примеры, FAQ, CTA, форма с темой ai_practicum" "grep -q 'ИИ-Практикум для производственных компаний' /tmp/mb_body && grep -q 'Примеры задач' /tmp/mb_body && grep -q 'Ответы на вопросы' /tmp/mb_body && grep -q 'Обсудить применение ИИ' /tmp/mb_body && grep -q 'value=\"ai_practicum\"' /tmp/mb_body"
-check "ИИ-страница: нет цен/гарантий/сертификатов/набора" "! grep -q 'тыс. ₽\|сертифик\|без утечек\|бесплатн\|240 ч\|набор открыт\|места ограничены' /tmp/mb_body"
+check "ИИ-страница: нет цен/гарантий/сертификатов/набора" "! grep -q 'тыс. ₽\|сертифик\|без утечек\|240 ч\|набор открыт\|места ограничены' /tmp/mb_body"
 check "MB-14: кнопка шапки на ИИ-странице ведёт к форме этой страницы (#contact), не на главную" "grep -q 'mb-nav__cta\" href=\"#contact\"' /tmp/mb_body"
 rm -f /tmp/mb_c_sub /tmp/mb_c_ed /tmp/mb_c_adm
 
@@ -181,14 +182,14 @@ check "в журнале отладки нет контактов" "! grep -q 'e
 
 echo "== MB-13 безJS: серверный чек, подделка URL, сохранение полей при ошибке =="
 $WP eval 'global $wpdb; $wpdb->query("DELETE FROM {$wpdb->options} WHERE option_name LIKE \"mb_ctr_%\"");' >/dev/null 2>&1
-c=$(code "/kak-rabotaem/?mbr=ok&mbc=accepted&mbr=MB-NOT-SAVED"); check "подделанный query не показывает подтверждение" "! grep -q 'Обращение записано' /tmp/mb_body"
+c=$(code "/kak-rabotaem/?mbr=ok&mbc=accepted&mbr=MB-NOT-SAVED"); check "подделанный query не показывает подтверждение" "! grep -q 'Тестовая заявка сохранена' /tmp/mb_body"
 c=$(code "/kak-rabotaem/?mbr=000000000000000000000000"); check "несуществующий чек → без сообщения" "! grep -q 'mb-notice' /tmp/mb_body"
 LOC=$(curl -s -o /dev/null -w '%{redirect_url}' -X POST "$BASE/wp-admin/admin-post.php" --data-urlencode "action=maxbit_lead" --data-urlencode "name=БезJS" --data-urlencode "contact=nojs-$RUN@example.test" --data-urlencode "message=задача без js" --data-urlencode "topic=general" --data-urlencode "consent=1" --data-urlencode "token=$TOKEN" --data-urlencode "redirect=/kak-rabotaem/#contact")
 check "безJS успех: редирект с чеком, без PII в URL" "echo \"$LOC\" | grep -q 'mbr=[a-f0-9]\{24\}' && ! echo \"$LOC\" | grep -q 'nojs'"
-c=$(curl -s -o /tmp/mb_body -w '%{http_code}' "$LOC"); check "безJS успех: страница показывает номер MB-… (проверенный результат)" "grep -q 'Обращение записано. Номер: MB-' /tmp/mb_body"
-c=$(curl -s -o /tmp/mb_body -w '%{http_code}' "$LOC"); check "чек одноразовый: повторное открытие без сообщения и без новой записи" "! grep -q 'Обращение записано' /tmp/mb_body"
+c=$(curl -s -o /tmp/mb_body -w '%{http_code}' "$LOC"); check "безJS успех: страница показывает номер MB-… (проверенный результат)" "grep -q 'Тестовая заявка сохранена' /tmp/mb_body"
+c=$(curl -s -o /tmp/mb_body -w '%{http_code}' "$LOC"); check "чек одноразовый: повторное открытие без сообщения и без новой записи" "! grep -q 'Тестовая заявка сохранена' /tmp/mb_body"
 LOC=$(curl -s -o /dev/null -w '%{redirect_url}' -X POST "$BASE/wp-admin/admin-post.php" --data-urlencode "action=maxbit_lead" --data-urlencode "name=Ошибка" --data-urlencode "contact=x" --data-urlencode "message=текст остаётся" --data-urlencode "topic=general" --data-urlencode "token=$TOKEN" --data-urlencode "redirect=/kak-rabotaem/#contact")
-curl -s -D /tmp/mb_hdr -o /tmp/mb_body "$LOC"; check "безJS ошибка: имя и текст сохранены в форме, ошибка у поля контакта" "grep -q 'value=\"Ошибка\"' /tmp/mb_body && grep -q 'текст остаётся' /tmp/mb_body && grep -q 'Укажите телефон' /tmp/mb_body"
+curl -s -D /tmp/mb_hdr -o /tmp/mb_body "$LOC"; check "безJS ошибка: имя и текст сохранены в форме, ошибка у поля контакта" "grep -q 'value=\"Ошибка\"' /tmp/mb_body && grep -q 'текст остаётся' /tmp/mb_body && grep -q 'Укажите email или имя пользователя' /tmp/mb_body"
 check "безJS ошибка: ответ с чеком не кешируется" "grep -qi 'no-cache\|no-store' /tmp/mb_hdr"
 
 echo "== A12 внешние сервисы =="

@@ -31,10 +31,10 @@ function maxbit_document_title(): string {
 		return ( $t ?: 'Практика: статьи, чек-листы и разборы для руководителя производства — MAXBIT' ) . $suffix;
 	}
 	if ( is_post_type_archive( 'mb_solution' ) ) {
-		return 'Решения для производственных компаний' . $suffix . ' — MAXBIT';
+		return ( maxbit_seo_archive( '/resheniya/', 'title' ) ?: 'Решения для производственных компаний | MAXBIT' ) . $suffix;
 	}
 	if ( is_post_type_archive( 'mb_project' ) ) {
-		return 'Проекты' . $suffix . ' — MAXBIT';
+		return ( maxbit_seo_archive( '/proekty/', 'title' ) ?: 'Проекты MAXBIT' ) . $suffix;
 	}
 	if ( is_404() ) {
 		return 'Страница не найдена — MAXBIT';
@@ -45,6 +45,12 @@ function maxbit_document_title(): string {
 	return ''; // пусто = стандартный title ядра (без рекурсии)
 }
 add_filter( 'pre_get_document_title', 'maxbit_document_title', 20 );
+
+/** Заголовок/описание архивов из реестра SEO v4 (опция maxbit_seo_archives, ставится комплектом содержания). */
+function maxbit_seo_archive( string $url, string $field ): string {
+	$m = get_option( 'maxbit_seo_archives', array() );
+	return is_array( $m ) && ! empty( $m[ $url ][ $field ] ) ? (string) $m[ $url ][ $field ] : '';
+}
 
 function maxbit_meta_description(): string {
 	if ( is_singular() ) {
@@ -62,10 +68,10 @@ function maxbit_meta_description(): string {
 		return $d ?: 'Разборы типовых проблем производственных компаний, чек-листы и инструкции по учёту заказов, Битрикс24 и 1С.';
 	}
 	if ( is_post_type_archive( 'mb_solution' ) ) {
-		return 'Направления MAXBIT для производственных компаний: управление заказами, Битрикс24 для производства, интеграция Битрикс24 и 1С. Состав, границы, порядок работы.';
+		return maxbit_seo_archive( '/resheniya/', 'description' ) ?: 'Управление заказами, Битрикс24 для производства и интеграция с 1С. Рабочие процессы, границы решений и регулярное цифровое развитие.';
 	}
 	if ( is_post_type_archive( 'mb_project' ) ) {
-		return 'Проекты MAXBIT для производственных компаний: задача, что сделали, что изменилось. Публикуются только с разрешения клиента и после проверки фактов.';
+		return maxbit_seo_archive( '/proekty/', 'description' ) ?: 'Реальные задачи компаний: продажи, производство, документы и взаимодействие отделов. Кейсы внедрения и развития Битрикс24 и связанных систем.';
 	}
 	return '';
 }
@@ -97,6 +103,9 @@ function maxbit_canonical_url(): string {
 // Отключаем canonical ядра и выводим свой (один на страницу).
 remove_action( 'wp_head', 'rel_canonical' );
 add_action( 'wp_head', function () {
+	if ( function_exists( 'maxbit_is_private_material' ) && maxbit_is_private_material() ) {
+		return; // закрытый материал: без canonical, OG, description и разметки
+	}
 	if ( is_404() || is_search() ) {
 		return;
 	}
@@ -236,7 +245,7 @@ function maxbit_breadcrumbs(): array {
 		$items[] = array( get_the_title(), '' );
 	} elseif ( is_singular( 'mb_project' ) ) {
 		$items[] = array( 'Проекты', get_post_type_archive_link( 'mb_project' ) );
-		$items[] = array( get_the_title(), '' );
+		$items[] = array( get_post_meta( get_queried_object_id(), '_mb_pf_client', true ) ?: get_the_title(), '' );
 	} elseif ( is_singular( 'post' ) ) {
 		$items[] = array( 'Практика', get_permalink( (int) get_option( 'page_for_posts' ) ) );
 		$items[] = array( get_the_title(), '' );
@@ -245,7 +254,7 @@ function maxbit_breadcrumbs(): array {
 		if ( $post->post_parent && 'tekhnologii' !== get_post( $post->post_parent )->post_name ) {
 			$items[] = array( get_the_title( $post->post_parent ), get_permalink( $post->post_parent ) );
 		}
-		$items[] = array( get_the_title(), '' );
+		$items[] = array( 'bitrix24' === $post->post_name && ! $post->post_parent ? 'Битрикс24' : get_the_title(), '' );
 	} elseif ( is_home() ) {
 		$items[] = array( 'Практика', '' );
 	} elseif ( is_post_type_archive( 'mb_solution' ) ) {
@@ -278,20 +287,18 @@ function maxbit_org_schema(): array {
 		$org['logo'] = array( '@type' => 'ImageObject', 'url' => get_theme_file_uri( 'assets/brand/logo-512.png' ), 'width' => 512, 'height' => 512 );
 	}
 	$cp = array( '@type' => 'ContactPoint', 'contactType' => 'sales', 'areaServed' => 'RU', 'availableLanguage' => 'ru' );
-	if ( ! empty( $s['phone'] ) ) {
-		$cp['telephone'] = $s['phone'];
-		$org['telephone'] = $s['phone'];
-	}
-	if ( ! empty( $s['email'] ) ) {
-		$cp['email'] = $s['email'];
-		$org['email'] = $s['email'];
+	// Телефон не публикуется (решение владельца); почта — только после проверки ящика.
+	$mail = maxbit_public_email();
+	if ( $mail ) {
+		$cp['email'] = $mail;
+		$org['email'] = $mail;
 	}
 	if ( ! empty( $s['tg_bot_url'] ) ) {
 		$cp['url'] = $s['tg_bot_url'];
 	} elseif ( ! empty( $s['max_bot_url'] ) ) {
 		$cp['url'] = $s['max_bot_url'];
 	}
-	if ( isset( $cp['telephone'] ) || isset( $cp['email'] ) || isset( $cp['url'] ) ) {
+	if ( isset( $cp['email'] ) || isset( $cp['url'] ) ) {
 		$org['contactPoint'] = $cp;
 	}
 	if ( ! empty( $s['city'] ) ) {
@@ -356,6 +363,9 @@ function maxbit_faq_from_content( int $post_id ): array {
 }
 
 add_action( 'wp_head', function () {
+	if ( function_exists( 'maxbit_is_private_material' ) && maxbit_is_private_material() ) {
+		return; // закрытый материал: без canonical, OG, description и разметки
+	}
 	if ( is_404() || is_search() ) {
 		return;
 	}
@@ -383,10 +393,11 @@ add_action( 'wp_head', function () {
 	}
 	$id = is_singular() ? get_queried_object_id() : 0;
 	$is_person_page = $id && 'osnovatel' === get_post_field( 'post_name', $id );
-	if ( $id && ( is_singular( 'post' ) || $is_person_page || is_singular( 'mb_solution' ) || ( is_page() && str_starts_with( (string) get_page_uri( $id ), 'tekhnologii/' ) ) ) ) {
+	if ( $is_person_page ) {
 		$graph[] = maxbit_person_schema();
 	}
-	if ( is_singular( 'post' ) ) {
+	// Автор публикаций и кейсов — MAXBIT, пока персональное авторство не подтверждено (ТЗ v4 §7).
+	if ( is_singular( array( 'post', 'mb_project' ) ) ) {
 		$desc = maxbit_meta_description();
 		$art  = array(
 			'@type'    => 'Article',
@@ -396,7 +407,7 @@ add_action( 'wp_head', function () {
 			'mainEntityOfPage' => get_permalink( $id ),
 			'datePublished' => get_the_date( 'c', $id ),
 			'dateModified'  => maxbit_content_modified( $id, 'c' ),
-			'author'   => array( '@id' => home_url( '/osnovatel/#person' ) ),
+			'author'   => array( '@id' => home_url( '/#organization' ) ),
 			'publisher' => array( '@id' => home_url( '/#organization' ) ),
 			'inLanguage' => 'ru-RU',
 		);
@@ -409,7 +420,7 @@ add_action( 'wp_head', function () {
 		}
 		$graph[] = $art;
 	}
-	if ( is_singular( 'mb_solution' ) || ( is_page() && $id && str_starts_with( (string) get_page_uri( $id ), 'tekhnologii/' ) ) ) {
+	if ( is_singular( 'mb_solution' ) || ( is_page() && $id && ( str_starts_with( (string) get_page_uri( $id ), 'tekhnologii/' ) || 'bitrix24' === get_page_uri( $id ) ) ) ) {
 		$desc = maxbit_meta_description();
 		$svc  = array(
 			'@type'       => 'Service',
@@ -490,6 +501,17 @@ add_action( 'init', function () {
 	if ( $tech && 'publish' === $tech->post_status ) {
 		$out .= '- [' . $tech->post_title . '](' . get_permalink( $tech ) . '): ' . ( get_post_meta( $tech->ID, '_mb_seo_description', true ) ?: '' ) . "\n";
 	}
+	$b24 = get_page_by_path( 'bitrix24' );
+	if ( $b24 && 'publish' === $b24->post_status ) {
+		$out .= '- [' . $b24->post_title . '](' . get_permalink( $b24 ) . '): ' . ( get_post_meta( $b24->ID, '_mb_seo_description', true ) ?: '' ) . "\n";
+	}
+	$projects = function_exists( 'maxbit_public_projects' ) ? maxbit_public_projects() : array();
+	if ( $projects ) {
+		$out .= "\n## Проекты (реальные кейсы)\n";
+		foreach ( $projects as $p ) {
+			$out .= '- [' . $p->post_title . '](' . get_permalink( $p ) . '): ' . ( get_post_meta( $p->ID, '_mb_seo_description', true ) ?: '' ) . "\n";
+		}
+	}
 	$out .= "\n## О компании\n";
 	foreach ( array( 'kak-rabotaem' => 'Как работаем', 'o-kompanii' => 'О компании', 'osnovatel' => 'Основатель' ) as $slug => $label ) {
 		$pg = get_page_by_path( $slug );
@@ -503,11 +525,8 @@ add_action( 'init', function () {
 	}
 	$out .= "\n## Контакты\n";
 	$out .= '- Сайт: ' . home_url( '/' ) . "\n";
-	if ( ! empty( $s['email'] ) ) {
-		$out .= '- Почта: ' . $s['email'] . "\n";
-	}
-	if ( ! empty( $s['phone'] ) ) {
-		$out .= '- Телефон: ' . $s['phone'] . "\n";
+	if ( maxbit_public_email() ) {
+		$out .= '- Почта: ' . maxbit_public_email() . "\n";
 	}
 	if ( ! empty( $s['tg_bot_url'] ) ) {
 		$out .= '- Написать в Telegram: ' . $s['tg_bot_url'] . "\n";
@@ -521,7 +540,7 @@ add_action( 'init', function () {
 	if ( ! empty( $s['max_channel_url'] ) ) {
 		$out .= '- Канал с материалами (MAX): ' . $s['max_channel_url'] . "\n";
 	}
-	$out .= "\n## Как читать этот сайт\n- Решения описывают один участок процесса: для кого, как устроен путь заказа, что входит в работу, что получает клиент.\n- Статьи «Практики» — разборы и чек-листы, применимые без MAXBIT.\n- Кейсы публикуются только с письменного разрешения клиента; без разрешения — обобщённые примеры с пометкой «условный пример».\n- Цены на сайте не публикуются; порядок формирования стоимости описан на странице «Как формируется стоимость», если она опубликована.\n";
+	$out .= "\n## Как читать этот сайт\n- Решения описывают один участок процесса: для кого, как устроен путь заказа, что входит в работу, что получает клиент.\n- Статьи «Практики» — разборы и чек-листы, применимые без MAXBIT.\n- «Проекты» — реальные истории клиентов: задача, что сделано, что подтверждено; без придуманных показателей.\n- Первая встреча — бесплатная, примерно 30 минут. Основной формат — ежемесячная работа; есть почасовой формат и отдельные проекты.\n- Цены на сайте не публикуются: коммерческое предложение отправляем по ссылке после заявки.\n";
 	status_header( 200 );
 	header( 'Content-Type: text/plain; charset=utf-8' );
 	header( 'Cache-Control: public, max-age=3600' );

@@ -47,8 +47,8 @@ function maxbit_settings_defaults(): array {
 		// Согласия и закрытые материалы (0.4.1)
 		'transfer_consent' => '0', // отдельное согласие на передачу данных третьим лицам (CRM/подрядчики)
 		'transfer_to'   => '',     // кому передаются: «облачный Битрикс24 (ООО «1С-Битрикс»)» — подставляется в текст согласия
-		'price_key'     => '',     // ключ скрытой страницы цен: /price/<ключ>/
-		'price_page'    => 'stoimost-podrobno', // slug закрытой (private) страницы с подробными ценами
+		'email_verified' => '0',   // 1 — ящик создан и доставка проверена; до этого почта на сайте не выводится (ТЗ v4 §17.4)
+		'material_ttl_days' => '0', // срок действия ссылок на КП/презентацию, дней; 0 — без срока (отзыв вручную)
 		'materials'     => "Чек-лист: 12 пунктов перед передачей заказа в производство | module:chek-list-peredacha-zakaza-v-proizvodstvo.pdf", // по строке: Название | файл
 	);
 }
@@ -60,19 +60,6 @@ function maxbit_get_settings(): array {
 		$s['tg_channel_url'] = $s['telegram']; // совместимость с 0.4.0
 	}
 	return $s;
-}
-
-/** Ключ скрытой страницы цен: создаётся при первом обращении, меняется кнопкой в настройках. */
-function maxbit_price_key(): string {
-	$s = maxbit_get_settings();
-	if ( empty( $s['price_key'] ) || ! preg_match( '/^[a-f0-9]{20}$/', (string) $s['price_key'] ) ) {
-		$saved = get_option( 'maxbit_settings', array() );
-		$saved = is_array( $saved ) ? $saved : array();
-		$saved['price_key'] = substr( bin2hex( random_bytes( 16 ) ), 0, 20 );
-		update_option( 'maxbit_settings', $saved );
-		return $saved['price_key'];
-	}
-	return (string) $s['price_key'];
 }
 
 /** Материалы для выдачи после самодиагностики: [ [title, file], … ]; file — «module:имя» (комплект модуля) или имя в uploads/maxbit-private/. */
@@ -92,6 +79,12 @@ function maxbit_materials(): array {
 }
 
 /** Публичные профили (sameAs): по одному адресу в строке, только http(s). */
+/** Почта для показа на сайте и в разметке: только после проверки ящика (ТЗ v4 §17.4). */
+function maxbit_public_email(): string {
+	$s = maxbit_get_settings();
+	return ( ! empty( $s['email'] ) && '1' === (string) $s['email_verified'] ) ? (string) $s['email'] : '';
+}
+
 function maxbit_profiles(): array {
 	$s   = maxbit_get_settings();
 	$out = array();
@@ -155,8 +148,19 @@ add_action( 'admin_init', function () {
 				add_settings_error( 'maxbit_settings', 'tg_token', 'Токен бота Telegram имеет вид 123456:ABC… — значение не сохранено.' );
 				$tg = (string) $prev['tg_token'];
 			}
-			return array(
-				'phone'         => $txt( 'phone', 40 ),
+			$url = fn( $k ) => ( preg_match( '#^https://#', (string) ( $in[ $k ] ?? '' ) ) ? esc_url_raw( $in[ $k ] ) : '' );
+			$out = array(
+				'tg_bot_url'    => $url( 'tg_bot_url' ),
+				'max_bot_url'   => $url( 'max_bot_url' ),
+				'tg_channel_url' => $url( 'tg_channel_url' ),
+				'max_channel_url' => $url( 'max_channel_url' ),
+				'email_verified' => empty( $in['email_verified'] ) ? '0' : '1',
+				'founder_facts' => mb_substr( sanitize_textarea_field( $in['founder_facts'] ?? '' ), 0, 1000 ),
+				'transfer_consent' => empty( $in['transfer_consent'] ) ? '0' : '1',
+				'transfer_to'   => $txt( 'transfer_to', 200 ),
+				'materials'     => mb_substr( sanitize_textarea_field( $in['materials'] ?? '' ), 0, 2000 ),
+				'material_ttl_days' => (string) max( 0, min( 365, (int) ( $in['material_ttl_days'] ?? 0 ) ) ),
+				'phone'         => '', // телефон на сайте не размещается (решение владельца 26.10.2026)
 				'email'         => sanitize_email( $in['email'] ?? '' ),
 				'messenger'     => $txt( 'messenger', 60 ),
 				'messenger_url' => esc_url_raw( $in['messenger_url'] ?? '' ),
@@ -181,6 +185,9 @@ add_action( 'admin_init', function () {
 				'yandex_verification' => preg_replace( '/[^a-f0-9]/i', '', (string) ( $in['yandex_verification'] ?? '' ) ),
 				'cookie_notice' => empty( $in['cookie_notice'] ) ? '0' : '1',
 			);
+			// Ключи, которых нет в форме (служебные), не теряются при сохранении.
+			$saved = get_option( 'maxbit_settings', array() );
+			return array_merge( is_array( $saved ) ? $saved : array(), $out );
 		},
 	) );
 } );
@@ -254,14 +261,31 @@ function maxbit_settings_page(): void {
 			<h2>Контакты (публичные, показываются только если заполнены)</h2>
 			<table class="form-table">
 				<?php
-				$field( 'phone', 'Телефон', 'text', '', '+7 ...' );
-				$field( 'email', 'Почта', 'email' );
+				$field( 'tg_bot_url', 'Бот Telegram (написать)', 'url', 'Кнопка «Написать в Telegram». Только https-ссылка.', 'https://t.me/...' );
+				$field( 'max_bot_url', 'Бот MAX (написать)', 'url', 'Кнопка «Написать в MAX».', 'https://max.ru/..._bot' );
+				$field( 'tg_channel_url', 'Канал в Telegram', 'url', 'Подвал, «Наши каналы».' );
+				$field( 'max_channel_url', 'Канал в MAX', 'url', 'Подвал, «Наши каналы». Не путать с ботом.' );
+				$field( 'email', 'Почта', 'email', 'Выводится на сайте только после отметки ниже.' );
+				?>
+				<tr><th>Почта проверена</th><td><label><input type="checkbox" name="maxbit_settings[email_verified]" value="1" <?php checked( $s['email_verified'], '1' ); ?>> Ящик создан, письмо снаружи доходит и ответ уходит — показывать почту на сайте</label></td></tr>
+				<tr><th>Телефон</th><td><p class="description">Не размещается (решение владельца). Поле убрано.</p></td></tr>
+				<?php
 				$field( 'city', 'Город', 'text', 'Показывается в контактах и в разметке Organization.' );
 				$field( 'telegram', 'Telegram (ссылка)', 'url', '', 'https://t.me/...' );
 				$field( 'messenger', 'Другой мессенджер (подпись)', 'text', '', 'например: MAX' );
 				$field( 'messenger_url', 'Ссылка мессенджера', 'url' );
 				$field( 'profiles', 'Профили компании', 'textarea', 'По одной ссылке в строке: vc.ru, Хабр, Дзен, VK, партнёрские каталоги. Попадают в sameAs разметки.', "https://vc.ru/...\nhttps://dzen.ru/..." );
 				$field( 'founder', 'Основатель', 'text' );
+				$field( 'founder_facts', 'Основатель: факты', 'textarea', 'Только проверяемые факты, по строке. Пока не выводятся.' );
+				?>
+			</table>
+			<h2>Согласия и закрытые материалы</h2>
+			<table class="form-table">
+				<tr><th>Передача данных</th><td><label><input type="checkbox" name="maxbit_settings[transfer_consent]" value="1" <?php checked( $s['transfer_consent'], '1' ); ?>> Отдельная галочка согласия на передачу данных (включить, если заявки уходят в облачный Битрикс24 или подрядчику)</label></td></tr>
+				<?php
+				$field( 'transfer_to', 'Кому передаются данные', 'text', 'Подставляется в текст галочки.' );
+				$field( 'material_ttl_days', 'Срок ссылок на КП и презентацию, дней', 'number', '0 — без срока; ссылку можно отозвать в карточке обращения.' );
+				$field( 'materials', 'Материалы самодиагностики', 'textarea', 'По строке: «Название | файл». Файл — module:имя или имя в uploads/maxbit-private/.' );
 				?>
 			</table>
 			<h2>Оператор персональных данных и реквизиты</h2>
@@ -327,11 +351,8 @@ add_shortcode( 'maxbit_contacts', function () {
 	if ( ! empty( $s['max_bot_url'] ) ) {
 		$rows[] = '<li><span>MAX</span><a href="' . esc_url( $s['max_bot_url'] ) . '" data-contact="max" target="_blank" rel="noopener">Написать в MAX ››</a></li>';
 	}
-	if ( ! empty( $s['email'] ) ) {
+	if ( maxbit_public_email() ) {
 		$rows[] = '<li><span>Почта</span><a href="mailto:' . esc_attr( $s['email'] ) . '" data-contact="email">' . esc_html( $s['email'] ) . '</a></li>';
-	}
-	if ( ! empty( $s['phone'] ) ) {
-		$rows[] = '<li><span>Телефон</span><a href="tel:' . esc_attr( preg_replace( '/[^\d+]/', '', $s['phone'] ) ) . '" data-contact="phone">' . esc_html( $s['phone'] ) . '</a></li>';
 	}
 	if ( ! empty( $s['tg_channel_url'] ) ) {
 		$rows[] = '<li><span>Канал</span><a href="' . esc_url( $s['tg_channel_url'] ) . '" data-contact="telegram_channel" target="_blank" rel="noopener">' . esc_html( preg_replace( '#^https?://#', '', $s['tg_channel_url'] ) ) . '</a></li>';
@@ -371,8 +392,11 @@ add_shortcode( 'maxbit_requisite', function ( $atts ) {
 	$s = maxbit_get_settings();
 	$k = preg_replace( '/[^a-z_]/', '', $a['field'] );
 	$v = $s[ $k ] ?? '';
+	if ( 'email' === $k || 'phone' === $k ) {
+		$v = 'email' === $k ? maxbit_public_email() : '';
+	}
 	if ( 'pdn_email' === $k && ! $v ) {
-		$v = $s['email'];
+		$v = maxbit_public_email();
 	}
 	if ( '' === (string) $v ) {
 		$labels = array( 'legal_name' => 'наименование оператора', 'inn' => 'ИНН', 'ogrn' => 'ОГРН', 'address' => 'адрес', 'pdn_email' => 'почта', 'email' => 'почта', 'phone' => 'телефон', 'city' => 'город' );

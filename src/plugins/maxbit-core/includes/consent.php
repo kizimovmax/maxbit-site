@@ -22,8 +22,8 @@ function maxbit_metrika_id(): string {
 }
 
 add_action( 'wp_footer', function () {
-	if ( is_admin() ) {
-		return;
+	if ( is_admin() || ( function_exists( 'maxbit_is_private_material' ) && maxbit_is_private_material() ) ) {
+		return; // на закрытых материалах счётчик не подключается (адрес с токеном не уходит третьим лицам)
 	}
 	$id      = maxbit_metrika_id();
 	$enabled = maxbit_cookie_consent_enabled();

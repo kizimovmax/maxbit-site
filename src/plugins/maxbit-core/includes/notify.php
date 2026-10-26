@@ -25,6 +25,7 @@ function maxbit_notify_text( int $post_id ): string {
 	$topic  = (string) get_post_meta( $post_id, '_mb_topic', true );
 	$rows   = array(
 		'Номер'    => get_post_meta( $post_id, '_mb_request_id', true ),
+		'Цель'     => maxbit_lead_purposes()[ (string) get_post_meta( $post_id, '_mb_purpose', true ) ] ?? 'Обсудить задачу',
 		'Тема'     => $topics[ $topic ] ?? $topic,
 		'Имя'      => get_post_meta( $post_id, '_mb_name', true ),
 		'Контакт'  => get_post_meta( $post_id, '_mb_contact', true ),

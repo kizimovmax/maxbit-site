@@ -2,7 +2,7 @@
 /**
  * Plugin Name: MAXBIT Core
  * Description: Типы материалов, связи, SEO-поля, допуск к публикации и серверный приём обращений для сайта MAXBIT. Не зависит от темы.
- * Version: 0.4.1
+ * Version: 0.5.0
  * Requires at least: 6.6
  * Requires PHP: 8.1
  * Author: MAXBIT
@@ -11,7 +11,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'MAXBIT_CORE_VERSION', '0.4.1' );
+define( 'MAXBIT_CORE_VERSION', '0.5.0' );
 define( 'MAXBIT_CORE_DIR', plugin_dir_path( __FILE__ ) );
 define( 'MAXBIT_CORE_URL', plugin_dir_url( __FILE__ ) );
 
@@ -59,12 +59,30 @@ function maxbit_lead_topics(): array {
 		'checklist'     => 'После чек-листа',
 		'about'         => 'Со страницы компании',
 		'diagnostic'    => 'Самодиагностика участка',
+		'project'       => 'Со страницы проекта',
+		'b24'           => 'Обзор Битрикс24',
+		'material'      => 'Со страницы материала (КП/презентация)',
+	);
+}
+
+/**
+ * Цели обращения (v4): посетитель выбирает одну из трёх на общей форме; остальные подставляются
+ * контекстом страницы (обзор Битрикс24, КП). Ключ — в заявку и события, подпись — в карточку обращения.
+ */
+function maxbit_lead_purposes(): array {
+	return array(
+		'discuss'      => 'Обсудить задачу',
+		'kp'           => 'Получить коммерческое предложение',
+		'presentation' => 'Получить презентацию MAXBIT',
+		'b24'          => 'Обсудить внедрение Битрикс24',
+		'tariff'       => 'Обсудить тариф',
+		'hourly'       => 'Обсудить почасовую работу',
 	);
 }
 
 /** Допустимые направления для событий аналитики. */
 function maxbit_event_directions(): array {
-	return array( 'general', 'order_control', 'bitrix24', 'integration', 'ai_practicum', 'article', 'checklist', 'about', 'diagnostic' );
+	return array( 'general', 'order_control', 'bitrix24', 'integration', 'ai_practicum', 'article', 'checklist', 'about', 'diagnostic', 'project', 'b24', 'material' );
 }
 
 /** Признак: текущий пользователь может видеть закрытые материалы. */
@@ -102,10 +120,13 @@ require_once MAXBIT_CORE_DIR . 'includes/events.php';
 require_once MAXBIT_CORE_DIR . 'includes/taxonomies.php';
 require_once MAXBIT_CORE_DIR . 'includes/consent.php';
 require_once MAXBIT_CORE_DIR . 'includes/og.php';
-require_once MAXBIT_CORE_DIR . 'includes/price.php';
+require_once MAXBIT_CORE_DIR . 'includes/materials.php';
+require_once MAXBIT_CORE_DIR . 'includes/blocks.php';
+require_once MAXBIT_CORE_DIR . 'includes/reviews.php';
 require_once MAXBIT_CORE_DIR . 'includes/quiz.php';
 require_once MAXBIT_CORE_DIR . 'includes/seed.php';
 require_once MAXBIT_CORE_DIR . 'includes/update.php';
+require_once MAXBIT_CORE_DIR . 'includes/v4.php';
 
 register_activation_hook( __FILE__, function () {
 	maxbit_register_post_types();

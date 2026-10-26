@@ -13,8 +13,11 @@ function maxbit_render_form( array $args = array() ): string {
 		'topic'    => 'general',
 		'heading'  => 'Что сейчас мешает работе вашей компании?',
 		'text'     => 'Расскажите о задаче. Обсудим текущий процесс и определим, с чего разумно начать.',
-		'button'   => 'Обсудить задачу',
+		'button'   => 'Отправить заявку',
 		'id'       => 'contact',
+		'purposes' => '0',         // 1 — посетитель выбирает цель: обсудить задачу / КП / презентация (ТЗ v4 §3.11)
+		'purpose'  => 'discuss',   // цель по умолчанию или скрытая цель страницы (b24, tariff, hourly)
+		'src'      => '',          // логическая метка источника (kp, presentation) — без адреса страницы с токеном
 		'variant'  => 'full',      // full — задача и мессенджеры; magnet — имя + контакт, выдача материалов
 		'quiz'     => '',          // итог самодиагностики (только цифры), уходит в заявку
 	) );
@@ -22,6 +25,10 @@ function maxbit_render_form( array $args = array() ): string {
 	$s_all  = maxbit_get_settings();
 	$transfer = '1' === (string) $s_all['transfer_consent'];
 	$topic = array_key_exists( $args['topic'], maxbit_lead_topics() ) ? $args['topic'] : 'general';
+	$purposes = maxbit_lead_purposes();
+	$purpose  = array_key_exists( $args['purpose'], $purposes ) ? $args['purpose'] : 'discuss';
+	$choose   = '1' === (string) $args['purposes'] && ! $magnet;
+	$src_tag  = in_array( $args['src'], array( 'kp', 'presentation' ), true ) ? $args['src'] : '';
 	$uid   = 'mbf-' . substr( md5( $topic . $args['id'] ), 0, 6 );
 	$state = maxbit_form_state_from_request();
 	if ( $state && ! empty( $state['values']['topic'] ) && $state['values']['topic'] !== $topic ) {
@@ -33,13 +40,24 @@ function maxbit_render_form( array $args = array() ): string {
 		<div class="mb-form__intro">
 			<h2 class="mb-form__heading"><?php echo esc_html( $args['heading'] ); ?></h2>
 			<p><?php echo esc_html( $args['text'] ); ?></p>
+			<?php
+			if ( ! $magnet ) {
+				// Тема выводит здесь «Написать в Telegram / MAX» (два равноправных входа рядом с формой).
+				if ( has_action( 'maxbit_form_intro_after' ) ) {
+					do_action( 'maxbit_form_intro_after', $topic );
+				} else {
+					echo maxbit_messengers_html( 'bots', 'buttons', 'Или напишите нам:' ); // phpcs:ignore
+				}
+			}
+			?>
 		</div>
 		<form class="mb-form__form" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" novalidate data-endpoint="<?php echo esc_url( rest_url( 'maxbit/v1/lead' ) ); ?>">
 			<input type="hidden" name="action" value="maxbit_lead">
 			<input type="hidden" name="topic" value="<?php echo esc_attr( $topic ); ?>">
 			<input type="hidden" name="token" value="<?php echo esc_attr( maxbit_lead_token() ); ?>">
 			<input type="hidden" name="client_key" value="">
-			<input type="hidden" name="source" value="<?php echo esc_attr( maxbit_form_source() ); ?>">
+			<input type="hidden" name="source" value="<?php echo esc_attr( maxbit_form_source() . ( $src_tag ? ' [' . $src_tag . ']' : '' ) ); ?>">
+			<?php if ( ! $choose && ! $magnet ) : ?><input type="hidden" name="purpose" value="<?php echo esc_attr( $purpose ); ?>" data-purpose><?php endif; ?>
 			<?php if ( $magnet ) : ?><input type="hidden" name="quiz" value="<?php echo esc_attr( preg_replace( '/[^0-9,]/', '', (string) $args['quiz'] ) ); ?>" data-quiz><input type="hidden" name="variant" value="magnet"><?php endif; ?>
 			<input type="hidden" name="redirect" value="<?php echo esc_attr( maxbit_current_path() . '#' . $args['id'] ); ?>">
 			<p class="mb-form__hp" aria-hidden="true"><label>Не заполняйте это поле <input type="text" name="website" tabindex="-1" autocomplete="off"></label></p>
@@ -50,26 +68,35 @@ function maxbit_render_form( array $args = array() ): string {
 				<?php endif; ?>
 			</div>
 
+			<?php if ( $choose ) : ?>
+			<fieldset class="mb-form__row mb-form__purposes">
+				<legend>Цель обращения</legend>
+				<?php foreach ( array( 'discuss', 'kp', 'presentation' ) as $pk ) : ?>
+				<label class="mb-chip"><input type="radio" name="purpose" value="<?php echo esc_attr( $pk ); ?>" <?php checked( ( $state['values']['purpose'] ?? $purpose ), $pk ); ?>><span><?php echo esc_html( $purposes[ $pk ] ); ?></span></label>
+				<?php endforeach; ?>
+			</fieldset>
+			<?php endif; ?>
 			<div class="mb-form__row">
 				<label for="<?php echo $uid; ?>-name">Как к вам обращаться <span aria-hidden="true">*</span></label>
 				<input id="<?php echo $uid; ?>-name" name="name" type="text" required maxlength="100" autocomplete="name" aria-required="true" aria-describedby="<?php echo $uid; ?>-name-err" value="<?php echo esc_attr( $state['values']['name'] ?? '' ); ?>">
 				<p class="mb-form__error" id="<?php echo $uid; ?>-name-err"><?php echo esc_html( $state['fields']['name'] ?? '' ); ?></p>
 			</div>
 			<div class="mb-form__row">
-				<label for="<?php echo $uid; ?>-contact">Телефон, почта или другой удобный контакт <span aria-hidden="true">*</span></label>
-				<input id="<?php echo $uid; ?>-contact" name="contact" type="text" required maxlength="200" autocomplete="tel email" aria-required="true" aria-describedby="<?php echo $uid; ?>-contact-err" value="<?php echo esc_attr( $state['values']['contact'] ?? '' ); ?>">
+				<label for="<?php echo $uid; ?>-contact">Удобный контакт <span aria-hidden="true">*</span></label>
+				<input id="<?php echo $uid; ?>-contact" name="contact" type="text" required maxlength="200" autocomplete="email" aria-required="true" aria-describedby="<?php echo $uid; ?>-contact-hint <?php echo $uid; ?>-contact-err" value="<?php echo esc_attr( $state['values']['contact'] ?? '' ); ?>">
+				<p class="mb-form__hint" id="<?php echo $uid; ?>-contact-hint">Email или имя пользователя в Telegram/MAX</p>
 				<p class="mb-form__error" id="<?php echo $uid; ?>-contact-err"><?php echo esc_html( $state['fields']['contact'] ?? '' ); ?></p>
 			</div>
 			<?php if ( ! $magnet ) : ?>
 			<div class="mb-form__row">
-				<label for="<?php echo $uid; ?>-message">Коротко о задаче — необязательно</label>
+				<label for="<?php echo $uid; ?>-message">Коротко о задаче</label>
 				<textarea id="<?php echo $uid; ?>-message" name="message" rows="4" maxlength="2000"><?php echo esc_textarea( $state['values']['message'] ?? '' ); ?></textarea>
 			</div>
 			<?php endif; ?>
 			<div class="mb-form__row mb-form__row--consent">
 				<label class="mb-check" for="<?php echo $uid; ?>-consent">
 					<input id="<?php echo $uid; ?>-consent" name="consent" type="checkbox" value="1" required aria-required="true" aria-describedby="<?php echo $uid; ?>-consent-err" <?php checked( ! empty( $state['values']['consent'] ) ); ?>>
-					<span>Даю <a href="<?php echo esc_url( maxbit_legal_url( 'consent' ) ); ?>" target="_blank" rel="noopener">согласие на обработку персональных данных</a> в соответствии с <a href="<?php echo esc_url( maxbit_legal_url( 'policy' ) ); ?>" target="_blank" rel="noopener">политикой</a> — чтобы MAXBIT мог связаться со мной по этому обращению.</span>
+					<span>Даю <a href="<?php echo esc_url( maxbit_legal_url( 'consent' ) ); ?>" target="_blank" rel="noopener">согласие на обработку персональных данных</a>. <a href="<?php echo esc_url( maxbit_legal_url( 'policy' ) ); ?>" target="_blank" rel="noopener">Политика обработки персональных данных</a></span>
 				</label>
 				<p class="mb-form__error" id="<?php echo $uid; ?>-consent-err"><?php echo esc_html( $state['fields']['consent'] ?? '' ); ?></p>
 				<?php if ( $transfer ) : ?>
@@ -82,12 +109,13 @@ function maxbit_render_form( array $args = array() ): string {
 			</div>
 			<div class="mb-form__actions">
 				<button type="submit" class="mb-btn mb-btn--primary"><?php echo esc_html( $args['button'] ); ?></button>
+				<?php if ( $choose || in_array( $purpose, array( 'kp', 'presentation' ), true ) ) : ?><p class="mb-form__note mb-form__note--inline">Если вы запросили КП или презентацию, отправим ссылку после получения заявки.</p><?php endif; ?>
 			</div>
 			<?php if ( $magnet ) : ?>
 				<p class="mb-form__note">Материалы откроются сразу после отправки; ссылки именные и действуют 7 дней. Пишем только по этому обращению, без рассылок.</p>
 			<?php endif; ?>
 			<?php if ( 'LOCAL_TEST' === MAXBIT_FORM_MODE ) : ?>
-				<p class="mb-form__note mb-form__note--test"><strong>Тестовая версия.</strong> Не вводите реальные персональные данные. Обращения не отправляются MAXBIT — они сохраняются только в локальной базе для проверки.</p>
+				<p class="mb-form__note mb-form__note--test"><strong>Тестовый стенд.</strong> Не вводите реальные данные: заявка сохраняется только на стенде и не отправляется MAXBIT.</p>
 			<?php endif; ?>
 			<?php if ( $magnet && $state && $state['ok'] && ! empty( $state['materials'] ) ) : ?>
 				<ul class="mb-quiz__files"><?php foreach ( $state['materials'] as $m ) : ?><li><a href="<?php echo esc_url( $m['url'] ); ?>"><?php echo esc_html( $m['title'] ); ?></a></li><?php endforeach; ?></ul>
@@ -113,9 +141,14 @@ function maxbit_current_path(): string {
 	return $path ? esc_url_raw( $path ) : '/';
 }
 
+/** Путь страницы без секретной части: /materialy/kp/<токен>/ → /materialy/kp/ (в заявки, аналитику и CRM токен не попадает). */
+function maxbit_mask_private_path( string $path ): string {
+	return (string) preg_replace( '#^(/materialy/[a-z]+/)[^/?\s]*/?#', '$1', $path );
+}
+
 /** Источник: путь страницы (без query) + очищенные UTM с ограничением длины. Без свободного текста. */
 function maxbit_form_source(): string {
-	$parts = array( maxbit_current_path() );
+	$parts = array( maxbit_mask_private_path( maxbit_current_path() ) );
 	foreach ( array( 'utm_source', 'utm_medium', 'utm_campaign' ) as $k ) {
 		if ( ! empty( $_GET[ $k ] ) ) {
 			$v = preg_replace( '/[^a-zA-Z0-9_\-]/', '', (string) $_GET[ $k ] );
@@ -164,13 +197,14 @@ function maxbit_lead_admin_post(): void {
 	$result = maxbit_lead_process( $in );
 	$redirect = isset( $in['redirect'] ) ? wp_validate_redirect( home_url( (string) $in['redirect'] ), home_url( '/' ) ) : home_url( '/' );
 	$receipt = bin2hex( random_bytes( 12 ) );
-	$flash = array( 'ok' => $result['ok'], 'code' => $result['code'], 'request_id' => $result['request_id'] ?? '', 'fields' => $result['fields'] ?? array(), 'values' => array(), 'materials' => $result['materials'] ?? array() );
+	$flash = array( 'message' => $result['ok'] ? (string) ( $result['message'] ?? '' ) : '', 'ok' => $result['ok'], 'code' => $result['code'], 'request_id' => $result['request_id'] ?? '', 'fields' => $result['fields'] ?? array(), 'values' => array(), 'materials' => $result['materials'] ?? array() );
 	if ( ! $result['ok'] && ! in_array( $result['code'], array( 'spam' ), true ) ) {
 		$flash['values'] = array(
 			'name'    => mb_substr( sanitize_text_field( $in['name'] ?? '' ), 0, 100 ),
 			'contact' => mb_substr( sanitize_text_field( $in['contact'] ?? '' ), 0, 200 ),
 			'message' => mb_substr( sanitize_textarea_field( $in['message'] ?? '' ), 0, 2000 ),
 			'topic'   => sanitize_key( $in['topic'] ?? '' ),
+			'purpose' => sanitize_key( $in['purpose'] ?? '' ),
 		);
 	}
 	set_transient( 'mb_flash_' . $receipt, $flash, 10 * MINUTE_IN_SECONDS );
@@ -200,26 +234,25 @@ function maxbit_form_state_from_request(): array {
 	nocache_headers();
 	$rid  = $flash['request_id'] ?: '';
 	$msgs = maxbit_form_messages();
-	$message = sprintf( $msgs[ $flash['code'] ] ?? $msgs['generic'], $rid );
+	$message = ! empty( $flash['message'] ) ? (string) $flash['message'] : sprintf( $msgs[ $flash['code'] ] ?? $msgs['generic'], $rid );
 	$state = array( 'ok' => (bool) $flash['ok'], 'message' => $message, 'fields' => (array) $flash['fields'], 'values' => (array) $flash['values'], 'materials' => (array) ( $flash['materials'] ?? array() ) );
 	return $state;
 }
 
 /** Тексты сообщений формы: зависят от режима (LOCAL_TEST-фраза — только в тестовом режиме). */
 function maxbit_form_messages(): array {
-	$test = 'LOCAL_TEST' === MAXBIT_FORM_MODE ? ' Тестовая версия: обращение не отправлено MAXBIT.' : '';
 	return array(
-		'accepted'      => ( 'LOCAL_TEST' === MAXBIT_FORM_MODE ? 'Обращение записано. Номер: %s.' : 'Спасибо, обращение принято. Номер: %s. Ответим по указанному контакту в ближайший рабочий день.' ) . $test,
+		'accepted'      => 'LOCAL_TEST' === MAXBIT_FORM_MODE ? 'Тестовая заявка сохранена. Это стенд: обращение не отправлено MAXBIT.' : 'Спасибо, заявка получена. Свяжемся с вами по указанному контакту.',
 		'duplicate'     => 'Это обращение уже было принято ранее (номер %s). Повторная запись не создана.',
 		'validation'    => 'Проверьте заполнение обязательных полей.',
 		'token_expired' => 'Форма была открыта слишком давно. Отправьте её ещё раз.',
 		'token_invalid' => 'Не удалось проверить форму. Обновите страницу и попробуйте снова.',
 		'too_fast'      => 'Форма отправлена слишком быстро. Попробуйте ещё раз.',
 		'rate_limited'  => 'Слишком много попыток. Подождите несколько минут.',
-		'storage'       => 'Не удалось сохранить обращение. Попробуйте позже.',
+		'storage'       => 'Не удалось отправить заявку. Попробуйте ещё раз позже.',
 		'busy'          => 'Обращение обрабатывается. Подождите несколько секунд и повторите.',
-		'spam'          => 'Не удалось отправить обращение.',
-		'generic'       => 'Не удалось отправить обращение.',
+		'spam'          => 'Не удалось отправить заявку. Попробуйте ещё раз позже.',
+		'generic'       => 'Не удалось отправить заявку. Попробуйте ещё раз позже.',
 	);
 }
 

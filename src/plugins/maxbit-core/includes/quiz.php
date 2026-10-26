@@ -67,18 +67,22 @@ add_shortcode( 'maxbit_quiz', function ( $atts ) {
 	$a = shortcode_atts( array(
 		'heading' => 'Проверьте свой участок за минуту',
 		'text'    => 'Семь вопросов о том, как заказ проходит у вас сейчас. Результат — сразу на экране, без регистрации. Материалы по результату — по желанию, за имя и контакт.',
+		'collapsed' => '0', // 1 — свёрнуто до нажатия «Пройти самодиагностику» (без JS — развёрнуто)
 	), $atts );
+	$collapsed = '1' === (string) $a['collapsed'];
 	$q = maxbit_quiz_questions();
 	$zones = array_map( fn( $z ) => array( 'min' => $z[0], 'title' => $z[1], 'text' => $z[2], 'tips' => $z[3], 'url' => $z[4] ? ( ( $p = get_page_by_path( $z[4], OBJECT, 'mb_solution' ) ) && maxbit_is_publicly_visible( $p->ID ) ? get_permalink( $p ) : '' ) : '' ), maxbit_quiz_zones() );
 	wp_enqueue_script( 'maxbit-quiz', MAXBIT_CORE_URL . 'assets/quiz.js', array( 'maxbit-form' ), MAXBIT_CORE_VERSION, array( 'strategy' => 'defer', 'in_footer' => true ) );
 	wp_localize_script( 'maxbit-quiz', 'MAXBIT_QUIZ', array( 'zones' => $zones, 'max' => 2 * count( $q ) ) );
 	ob_start();
 	?>
-	<section class="mb-quiz" id="diagnostic" aria-labelledby="mb-quiz-h">
+	<section class="mb-quiz<?php echo $collapsed ? ' mb-quiz--collapsible' : ''; ?>" id="diagnostic" aria-labelledby="mb-quiz-h"<?php echo $collapsed ? ' data-collapsible' : ''; ?>>
 		<div class="mb-quiz__head">
 			<h2 id="mb-quiz-h"><?php echo esc_html( $a['heading'] ); ?></h2>
 			<p><?php echo esc_html( $a['text'] ); ?></p>
+			<?php if ( $collapsed ) : ?><p class="mb-quiz__open-wrap"><button type="button" class="mb-btn mb-btn--primary mb-quiz__open" aria-expanded="false" aria-controls="mb-quiz-body">Пройти самодиагностику</button></p><?php endif; ?>
 		</div>
+		<div class="mb-quiz__body" id="mb-quiz-body">
 		<form class="mb-quiz__form" data-quiz-form>
 			<ol class="mb-quiz__list">
 				<?php foreach ( $q as $i => $text ) : $n = $i + 1; ?>
@@ -117,6 +121,7 @@ add_shortcode( 'maxbit_quiz', function ( $atts ) {
 			?>
 		</div>
 		<noscript><p class="mb-quiz__hint">Для подсчёта результата нужен JavaScript. Материалы можно запросить через форму «Обсудить задачу» ниже.</p></noscript>
+	</div>
 	</section>
 	<?php
 	return ob_get_clean();

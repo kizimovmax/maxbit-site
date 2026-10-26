@@ -7,13 +7,14 @@ from playwright.async_api import async_playwright
 
 BASE = os.environ.get('MAXBIT_BASE', 'http://127.0.0.1:8080')
 PAGES = [
-    ('home', '/'), ('resheniya', '/resheniya/'), ('zakaz', '/resheniya/zakaz-pod-kontrolem/'),
-    ('integraciya', '/resheniya/integraciya-bitrix24-i-1c/'), ('bitrix24', '/tekhnologii/bitrix24-dlya-proizvodstva/'),
-    ('kak-rabotaem', '/kak-rabotaem/'), ('praktika', '/praktika/'), ('chek-list', '/praktika/chek-list-peredacha-zakaza-v-proizvodstvo/'),
-    ('kartochka', '/praktika/kartochka-proizvodstvennogo-zakaza/'), ('o-kompanii', '/o-kompanii/'), ('osnovatel', '/osnovatel/'),
-    ('proekty', '/proekty/'), ('404', '/net-takoy/'),
-    ('price', '/price/' + os.environ.get('MAXBIT_PRICE_KEY', 'x') + '/'),
-]
+    ('home', '/'), ('resheniya', '/resheniya/'), ('bitrix24', '/bitrix24/'), ('kak-rabotaem', '/kak-rabotaem/'),
+    ('o-kompanii', '/o-kompanii/'), ('osnovatel', '/osnovatel/'), ('zakaz', '/resheniya/zakaz-pod-kontrolem/'),
+    ('b24-proizv', '/tekhnologii/bitrix24-dlya-proizvodstva/'), ('integraciya', '/resheniya/integraciya-bitrix24-i-1c/'),
+    ('proekty', '/proekty/'), ('praktika', '/praktika/'), ('chek-list', '/praktika/chek-list-peredacha-zakaza-v-proizvodstvo/'),
+    ('kartochka', '/praktika/kartochka-proizvodstvennogo-zakaza/'), ('gk-vpk', '/proekty/gk-vpk/'), ('lentochka', '/proekty/lentochka/'),
+    ('paritet', '/proekty/paritet-alyans/'), ('avtospeccentr', '/proekty/avtospeccentr/'), ('cupol365', '/proekty/cupol365/'),
+    ('helper-med', '/proekty/helper-med/'), ('ngsk', '/proekty/ngsk/'), ('404', '/net-takoy/'),
+] + [(n, u) for n, u in (('kp', os.environ.get('MAXBIT_KP', '')), ('prezentaciya', os.environ.get('MAXBIT_PRES', ''))) if u]
 
 async def main():
     out = sys.argv[1] if len(sys.argv) > 1 else 'reports/shots-local'

@@ -170,14 +170,18 @@ function maxbit_lead_process( array $in ): array {
 	$client_key = substr( preg_replace( '/[^a-zA-Z0-9\-]/', '', (string) ( $in['client_key'] ?? '' ) ), 0, 64 );
 	$quiz    = substr( preg_replace( '/[^0-9,]/', '', (string) ( $in['quiz'] ?? '' ) ), 0, 64 );
 	$variant = 'magnet' === ( $in['variant'] ?? '' ) ? 'magnet' : 'full';
+	$purpose = sanitize_key( $in['purpose'] ?? 'discuss' );
+	$purpose = array_key_exists( $purpose, maxbit_lead_purposes() ) ? $purpose : 'discuss';
+	if ( 'magnet' === $variant ) {
+		$purpose = 'discuss';
+	}
 
 	$errors = array();
 	if ( mb_strlen( $name ) < 2 ) {
 		$errors['name'] = 'Укажите, как к вам обращаться (не короче 2 символов).';
 	}
-	$contact_compact = preg_replace( '/[\s\-\(\)\.]/u', '', $contact );
-	if ( mb_strlen( $contact ) < 5 || ! preg_match( '/(\d{6,}|@|https?:\/\/|t\.me|[a-zA-Z0-9_]{4,})/u', $contact_compact ) ) {
-		$errors['contact'] = 'Укажите телефон, почту или другой контакт, по которому можно ответить.';
+	if ( ! maxbit_contact_valid( $contact ) ) {
+		$errors['contact'] = 'Укажите email или имя пользователя в Telegram/MAX.';
 	}
 	if ( ! array_key_exists( $topic, maxbit_lead_topics() ) ) {
 		$errors['topic'] = 'Недопустимая тема обращения.';
@@ -195,7 +199,7 @@ function maxbit_lead_process( array $in ): array {
 		return $fail( 'validation', 'Проверьте заполнение полей.', $errors );
 	}
 
-	$fingerprint = hash( 'sha256', mb_strtolower( $name . '|' . $contact . '|' . $message . '|' . $topic ) );
+	$fingerprint = hash( 'sha256', mb_strtolower( $name . '|' . $contact . '|' . $message . '|' . $topic . '|' . $purpose ) );
 	$lock_name   = $client_key ? 'key_' . substr( hash( 'sha256', $client_key ), 0, 40 ) : 'fp_' . substr( $fingerprint, 0, 40 );
 
 	// Атомарная блокировка на ключ/отпечаток: параллельные повторы ждут и получают тот же результат.
@@ -224,7 +228,7 @@ function maxbit_lead_process( array $in ): array {
 		if ( maxbit_lead_rate_limited() ) {
 			return $fail( 'rate_limited', 'Слишком много попыток. Подождите несколько минут и повторите.' );
 		}
-		return maxbit_lead_store( compact( 'name', 'contact', 'message', 'topic', 'source', 'client_key', 'fingerprint', 'quiz', 'variant' ) + array( 'page' => mb_substr( sanitize_text_field( $in['page'] ?? '' ), 0, 300 ), 'consent_transfer' => $consent_transfer ? '1' : '0' ) );
+		return maxbit_lead_store( compact( 'name', 'contact', 'message', 'topic', 'source', 'client_key', 'fingerprint', 'quiz', 'variant', 'purpose' ) + array( 'page' => mb_substr( maxbit_mask_private_path( sanitize_text_field( $in['page'] ?? '' ) ), 0, 300 ), 'consent_transfer' => $consent_transfer ? '1' : '0' ) );
 	} finally {
 		maxbit_lock_release( $lock_name );
 	}
@@ -241,7 +245,7 @@ function maxbit_lead_store( array $d ): array {
 	$post_id = wp_insert_post( array(
 		'post_type'   => 'mb_lead',
 		'post_status' => 'draft', // черновик до полной записи; private — только когда всё сохранено
-		'post_title'  => $request_id . ' · ' . maxbit_lead_topics()[ $d['topic'] ],
+		'post_title'  => $request_id . ' · ' . maxbit_lead_purposes()[ $d['purpose'] ?? 'discuss' ] . ' · ' . maxbit_lead_topics()[ $d['topic'] ],
 		'post_author' => 0,
 	), true );
 	if ( is_wp_error( $post_id ) || ! $post_id ) {
@@ -269,6 +273,7 @@ function maxbit_lead_store( array $d ): array {
 		'_mb_quiz'        => $d['quiz'] ?? '',
 		'_mb_variant'     => $d['variant'] ?? 'full',
 		'_mb_consent_transfer' => $d['consent_transfer'] ?? '0',
+		'_mb_purpose'     => $d['purpose'] ?? 'discuss',
 	);
 	$rollback = static function () use ( $post_id ) {
 		wp_delete_post( $post_id, true );
@@ -305,16 +310,42 @@ function maxbit_lead_success( int $post_id, bool $duplicate ): array {
 	if ( 'magnet' === get_post_meta( $post_id, '_mb_variant', true ) && function_exists( 'maxbit_material_links' ) ) {
 		$materials = maxbit_material_links( $post_id );
 	}
+	$purpose = (string) get_post_meta( $post_id, '_mb_purpose', true );
+	$msgs = maxbit_form_messages();
+	$text = $duplicate ? 'Эта заявка уже была получена ранее — повторная запись не создана.' : $msgs['accepted'];
+	if ( ! $duplicate && 'LOCAL_TEST' !== MAXBIT_FORM_MODE && in_array( $purpose, array( 'kp', 'presentation' ), true ) ) {
+		$text .= ' Ссылку на выбранный материал отправим после обработки заявки.';
+	}
 	return array(
+		'purpose'    => $purpose,
 		'materials'  => $materials,
 		'ok'         => true,
 		'code'       => $duplicate ? 'duplicate' : 'accepted',
 		'request_id' => get_post_meta( $post_id, '_mb_request_id', true ),
 		'mode'       => MAXBIT_FORM_MODE,
-		'message'    => $duplicate
-			? 'Это обращение уже принято ранее — повторная запись не создана.'
-			: ( 'LOCAL_TEST' === MAXBIT_FORM_MODE ? 'Обращение записано.' : 'Спасибо, обращение принято. Ответим по указанному контакту в ближайший рабочий день.' ),
+		'message'    => $text,
 	);
+}
+
+/**
+ * «Удобный контакт» (ТЗ v4 §17.3): email, @имя или ссылка t.me / max.ru, либо имя пользователя мессенджера.
+ * Телефон не требуется; если посетитель всё же указал номер — заявку принимаем.
+ */
+function maxbit_contact_valid( string $c ): bool {
+	$c = trim( $c );
+	if ( mb_strlen( $c ) < 3 ) {
+		return false;
+	}
+	if ( is_email( $c ) ) {
+		return true;
+	}
+	if ( preg_match( '~^(https?://)?(t\.me|telegram\.me|max\.ru|web\.max\.ru)/[A-Za-z0-9_+/\-]{3,}~i', $c ) ) {
+		return true;
+	}
+	if ( preg_match( '/^@?[A-Za-z][A-Za-z0-9_]{3,31}$/', $c ) ) {
+		return true;
+	}
+	return (bool) preg_match( '/\d{6,}/', preg_replace( '/[\s\-\(\)\.+]/', '', $c ) );
 }
 
 function maxbit_new_request_id(): string {
@@ -371,6 +402,7 @@ add_action( 'add_meta_boxes_mb_lead', function () {
 		$rows = array(
 			'Идентификатор' => get_post_meta( $post->ID, '_mb_request_id', true ),
 			'Режим'         => $mode . ( 'LOCAL_TEST' === $mode ? ' — тестовое обращение, MAXBIT не отправлялось' : '' ),
+			'Цель'          => maxbit_lead_purposes()[ (string) get_post_meta( $post->ID, '_mb_purpose', true ) ] ?? 'Обсудить задачу',
 			'Тема'          => maxbit_lead_topics()[ get_post_meta( $post->ID, '_mb_topic', true ) ] ?? '',
 			'Имя'           => get_post_meta( $post->ID, '_mb_name', true ),
 			'Контакт'       => get_post_meta( $post->ID, '_mb_contact', true ),

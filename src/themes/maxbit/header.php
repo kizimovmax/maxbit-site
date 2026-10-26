@@ -37,21 +37,14 @@
 				'fallback_cb'    => false,
 			) );
 			?>
-			<a class="mb-btn mb-btn--primary mb-nav__cta" href="<?php echo esc_url( maxbit_cta_url() ); ?>">Обсудить задачу</a>
+			<a class="mb-btn mb-btn--primary mb-nav__cta" href="<?php echo esc_url( maxbit_cta_url() ); ?>">Обсудить задачу за 30 минут</a>
 			<?php
-			$s = maxbit_theme_settings();
 			$nav_contacts = array();
-			if ( ! empty( $s['tg_bot_url'] ) ) {
-				$nav_contacts[] = '<a href="' . esc_url( $s['tg_bot_url'] ) . '" data-contact="telegram" target="_blank" rel="noopener">Написать в Telegram ››</a>';
-			}
-			if ( ! empty( $s['max_bot_url'] ) ) {
-				$nav_contacts[] = '<a href="' . esc_url( $s['max_bot_url'] ) . '" data-contact="max" target="_blank" rel="noopener">Написать в MAX ››</a>';
-			}
-			if ( ! empty( $s['email'] ) ) {
-				$nav_contacts[] = '<a href="mailto:' . esc_attr( $s['email'] ) . '" data-contact="email">' . esc_html( $s['email'] ) . '</a>';
+			foreach ( maxbit_theme_links( 'bots' ) as $l ) {
+				$nav_contacts[] = '<a href="' . esc_url( $l['url'] ) . '" data-event="' . esc_attr( $l['event'] ) . '"' . ( str_starts_with( $l['url'], 'mailto:' ) ? '' : ' target="_blank" rel="noopener"' ) . '>' . esc_html( $l['label'] ) . ' ››</a>';
 			}
 			if ( $nav_contacts ) {
-				echo '<div class="mb-nav__contacts">' . implode( '', $nav_contacts ) . '</div>';
+				echo '<div class="mb-nav__contacts">' . implode( '', $nav_contacts ) . '</div>'; // phpcs:ignore
 			}
 			?>
 		</nav>

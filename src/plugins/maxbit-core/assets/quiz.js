@@ -3,6 +3,23 @@
 (function () {
   'use strict';
   var cfg = window.MAXBIT_QUIZ || {};
+  // Свёрнутая самодиагностика (главная): раскрывается кнопкой в блоке или карточкой «Пройти самодиагностику».
+  var box = document.querySelector('.mb-quiz[data-collapsible]');
+  if (box) {
+    var openBtn = box.querySelector('.mb-quiz__open');
+    box.classList.add('is-collapsed');
+    var expand = function (focus) {
+      box.classList.remove('is-collapsed');
+      if (openBtn) { openBtn.setAttribute('aria-expanded', 'true'); openBtn.parentNode.hidden = true; }
+      box.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (focus) { var r = box.querySelector('input[type=radio]'); if (r) { r.focus({ preventScroll: true }); } }
+    };
+    if (openBtn) { openBtn.addEventListener('click', function () { expand(true); }); }
+    document.querySelectorAll('[data-mb-open="diagnostic"]').forEach(function (a) {
+      a.addEventListener('click', function (e) { e.preventDefault(); expand(true); });
+    });
+    if (location.hash === '#diagnostic') { expand(false); }
+  }
   var form = document.querySelector('[data-quiz-form]');
   var result = document.querySelector('[data-quiz-result]');
   if (!form || !result) { return; }

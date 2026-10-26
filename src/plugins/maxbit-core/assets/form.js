@@ -49,7 +49,7 @@
     setError(form, 'name', ''); setError(form, 'contact', ''); setError(form, 'consent', ''); if (transfer) { setError(form, 'consent_transfer', ''); }
     var first = null;
     if (!name.value || name.value.trim().length < 2) { setError(form, 'name', 'Укажите, как к вам обращаться.'); ok = false; first = first || name; }
-    if (!contact.value || contact.value.trim().length < 5) { setError(form, 'contact', 'Укажите телефон, почту или другой контакт.'); ok = false; first = first || contact; }
+    if (!contact.value || contact.value.trim().length < 3) { setError(form, 'contact', 'Укажите email или имя пользователя в Telegram/MAX.'); ok = false; first = first || contact; }
     if (consent && !consent.checked) { setError(form, 'consent', 'Нужно согласие на обработку персональных данных.'); ok = false; first = first || consent; }
     if (transfer && !transfer.checked) { setError(form, 'consent_transfer', 'Нужно согласие на передачу данных.'); ok = false; first = first || transfer; }
     if (!ok && first) { first.focus(); }
@@ -78,7 +78,7 @@
       var data = {};
       new FormData(form).forEach(function (v, k) { data[k] = v; });
       delete data.action; delete data.redirect;
-      data.page = location.pathname.slice(0, 300);
+      data.page = location.pathname.replace(/^(\/materialy\/[a-z]+\/)[^\/]*\/?/, '$1').slice(0, 300); // без токена
 
       var ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
       var timer = ctrl ? setTimeout(function () { ctrl.abort(); }, cfg.timeoutMs || 15000) : null;
@@ -100,15 +100,18 @@
       }).then(function (res) {
         var j = res.body || {};
         if (j.ok) {
-          var text = (j.code === 'duplicate')
-            ? 'Это обращение уже принято ранее (номер ' + j.request_id + '). Повторная запись не создана.'
-            : (j.mode === 'LOCAL_TEST' ? 'Обращение записано. Номер: ' + j.request_id + '.' : 'Спасибо, обращение принято. Номер: ' + j.request_id + '. Ответим по указанному контакту в ближайший рабочий день.');
-          if (j.mode === 'LOCAL_TEST') { text += ' Тестовая версия: обращение не отправлено MAXBIT.'; }
-          notice(form, 'ok', text);
-          if (j.code === 'accepted') { track('lead_submit_accepted', { direction: direction }); }
+          // Текст — только из ответа сервера: успех показывается после подтверждённого сохранения.
+          notice(form, 'ok', j.message || 'Заявка получена.');
+          if (j.code === 'accepted') {
+            track('lead_submit_accepted', { direction: direction });
+            track('form_success', { direction: direction, purpose: j.purpose || 'discuss' });
+            if (j.purpose === 'kp') { track('request_kp', { direction: direction }); }
+            if (j.purpose === 'presentation') { track('request_presentation', { direction: direction }); }
+          }
           try { document.dispatchEvent(new CustomEvent('maxbit:lead', { detail: { form: form, response: j } })); } catch (e2) { /* старые браузеры */ }
           form.querySelectorAll('input[type=text],textarea').forEach(function (i) { i.value = ''; });
           form.querySelectorAll('input[type=checkbox]').forEach(function (i) { i.checked = false; });
+          var first = form.querySelector('input[name=purpose][type=radio]'); if (first) { first.checked = true; }
           keyInput.value = uuid();               // новый ключ для следующего, действительно нового обращения
           tokenField.value = '';   // одноразовость: новый токен запросим перед следующей отправкой
           fetch(cfg.tokenUrl, { credentials: 'same-origin' }).then(function (r) { return r.json(); })
@@ -127,7 +130,7 @@
           notice(form, 'error', j.message);
           return;
         }
-        notice(form, 'error', j.message || 'Не удалось отправить обращение. Попробуйте позже.');
+        notice(form, 'error', j.message || 'Не удалось отправить заявку. Попробуйте ещё раз позже.');
       }).catch(function (err) {
         var aborted = err && err.name === 'AbortError';
         track('lead_submit_error', { direction: direction, reason: aborted ? 'timeout' : 'network' });
@@ -144,6 +147,23 @@
   // Клик по контакту (телефон/почта/мессенджер) — отдельное событие, не заявка.
   document.querySelectorAll('a[data-contact]').forEach(function (a) {
     a.addEventListener('click', function () { track('contact_click', { direction: 'general', kind: a.getAttribute('data-contact') }); });
+  });
+
+  // Клики по ботам, каналам и реферальным ссылкам — события без персональных данных (не равны обращению/регистрации).
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest ? e.target.closest('a[data-event]') : null;
+    if (a) { track(a.getAttribute('data-event'), { direction: 'general' }); }
+    // Кнопки «Обсудить почасовую работу» и т. п.: подставить цель в форму, к которой ведёт ссылка.
+    var pb = e.target.closest ? e.target.closest('[data-mb-purpose]') : null;
+    if (pb) {
+      var target = document.querySelector((pb.getAttribute('href') || '#contact').replace(/^[^#]*/, '') || '#contact');
+      var f = target ? (target.matches('form') ? target : target.querySelector('form')) : null;
+      if (f) {
+        var v = pb.getAttribute('data-mb-purpose');
+        var radio = f.querySelector('input[name=purpose][value="' + v + '"]');
+        if (radio) { radio.checked = true; } else { var h = f.querySelector('input[name=purpose]'); if (h) { h.value = v; } }
+      }
+    }
   });
 
   // Мобильное меню.

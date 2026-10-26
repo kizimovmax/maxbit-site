@@ -1,10 +1,10 @@
 <?php
 /**
- * MAXBIT theme 0.6.0 «Графит». Тема — только оформление. Типы, поля, форма, согласия, SEO — в модуле maxbit-core.
+ * MAXBIT theme 0.7.0 «Графит» + содержание v4. Тема — только оформление. Типы, поля, форма, согласия, SEO — в модуле maxbit-core.
  */
 defined( 'ABSPATH' ) || exit;
 
-define( 'MAXBIT_THEME_VERSION', '0.6.0' );
+define( 'MAXBIT_THEME_VERSION', '0.7.0' );
 
 /**
  * Тема работает и без модуля maxbit-core (без формы, типов и допуска). Обёртки с префиксом maxbit_theme_
@@ -224,33 +224,14 @@ function maxbit_cta_url(): string {
 }
 
 /**
- * Кнопки мессенджеров и почты: Telegram / MAX (боты для связи) и почта — только если заданы в «MAXBIT → Контакты».
- * Телефон на сайте не размещается (решение владельца 26.10.2026). $kind: 'bots' — боты для связи, 'channels' — каналы с контентом.
+ * Кнопки «Написать в Telegram / MAX» (боты) и «Канал в Telegram / MAX» (каналы) — точные ссылки из настроек модуля.
+ * Почта — только после проверки ящика. Телефона на сайте нет (решение владельца 26.10.2026).
  */
+function maxbit_theme_links( string $kind ): array {
+	return function_exists( 'maxbit_messenger_links' ) ? maxbit_messenger_links( $kind ) : array();
+}
 function maxbit_theme_msg( string $kind = 'bots', bool $dark = false, string $label = '' ): string {
-	$s = maxbit_theme_settings();
-	if ( ! $s ) {
-		return '';
-	}
-	$links = array();
-	if ( 'channels' === $kind ) {
-		if ( ! empty( $s['tg_channel_url'] ) ) {
-			$links[] = array( $s['tg_channel_url'], 'Канал в Telegram', 'tg', 'telegram_channel' );
-		}
-		if ( ! empty( $s['max_channel_url'] ) ) {
-			$links[] = array( $s['max_channel_url'], 'Канал в MAX', 'max', 'max_channel' );
-		}
-	} else {
-		if ( ! empty( $s['tg_bot_url'] ) ) {
-			$links[] = array( $s['tg_bot_url'], 'Telegram', 'tg', 'telegram' );
-		}
-		if ( ! empty( $s['max_bot_url'] ) ) {
-			$links[] = array( $s['max_bot_url'], 'MAX', 'max', 'max' );
-		}
-		if ( ! empty( $s['email'] ) ) {
-			$links[] = array( 'mailto:' . $s['email'], 'Почта', 'mail', 'email' );
-		}
-	}
+	$links = maxbit_theme_links( 'channels' === $kind ? 'channels' : 'bots' );
 	if ( ! $links ) {
 		return '';
 	}
@@ -259,15 +240,46 @@ function maxbit_theme_msg( string $kind = 'bots', bool $dark = false, string $la
 		$out .= '<p class="mb-msg__label">' . esc_html( $label ) . '</p>';
 	}
 	foreach ( $links as $l ) {
-		$ext = str_starts_with( $l[0], 'mailto:' ) ? '' : ' target="_blank" rel="noopener"';
-		$out .= '<a class="mb-msg__btn mb-msg__btn--' . $l[2] . '" href="' . esc_url( $l[0] ) . '" data-contact="' . esc_attr( $l[3] ) . '"' . $ext . '>' . esc_html( $l[1] ) . '</a>';
+		$ext = str_starts_with( $l['url'], 'mailto:' ) ? '' : ' target="_blank" rel="noopener"';
+		$out .= '<a class="mb-msg__btn mb-msg__btn--' . esc_attr( $l['icon'] ) . '" href="' . esc_url( $l['url'] ) . '" data-event="' . esc_attr( $l['event'] ) . '"' . $ext . '>' . esc_html( $l['label'] ) . '</a>';
 	}
 	return $out . '</div>';
 }
+/** Модуль просит разметку мессенджеров — отдаём фирменную. */
+add_filter( 'maxbit_messengers_html', function ( $html, array $links, string $kind, string $style, string $label, bool $dark ) {
+	if ( ! $links ) {
+		return '';
+	}
+	if ( 'inline' === $style ) {
+		$a = array();
+		foreach ( $links as $l ) {
+			$a[] = '<a href="' . esc_url( $l['url'] ) . '" data-event="' . esc_attr( $l['event'] ) . '" target="_blank" rel="noopener">' . esc_html( $l['short'] ) . '</a>';
+		}
+		return '<p class="mb-msg-inline">' . ( $label ? '<span class="mb-msg-inline__label">' . esc_html( $label ) . '</span>' : '' ) . '<span class="mb-msg-inline__links">Написать: ' . implode( ' · ', $a ) . '</span></p>';
+	}
+	return maxbit_theme_msg( $kind, $dark, $label );
+}, 10, 6 );
+
+/** Карточка проекта (кейса): клиент, название, краткое описание, системы. */
+add_filter( 'maxbit_project_card_html', function ( $html, WP_Post $p, bool $featured ) {
+	$client = get_post_meta( $p->ID, '_mb_pf_client', true );
+	$title  = get_post_meta( $p->ID, '_mb_card_title', true ) ?: get_the_title( $p );
+	$text   = get_post_meta( $p->ID, '_mb_card_text', true ) ?: get_the_excerpt( $p );
+	$tags   = array_filter( array_map( 'trim', explode( ',', (string) get_post_meta( $p->ID, '_mb_case_tags', true ) ) ) );
+	$out  = '<article class="mb-pcard' . ( $featured ? ' mb-pcard--dark' : '' ) . '">';
+	$out .= '<p class="mb-pcard__client">' . esc_html( $client ) . '</p>';
+	$out .= '<h3 class="mb-pcard__title"><a href="' . esc_url( get_permalink( $p ) ) . '">' . esc_html( $title ) . '</a></h3>';
+	$out .= '<p class="mb-pcard__text">' . esc_html( $text ) . '</p>';
+	if ( $tags ) {
+		$out .= '<p class="mb-pcard__tags">' . implode( '', array_map( fn( $t ) => '<span>' . esc_html( $t ) . '</span>', $tags ) ) . '</p>';
+	}
+	$out .= '<p class="mb-pcard__more" aria-hidden="true">Посмотреть проект</p>';
+	return $out . '</article>';
+}, 10, 3 );
 
 /** Форма модуля: после вступления — кнопки мессенджеров «или напишите сразу». */
 add_action( 'maxbit_form_intro_after', function () {
-	echo maxbit_theme_msg( 'bots', false, 'Или напишите сразу:' ); // phpcs:ignore WordPress.Security.EscapeOutput
+	echo maxbit_theme_msg( 'bots', false, 'Или напишите нам:' ); // phpcs:ignore WordPress.Security.EscapeOutput
 } );
 
 /** Тема подменяет нейтральную карточку модуля своей (с пометкой закрытого просмотра). */
@@ -305,12 +317,13 @@ add_filter( 'wp_nav_menu_objects', function ( array $items ) {
 function maxbit_theme_aside(): void {
 	?>
 	<aside class="mb-aside" aria-label="Обсудить задачу">
+		<?php $bots = maxbit_theme_msg( 'bots', false ); if ( $bots ) : ?>
 		<div class="mb-aside__card">
-			<p class="mb-aside__title">Обсудить задачу</p>
-			<p>Расскажите о своей ситуации — на первой встрече определим проблемный участок и возможные следующие шаги.</p>
-			<a class="mb-btn mb-btn--primary" href="<?php echo esc_url( maxbit_cta_url() ); ?>">Обсудить задачу</a>
-			<?php echo maxbit_theme_msg( 'bots', false ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+			<p class="mb-aside__title">Написать нам</p>
+			<p>Первый разговор — бесплатно, примерно 30 минут. Форма заявки — внизу страницы.</p>
+			<?php echo $bots; // phpcs:ignore WordPress.Security.EscapeOutput ?>
 		</div>
+		<?php endif; ?>
 		<?php
 		$cl = get_page_by_path( 'chek-list-peredacha-zakaza-v-proizvodstvo', OBJECT, 'post' );
 		if ( $cl && 'publish' === $cl->post_status && get_the_ID() !== $cl->ID ) : ?>
@@ -327,34 +340,6 @@ function maxbit_theme_magnet(): void {
 		return;
 	}
 	echo '<aside class="mb-archive__aside"><div class="mb-practice__magnet"><p class="mb-eyebrow">Чек-лист</p><h3>12 пунктов перед передачей заказа в производство</h3><p>Одна страница. Распечатайте и проверьте свой следующий заказ — без регистрации и без формы.</p><p><a class="mb-btn mb-btn--primary" href="' . esc_url( get_permalink( $cl ) ) . '">Открыть чек-лист</a></p></div></aside>';
-}
-
-/**
- * «Кто ведёт проект» + призыв с мессенджерами — на страницах решений. Только проверяемые факты из настроек
- * («MAXBIT → Контакты → Основатель: факты», по строке); без фактов — имя, роль и ссылка на профиль.
- */
-function maxbit_theme_lead_block( string $heading = 'Обсудить задачу на вашем производстве' ): void {
-	$s     = maxbit_theme_settings();
-	$name  = $s['founder'] ?? 'Максим Кизимов';
-	$facts = array_values( array_filter( array_map( 'trim', preg_split( '/\R+/', (string) ( $s['founder_facts'] ?? '' ) ) ?: array() ) ) );
-	$page  = get_page_by_path( 'osnovatel' );
-	?>
-	<section class="mb-lead-block" aria-label="Кто ведёт проект и как связаться">
-		<div class="mb-lead-block__who">
-			<p class="mb-eyebrow">Кто ведёт проект</p>
-			<strong><?php echo esc_html( $name ); ?></strong>
-			<p>Основатель MAXBIT. Сам разбирает участок на первой встрече и отвечает за результат на каждом этапе.</p>
-			<?php if ( $facts ) : ?><ul><?php foreach ( array_slice( $facts, 0, 4 ) as $f ) : ?><li><?php echo esc_html( $f ); ?></li><?php endforeach; ?></ul><?php endif; ?>
-			<?php if ( $page && 'publish' === $page->post_status ) : ?><p><a class="mb-btn mb-btn--link" href="<?php echo esc_url( get_permalink( $page ) ); ?>">Подробнее об основателе</a></p><?php endif; ?>
-		</div>
-		<div class="mb-lead-block__cta">
-			<h2><?php echo esc_html( $heading ); ?></h2>
-			<p>Первая встреча — про вашу ситуацию и один проблемный участок. Без презентаций о нас.</p>
-			<p><a class="mb-btn mb-btn--primary" href="<?php echo esc_url( maxbit_cta_url() ); ?>">Обсудить задачу</a></p>
-			<?php echo maxbit_theme_msg( 'bots', true, 'Или напишите:' ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
-		</div>
-	</section>
-	<?php
 }
 
 /** Блок «Больше разборов — в канале» после статей: только если заданы ссылки на каналы. */
@@ -385,15 +370,16 @@ add_filter( 'nav_menu_css_class', function ( array $classes, $item ) {
  */
 function maxbit_theme_hero_art_html(): string {
 	$teaser = '';
-	$sol = get_posts( array( 'post_type' => 'mb_solution', 'post_status' => 'publish', 'numberposts' => 1, 'orderby' => 'menu_order title', 'order' => 'ASC', 'meta_query' => array( array( 'key' => '_mb_public_ok', 'value' => '1' ), array( 'key' => '_mb_test', 'compare' => 'NOT EXISTS' ) ) ) );
-	if ( $sol ) {
-		$teaser = '<div class="mb-hero__teaser"><p class="mb-hero__teaser-label">Решение 01</p><p class="mb-hero__teaser-title">' . esc_html( get_the_title( $sol[0] ) ) . '</p><a href="' . esc_url( get_permalink( $sol[0] ) ) . '">Смотреть ››</a></div>';
+	$pr = function_exists( 'maxbit_projects_by_slugs' ) ? maxbit_projects_by_slugs( array( 'gk-vpk' ) ) : array();
+	if ( ! $pr && function_exists( 'maxbit_public_projects' ) ) {
+		$pr = maxbit_public_projects( 1 );
 	}
-	$points = '<ul class="mb-hero__points mb-hero__points--dark" aria-label="Принципы работы">'
-		. '<li data-mark="›">Один участок за раз</li>'
-		. '<li data-mark="››">В ваших системах</li>'
-		. '<li data-mark="›››">Результат измерен</li></ul>';
-	return '<div class="mb-hero__art">' . maxbit_theme_x_svg( 'mb-hero__x', true ) . '<span class="mb-hero__ghost" aria-hidden="true">01</span>' . $teaser . $points . '</div>';
+	if ( $pr ) {
+		$client = get_post_meta( $pr[0]->ID, '_mb_pf_client', true );
+		$title  = get_post_meta( $pr[0]->ID, '_mb_card_title', true ) ?: get_the_title( $pr[0] );
+		$teaser = '<div class="mb-hero__teaser"><p class="mb-hero__teaser-label">Проект · ' . esc_html( $client ) . '</p><p class="mb-hero__teaser-title">' . esc_html( $title ) . '</p><a href="' . esc_url( get_permalink( $pr[0] ) ) . '">Посмотреть проект ››</a></div>';
+	}
+	return '<div class="mb-hero__art">' . maxbit_theme_x_svg( 'mb-hero__x', true ) . '<span class="mb-hero__ghost" aria-hidden="true">01</span>' . $teaser . '</div>';
 }
 add_filter( 'the_content', function ( string $html ): string {
 	if ( ! is_front_page() || ! in_the_loop() || ! is_main_query() || false === strpos( $html, 'mb-hero__cols' ) || false !== strpos( $html, 'mb-hero__art' ) ) {
@@ -401,14 +387,6 @@ add_filter( 'the_content', function ( string $html ): string {
 	}
 	return preg_replace( '/(<div class="wp-block-columns[^"]*mb-hero__cols[^"]*">)/u', '$1' . maxbit_theme_hero_art_html(), $html, 1 );
 }, 20 );
-
-/** Надзаголовок первого экрана: если в содержании его нет (убран ТЗ 25.10), подставляем короткий «Производственным компаниям». */
-add_filter( 'the_content', function ( string $html ): string {
-	if ( ! is_front_page() || ! in_the_loop() || ! is_main_query() || false === strpos( $html, 'mb-hero__cols' ) ) {
-		return $html;
-	}
-	return preg_replace( '/(<div class="wp-block-columns[^"]*mb-hero__cols[^"]*">.*?<div class="wp-block-column[^"]*">)\s*(<h1)/su', '$1<p class="mb-eyebrow">Производственным компаниям</p>$2', $html, 1 );
-}, 21 );
 
 /** Секциям главной — класс появления при прокрутке (без JS ничего не скрывается). */
 add_filter( 'the_content', function ( string $html ): string {

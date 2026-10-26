@@ -2,7 +2,7 @@
 <div class="mb-container mb-page">
 	<?php maxbit_the_breadcrumbs(); ?>
 	<h1 class="mb-page__title">Практика</h1>
-	<p class="mb-lead">Статьи, разборы проблем, руководства, чек-листы и схемы для руководителя производства: учёт заказов, Битрикс24, 1С. Материалы можно применить без нас; это не описания клиентских внедрений.</p>
+	<p class="mb-lead">Статьи и чек-листы о процессах, данных и цифровых инструментах. Их можно использовать в работе самостоятельно.</p>
 	<?php if ( have_posts() ) : ?>
 		<div class="mb-grid mb-grid--2 mb-grid--practice">
 			<?php while ( have_posts() ) : the_post(); maxbit_card( get_post(), 'chek-list-peredacha-zakaza-v-proizvodstvo' === get_post()->post_name ? 'Чек-лист' : 'Статья' ); endwhile; ?>

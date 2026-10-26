@@ -27,11 +27,11 @@ echo "  (примечание: прямой WP-CLI-доступ к мета не
 echo "== MB-12/A07: реальная смена темы при непустом блоке проектов =="
 PID=$($WP post list --post_type=mb_project --post_status=any --meta_key=_mb_test --meta_value=prj-open --field=ID | head -1)
 [ -n "$PID" ] || { PID=$($WP post create --post_type=mb_project --post_status=publish --post_title="SYN Открытый проект" --post_name=syn-prj-open --post_excerpt="Синтетика" --porcelain); $WP post meta set $PID _mb_test prj-open >/dev/null; $WP post meta set $PID _mb_public_ok 1 >/dev/null; }
-c=$(curl -s -o /tmp/mb_home -w '%{http_code}' "$BASE/"); grep -q "syn-prj-open" /tmp/mb_home && ok "тема MAXBIT: открытый синтетический проект виден на главной (блок непустой)" || fail "блок проектов пуст при открытом проекте (HTTP $c, PID=$PID, ok=$($WP post meta get $PID _mb_public_ok), status=$($WP post get $PID --field=post_status))"
+c=$(curl -s -o /tmp/mb_home -w '%{http_code}' "$BASE/proekty/"); grep -q "syn-prj-open" /tmp/mb_home && ok "тема MAXBIT: открытый синтетический проект виден в списке проектов (блок непустой)" || fail "блок проектов пуст при открытом проекте (HTTP $c, PID=$PID, ok=$($WP post meta get $PID _mb_public_ok), status=$($WP post get $PID --field=post_status))"
 $WP theme activate twentytwentythree >/dev/null 2>&1; RC=$?; ACT=$($WP theme list --status=active --field=name)
 [ $RC = 0 ] && [ "$ACT" = twentytwentythree ] && ok "активирована другая тема: $ACT (returncode $RC)" || fail "смена темы: rc=$RC active=$ACT"
 c=$(curl -s -o /tmp/mb_body -w '%{http_code}' "$BASE/")
-[ "$c" = 200 ] && grep -q "syn-prj-open" /tmp/mb_body && ! grep -qi 'fatal\|critical error' /tmp/mb_body && ok "при другой теме главная 200, блок проектов отрисован нейтральной карточкой модуля, без fatal" || fail "при другой теме: HTTP $c, fatal=$(grep -c -i 'critical error' /tmp/mb_body)"
+[ "$c" = 200 ] && grep -q "proekty/gk-vpk" /tmp/mb_body && ! grep -qi 'fatal\|critical error' /tmp/mb_body && ok "при другой теме главная 200, блок проектов отрисован нейтральной карточкой модуля, без fatal" || fail "при другой теме: HTTP $c, fatal=$(grep -c -i 'critical error' /tmp/mb_body)"
 c=$(curl -s -o /tmp/mb_body -w '%{http_code}' "$BASE/resheniya/zakaz-pod-kontrolem/")
 [ "$c" = 200 ] && grep -q 'value="order_control"' /tmp/mb_body && ok "при другой теме решение и форма (тема order_control) работают" || fail "решение при другой теме: $c"
 c=$(curl -s -o /tmp/mb_body -w '%{http_code}' "$BASE/resheniya/ii-praktikum/"); [ "$c" = 404 ] && ok "при другой теме закрытое остаётся закрытым (404)" || fail "закрытое при другой теме: $c"

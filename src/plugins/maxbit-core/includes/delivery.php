@@ -91,6 +91,7 @@ function maxbit_b24_fields( int $post_id, string $request_id ): array {
 	$c       = maxbit_split_contact( $contact );
 	$lines   = array_filter( array(
 		'Заявка с сайта ' . wp_parse_url( home_url(), PHP_URL_HOST ) . ', номер ' . $request_id,
+		'Цель: ' . ( maxbit_lead_purposes()[ (string) get_post_meta( $post_id, '_mb_purpose', true ) ] ?? 'Обсудить задачу' ),
 		'Тема: ' . ( $topics[ $topic ] ?? $topic ),
 		'Контакт (как ввёл посетитель): ' . $contact,
 		$msg ? "Задача:\n" . $msg : '',
