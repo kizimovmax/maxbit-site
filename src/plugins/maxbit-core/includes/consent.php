@@ -22,7 +22,7 @@ function maxbit_metrika_id(): string {
 }
 
 add_action( 'wp_footer', function () {
-	if ( is_admin() || ( function_exists( 'maxbit_is_private_material' ) && maxbit_is_private_material() ) ) {
+	if ( is_admin() || ( function_exists( 'maxbit_is_private_material' ) && ( maxbit_is_private_material() || maxbit_is_material_path() ) ) ) {
 		return; // на закрытых материалах счётчик не подключается (адрес с токеном не уходит третьим лицам)
 	}
 	$id      = maxbit_metrika_id();

@@ -117,6 +117,14 @@ function maxbit_is_private_material(): bool {
 	return ! empty( $GLOBALS['maxbit_private_material'] );
 }
 
+/** Любой запрос под /materialy/ (в т.ч. 404 по неверной или отозванной ссылке): адрес может содержать токен. */
+function maxbit_is_material_path(): bool {
+	$uri  = isset( $_SERVER['REQUEST_URI'] ) ? (string) wp_unslash( $_SERVER['REQUEST_URI'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+	$path = (string) wp_parse_url( $uri, PHP_URL_PATH );
+	$home = (string) wp_parse_url( home_url( '/' ), PHP_URL_PATH );
+	return 0 === strpos( '/' . ltrim( substr( $path, strlen( rtrim( $home, '/' ) ) ), '/' ), '/materialy/' );
+}
+
 function maxbit_material_headers(): void {
 	nocache_headers();
 	header( 'Cache-Control: private, no-store, no-cache, must-revalidate, max-age=0', true );
