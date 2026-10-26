@@ -2,7 +2,7 @@
 /**
  * Plugin Name: MAXBIT Core
  * Description: Типы материалов, связи, SEO-поля, допуск к публикации и серверный приём обращений для сайта MAXBIT. Не зависит от темы.
- * Version: 0.4.0
+ * Version: 0.4.1
  * Requires at least: 6.6
  * Requires PHP: 8.1
  * Author: MAXBIT
@@ -11,7 +11,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'MAXBIT_CORE_VERSION', '0.4.0' );
+define( 'MAXBIT_CORE_VERSION', '0.4.1' );
 define( 'MAXBIT_CORE_DIR', plugin_dir_path( __FILE__ ) );
 define( 'MAXBIT_CORE_URL', plugin_dir_url( __FILE__ ) );
 
@@ -58,12 +58,13 @@ function maxbit_lead_topics(): array {
 		'article'       => 'После статьи',
 		'checklist'     => 'После чек-листа',
 		'about'         => 'Со страницы компании',
+		'diagnostic'    => 'Самодиагностика участка',
 	);
 }
 
 /** Допустимые направления для событий аналитики. */
 function maxbit_event_directions(): array {
-	return array( 'general', 'order_control', 'bitrix24', 'integration', 'ai_practicum', 'article', 'checklist', 'about' );
+	return array( 'general', 'order_control', 'bitrix24', 'integration', 'ai_practicum', 'article', 'checklist', 'about', 'diagnostic' );
 }
 
 /** Признак: текущий пользователь может видеть закрытые материалы. */
@@ -98,6 +99,11 @@ require_once MAXBIT_CORE_DIR . 'includes/delivery.php';
 require_once MAXBIT_CORE_DIR . 'includes/notify.php';
 require_once MAXBIT_CORE_DIR . 'includes/form.php';
 require_once MAXBIT_CORE_DIR . 'includes/events.php';
+require_once MAXBIT_CORE_DIR . 'includes/taxonomies.php';
+require_once MAXBIT_CORE_DIR . 'includes/consent.php';
+require_once MAXBIT_CORE_DIR . 'includes/og.php';
+require_once MAXBIT_CORE_DIR . 'includes/price.php';
+require_once MAXBIT_CORE_DIR . 'includes/quiz.php';
 require_once MAXBIT_CORE_DIR . 'includes/seed.php';
 require_once MAXBIT_CORE_DIR . 'includes/update.php';
 

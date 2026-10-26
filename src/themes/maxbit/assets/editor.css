@@ -1,11 +1,13 @@
-/* Стили редактора: те же токены, чтобы контент-редактор видел близкий результат. */
-:root { --ink:#0F172A; --ink-2:#475569; --ink-3:#64748B; --accent:#2563EB; --accent-soft:#EFF4FF; --surface:#F4F7FC; --line:#E0E7F1; --radius:10px; --radius-s:8px; }
-.editor-styles-wrapper { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; color: var(--ink); }
+/* Стили редактора («Графит»): те же токены, чтобы контент-редактор видел близкий результат. */
+:root { --ink:#0F172A; --ink-2:#52617A; --accent:#2563EB; --surface:#EEF3FA; --line:#E0E7F1; }
+.editor-styles-wrapper { font-family: "Golos Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; color: var(--ink); }
 .editor-styles-wrapper .mb-section { padding: 32px 0; }
 .editor-styles-wrapper .mb-section--surface { background: var(--surface); }
-.editor-styles-wrapper .mb-tiles .wp-block-column, .editor-styles-wrapper .mb-cards-wide .wp-block-column { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; }
-.editor-styles-wrapper .mb-panel, .editor-styles-wrapper .is-style-panel { background: var(--surface); border-radius: var(--radius); padding: 20px; }
-.editor-styles-wrapper .mb-flow { border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; }
-.editor-styles-wrapper .mb-eyebrow { font-size: .9rem; font-weight: 600; color: var(--accent); }
-.editor-styles-wrapper .mb-note { font-size: .92rem; color: var(--ink-3); }
+.editor-styles-wrapper .mb-tiles .wp-block-column { background: #fff; border: 1px solid var(--line); padding: 20px; }
+.editor-styles-wrapper .mb-cards-wide .wp-block-column { background: #fff; border: 2px solid var(--ink); padding: 20px; }
+.editor-styles-wrapper .mb-panel, .editor-styles-wrapper .is-style-panel { background: var(--surface); padding: 20px; }
+.editor-styles-wrapper .mb-flow { background: var(--surface); padding: 16px; }
+.editor-styles-wrapper .mb-eyebrow { font-size: .75rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+.editor-styles-wrapper .mb-note { font-size: .92rem; color: var(--ink-2); }
 .editor-styles-wrapper .mb-hero h1 mark { background: none; color: var(--accent); }
+.editor-styles-wrapper .wp-block-details summary { font-weight: 800; }

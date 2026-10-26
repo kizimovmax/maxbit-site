@@ -61,7 +61,7 @@ for f in MAXBIT_compact_light MAXBIT_compact_dark MAXBIT_full_light MAXBIT_full_
 done
 check "старых файлов логотипа в теме нет" "! ls $ROOT/src/themes/maxbit/assets/brand/maxbit-*.svg >/dev/null 2>&1"
 code / >/dev/null; check "шапка: компактный логотип v2 (светлый фон) + подпись текстом; подвал — версия для тёмного фона" "grep -q 'mb-logo__full' /tmp/mb_body && grep -q 'mb-logo__mark' /tmp/mb_body && grep -q 'X-blue-chevron' /tmp/mb_body && [ \$(grep -c 'id=\"X-layer-order\"' /tmp/mb_body) -ge 3 ]"
-check "первый экран: иллюстрация WebP через picture, без lazy, с размерами" "grep -q 'mb-hero__art' /tmp/mb_body && grep -q 'hero-processes-1380.webp' /tmp/mb_body && grep -q 'width=\"1380\" height=\"700\"' /tmp/mb_body && ! grep -q 'hero-processes[^>]*loading=\"lazy\"' /tmp/mb_body"
+check "первый экран: X-фигура SVG в mb-hero__art, без растровой иллюстрации и без lazy" "grep -q 'mb-hero__art' /tmp/mb_body && grep -q 'mb-hero__x' /tmp/mb_body && ! grep -q 'hero-processes' /tmp/mb_body && ! grep -q '<picture' /tmp/mb_body"
 check "H1 главной не изменился фильтром иллюстрации" "grep -q 'Наводим порядок в заказах и процессах производственных компаний</h1>' /tmp/mb_body"
 check "MB-15: lang=\"ru-RU\"" "grep -q '<html lang=\"ru-RU\"' /tmp/mb_body"
 

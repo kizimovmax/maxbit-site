@@ -15,7 +15,12 @@ function maxbit_render_form( array $args = array() ): string {
 		'text'     => 'Расскажите о задаче. Обсудим текущий процесс и определим, с чего разумно начать.',
 		'button'   => 'Обсудить задачу',
 		'id'       => 'contact',
+		'variant'  => 'full',      // full — задача и мессенджеры; magnet — имя + контакт, выдача материалов
+		'quiz'     => '',          // итог самодиагностики (только цифры), уходит в заявку
 	) );
+	$magnet = 'magnet' === $args['variant'];
+	$s_all  = maxbit_get_settings();
+	$transfer = '1' === (string) $s_all['transfer_consent'];
 	$topic = array_key_exists( $args['topic'], maxbit_lead_topics() ) ? $args['topic'] : 'general';
 	$uid   = 'mbf-' . substr( md5( $topic . $args['id'] ), 0, 6 );
 	$state = maxbit_form_state_from_request();
@@ -35,6 +40,7 @@ function maxbit_render_form( array $args = array() ): string {
 			<input type="hidden" name="token" value="<?php echo esc_attr( maxbit_lead_token() ); ?>">
 			<input type="hidden" name="client_key" value="">
 			<input type="hidden" name="source" value="<?php echo esc_attr( maxbit_form_source() ); ?>">
+			<?php if ( $magnet ) : ?><input type="hidden" name="quiz" value="<?php echo esc_attr( preg_replace( '/[^0-9,]/', '', (string) $args['quiz'] ) ); ?>" data-quiz><input type="hidden" name="variant" value="magnet"><?php endif; ?>
 			<input type="hidden" name="redirect" value="<?php echo esc_attr( maxbit_current_path() . '#' . $args['id'] ); ?>">
 			<p class="mb-form__hp" aria-hidden="true"><label>Не заполняйте это поле <input type="text" name="website" tabindex="-1" autocomplete="off"></label></p>
 
@@ -54,22 +60,37 @@ function maxbit_render_form( array $args = array() ): string {
 				<input id="<?php echo $uid; ?>-contact" name="contact" type="text" required maxlength="200" autocomplete="tel email" aria-required="true" aria-describedby="<?php echo $uid; ?>-contact-err" value="<?php echo esc_attr( $state['values']['contact'] ?? '' ); ?>">
 				<p class="mb-form__error" id="<?php echo $uid; ?>-contact-err"><?php echo esc_html( $state['fields']['contact'] ?? '' ); ?></p>
 			</div>
+			<?php if ( ! $magnet ) : ?>
 			<div class="mb-form__row">
 				<label for="<?php echo $uid; ?>-message">Коротко о задаче — необязательно</label>
 				<textarea id="<?php echo $uid; ?>-message" name="message" rows="4" maxlength="2000"><?php echo esc_textarea( $state['values']['message'] ?? '' ); ?></textarea>
 			</div>
+			<?php endif; ?>
 			<div class="mb-form__row mb-form__row--consent">
 				<label class="mb-check" for="<?php echo $uid; ?>-consent">
 					<input id="<?php echo $uid; ?>-consent" name="consent" type="checkbox" value="1" required aria-required="true" aria-describedby="<?php echo $uid; ?>-consent-err" <?php checked( ! empty( $state['values']['consent'] ) ); ?>>
 					<span>Даю <a href="<?php echo esc_url( maxbit_legal_url( 'consent' ) ); ?>" target="_blank" rel="noopener">согласие на обработку персональных данных</a> в соответствии с <a href="<?php echo esc_url( maxbit_legal_url( 'policy' ) ); ?>" target="_blank" rel="noopener">политикой</a> — чтобы MAXBIT мог связаться со мной по этому обращению.</span>
 				</label>
 				<p class="mb-form__error" id="<?php echo $uid; ?>-consent-err"><?php echo esc_html( $state['fields']['consent'] ?? '' ); ?></p>
+				<?php if ( $transfer ) : ?>
+				<label class="mb-check" for="<?php echo $uid; ?>-transfer">
+					<input id="<?php echo $uid; ?>-transfer" name="consent_transfer" type="checkbox" value="1" required aria-required="true" aria-describedby="<?php echo $uid; ?>-transfer-err" <?php checked( ! empty( $state['values']['consent_transfer'] ) ); ?>>
+					<span>Даю согласие на передачу моих данных <?php echo esc_html( $s_all['transfer_to'] ?: 'третьим лицам, обрабатывающим обращения по поручению MAXBIT' ); ?> — только для ответа на это обращение.</span>
+				</label>
+				<p class="mb-form__error" id="<?php echo $uid; ?>-transfer-err"><?php echo esc_html( $state['fields']['consent_transfer'] ?? '' ); ?></p>
+				<?php endif; ?>
 			</div>
 			<div class="mb-form__actions">
 				<button type="submit" class="mb-btn mb-btn--primary"><?php echo esc_html( $args['button'] ); ?></button>
 			</div>
+			<?php if ( $magnet ) : ?>
+				<p class="mb-form__note">Материалы откроются сразу после отправки; ссылки именные и действуют 7 дней. Пишем только по этому обращению, без рассылок.</p>
+			<?php endif; ?>
 			<?php if ( 'LOCAL_TEST' === MAXBIT_FORM_MODE ) : ?>
 				<p class="mb-form__note mb-form__note--test"><strong>Тестовая версия.</strong> Не вводите реальные персональные данные. Обращения не отправляются MAXBIT — они сохраняются только в локальной базе для проверки.</p>
+			<?php endif; ?>
+			<?php if ( $magnet && $state && $state['ok'] && ! empty( $state['materials'] ) ) : ?>
+				<ul class="mb-quiz__files"><?php foreach ( $state['materials'] as $m ) : ?><li><a href="<?php echo esc_url( $m['url'] ); ?>"><?php echo esc_html( $m['title'] ); ?></a></li><?php endforeach; ?></ul>
 			<?php endif; ?>
 		</form>
 	</section>
@@ -143,7 +164,7 @@ function maxbit_lead_admin_post(): void {
 	$result = maxbit_lead_process( $in );
 	$redirect = isset( $in['redirect'] ) ? wp_validate_redirect( home_url( (string) $in['redirect'] ), home_url( '/' ) ) : home_url( '/' );
 	$receipt = bin2hex( random_bytes( 12 ) );
-	$flash = array( 'ok' => $result['ok'], 'code' => $result['code'], 'request_id' => $result['request_id'] ?? '', 'fields' => $result['fields'] ?? array(), 'values' => array() );
+	$flash = array( 'ok' => $result['ok'], 'code' => $result['code'], 'request_id' => $result['request_id'] ?? '', 'fields' => $result['fields'] ?? array(), 'values' => array(), 'materials' => $result['materials'] ?? array() );
 	if ( ! $result['ok'] && ! in_array( $result['code'], array( 'spam' ), true ) ) {
 		$flash['values'] = array(
 			'name'    => mb_substr( sanitize_text_field( $in['name'] ?? '' ), 0, 100 ),
@@ -180,7 +201,7 @@ function maxbit_form_state_from_request(): array {
 	$rid  = $flash['request_id'] ?: '';
 	$msgs = maxbit_form_messages();
 	$message = sprintf( $msgs[ $flash['code'] ] ?? $msgs['generic'], $rid );
-	$state = array( 'ok' => (bool) $flash['ok'], 'message' => $message, 'fields' => (array) $flash['fields'], 'values' => (array) $flash['values'] );
+	$state = array( 'ok' => (bool) $flash['ok'], 'message' => $message, 'fields' => (array) $flash['fields'], 'values' => (array) $flash['values'], 'materials' => (array) ( $flash['materials'] ?? array() ) );
 	return $state;
 }
 

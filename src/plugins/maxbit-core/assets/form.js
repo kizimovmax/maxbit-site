@@ -45,11 +45,13 @@
     var name = form.querySelector('[name="name"]');
     var contact = form.querySelector('[name="contact"]');
     var consent = form.querySelector('[name="consent"]');
-    setError(form, 'name', ''); setError(form, 'contact', ''); setError(form, 'consent', '');
+    var transfer = form.querySelector('[name="consent_transfer"]');
+    setError(form, 'name', ''); setError(form, 'contact', ''); setError(form, 'consent', ''); if (transfer) { setError(form, 'consent_transfer', ''); }
     var first = null;
     if (!name.value || name.value.trim().length < 2) { setError(form, 'name', 'Укажите, как к вам обращаться.'); ok = false; first = first || name; }
     if (!contact.value || contact.value.trim().length < 5) { setError(form, 'contact', 'Укажите телефон, почту или другой контакт.'); ok = false; first = first || contact; }
     if (consent && !consent.checked) { setError(form, 'consent', 'Нужно согласие на обработку персональных данных.'); ok = false; first = first || consent; }
+    if (transfer && !transfer.checked) { setError(form, 'consent_transfer', 'Нужно согласие на передачу данных.'); ok = false; first = first || transfer; }
     if (!ok && first) { first.focus(); }
     return ok;
   }
@@ -104,6 +106,7 @@
           if (j.mode === 'LOCAL_TEST') { text += ' Тестовая версия: обращение не отправлено MAXBIT.'; }
           notice(form, 'ok', text);
           if (j.code === 'accepted') { track('lead_submit_accepted', { direction: direction }); }
+          try { document.dispatchEvent(new CustomEvent('maxbit:lead', { detail: { form: form, response: j } })); } catch (e2) { /* старые браузеры */ }
           form.querySelectorAll('input[type=text],textarea').forEach(function (i) { i.value = ''; });
           form.querySelectorAll('input[type=checkbox]').forEach(function (i) { i.checked = false; });
           keyInput.value = uuid();               // новый ключ для следующего, действительно нового обращения
@@ -149,6 +152,9 @@
     toggle.addEventListener('click', function () {
       var open = document.body.classList.toggle('nav-open');
       toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+      // Панель меню начинается под шапкой: учитываем служебную полосу среды над ней (dev/local).
+      var hdr = document.querySelector('.mb-header');
+      if (open && hdr) { document.documentElement.style.setProperty('--mb-nav-top', Math.max(0, Math.round(hdr.getBoundingClientRect().bottom)) + 'px'); }
       if (open) { var first = document.querySelector('.mb-nav__menu a'); if (first) { first.focus(); } }
     });
     document.querySelectorAll('.mb-nav a').forEach(function (a) {

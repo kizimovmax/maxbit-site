@@ -31,8 +31,11 @@ function maxbit_notify_text( int $post_id ): string {
 		'Задача'   => get_post_meta( $post_id, '_mb_message', true ) ?: '—',
 		'Страница' => get_post_meta( $post_id, '_mb_page', true ) ?: get_post_meta( $post_id, '_mb_source', true ),
 		'Время'    => get_date_from_gmt( get_post( $post_id )->post_date_gmt, 'd.m.Y H:i' ) . ' (' . wp_timezone_string() . ')',
-		'Согласие' => 'да, версия ' . get_post_meta( $post_id, '_mb_consent_version', true ),
+		'Согласие' => 'да, версия ' . get_post_meta( $post_id, '_mb_consent_version', true ) . ( '1' === get_post_meta( $post_id, '_mb_consent_transfer', true ) ? '; передача третьим лицам — да' : '' ),
 	);
+	if ( get_post_meta( $post_id, '_mb_quiz', true ) ) {
+		$rows['Самодиагностика'] = function_exists( 'maxbit_quiz_summary' ) ? maxbit_quiz_summary( (string) get_post_meta( $post_id, '_mb_quiz', true ) ) : get_post_meta( $post_id, '_mb_quiz', true );
+	}
 	$out = '';
 	foreach ( $rows as $k => $v ) {
 		$out .= $k . ': ' . trim( (string) $v ) . "\n";

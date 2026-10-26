@@ -18,7 +18,12 @@ function maxbit_settings_defaults(): array {
 		'messenger_url' => '',
 		'founder'       => 'Максим Кизимов',
 		'city'          => '',
-		'telegram'      => '',   // ссылка на канал/аккаунт
+		'telegram'      => '',   // устар. (0.4.0): ссылка на канал — переносится в tg_channel_url
+		'tg_bot_url'    => '',   // бот/аккаунт для связи в Telegram
+		'max_bot_url'   => '',   // бот/аккаунт для связи в MAX
+		'tg_channel_url' => '',  // канал с материалами в Telegram
+		'max_channel_url' => '', // канал с материалами в MAX
+		'founder_facts' => '',   // проверяемые факты об основателе, по строке (блок «Кто ведёт проект»)
 		'profiles'      => '',   // по одной ссылке в строке (sameAs)
 		// Оператор ПДн / реквизиты
 		'legal_name'    => '',   // ИП Кизимов М. … / ООО «…»
@@ -39,12 +44,51 @@ function maxbit_settings_defaults(): array {
 		'metrika_id'    => '',
 		'yandex_verification' => '',
 		'cookie_notice' => '1',
+		// Согласия и закрытые материалы (0.4.1)
+		'transfer_consent' => '0', // отдельное согласие на передачу данных третьим лицам (CRM/подрядчики)
+		'transfer_to'   => '',     // кому передаются: «облачный Битрикс24 (ООО «1С-Битрикс»)» — подставляется в текст согласия
+		'price_key'     => '',     // ключ скрытой страницы цен: /price/<ключ>/
+		'price_page'    => 'stoimost-podrobno', // slug закрытой (private) страницы с подробными ценами
+		'materials'     => "Чек-лист: 12 пунктов перед передачей заказа в производство | module:chek-list-peredacha-zakaza-v-proizvodstvo.pdf", // по строке: Название | файл
 	);
 }
 
 function maxbit_get_settings(): array {
 	$saved = get_option( 'maxbit_settings', array() );
-	return array_merge( maxbit_settings_defaults(), is_array( $saved ) ? $saved : array() );
+	$s = array_merge( maxbit_settings_defaults(), is_array( $saved ) ? $saved : array() );
+	if ( empty( $s['tg_channel_url'] ) && ! empty( $s['telegram'] ) ) {
+		$s['tg_channel_url'] = $s['telegram']; // совместимость с 0.4.0
+	}
+	return $s;
+}
+
+/** Ключ скрытой страницы цен: создаётся при первом обращении, меняется кнопкой в настройках. */
+function maxbit_price_key(): string {
+	$s = maxbit_get_settings();
+	if ( empty( $s['price_key'] ) || ! preg_match( '/^[a-f0-9]{20}$/', (string) $s['price_key'] ) ) {
+		$saved = get_option( 'maxbit_settings', array() );
+		$saved = is_array( $saved ) ? $saved : array();
+		$saved['price_key'] = substr( bin2hex( random_bytes( 16 ) ), 0, 20 );
+		update_option( 'maxbit_settings', $saved );
+		return $saved['price_key'];
+	}
+	return (string) $s['price_key'];
+}
+
+/** Материалы для выдачи после самодиагностики: [ [title, file], … ]; file — «module:имя» (комплект модуля) или имя в uploads/maxbit-private/. */
+function maxbit_materials(): array {
+	$out = array();
+	foreach ( preg_split( '/\R+/', (string) maxbit_get_settings()['materials'] ) ?: array() as $line ) {
+		if ( false === strpos( $line, '|' ) ) {
+			continue;
+		}
+		[ $title, $file ] = array_map( 'trim', explode( '|', $line, 2 ) );
+		$file = preg_replace( '/[^a-zA-Z0-9_.:\-]/', '', $file );
+		if ( $title && $file && ! str_contains( $file, '..' ) ) {
+			$out[] = array( mb_substr( $title, 0, 120 ), $file );
+		}
+	}
+	return $out;
 }
 
 /** Публичные профили (sameAs): по одному адресу в строке, только http(s). */
@@ -57,8 +101,10 @@ function maxbit_profiles(): array {
 			$out[] = $u;
 		}
 	}
-	if ( ! empty( $s['telegram'] ) && ! in_array( $s['telegram'], $out, true ) ) {
-		array_unshift( $out, $s['telegram'] );
+	foreach ( array( 'tg_channel_url', 'max_channel_url', 'telegram' ) as $k ) {
+		if ( ! empty( $s[ $k ] ) && ! in_array( $s[ $k ], $out, true ) ) {
+			array_unshift( $out, $s[ $k ] );
+		}
 	}
 	return array_values( array_unique( $out ) );
 }
@@ -142,7 +188,7 @@ add_action( 'admin_init', function () {
 function maxbit_settings_page(): void {
 	$s = maxbit_get_settings();
 	$missing = array();
-	foreach ( array( 'phone' => 'телефон', 'email' => 'почта', 'legal_name' => 'наименование оператора ПДн', 'inn' => 'ИНН', 'address' => 'адрес' ) as $k => $label ) {
+	foreach ( array( 'email' => 'почта', 'legal_name' => 'наименование оператора ПДн', 'inn' => 'ИНН', 'address' => 'адрес' ) as $k => $label ) {
 		if ( empty( $s[ $k ] ) ) {
 			$missing[] = $label;
 		}
@@ -271,21 +317,27 @@ function maxbit_b24_webhook(): string {
 	return (string) MAXBIT_B24_WEBHOOK_URL;
 }
 
-/** Контакты на странице «О компании»: только заполненные; иначе — честное сообщение. */
+/** Контакты на странице «О компании»: только заполненные; телефон — только если задан (по умолчанию не размещается). */
 add_shortcode( 'maxbit_contacts', function () {
 	$s = maxbit_get_settings();
 	$rows = array();
-	if ( ! empty( $s['phone'] ) ) {
-		$rows[] = '<li><span>Телефон</span><a href="tel:' . esc_attr( preg_replace( '/[^\d+]/', '', $s['phone'] ) ) . '" data-contact="phone">' . esc_html( $s['phone'] ) . '</a></li>';
+	if ( ! empty( $s['tg_bot_url'] ) ) {
+		$rows[] = '<li><span>Telegram</span><a href="' . esc_url( $s['tg_bot_url'] ) . '" data-contact="telegram" target="_blank" rel="noopener">Написать в Telegram ››</a></li>';
+	}
+	if ( ! empty( $s['max_bot_url'] ) ) {
+		$rows[] = '<li><span>MAX</span><a href="' . esc_url( $s['max_bot_url'] ) . '" data-contact="max" target="_blank" rel="noopener">Написать в MAX ››</a></li>';
 	}
 	if ( ! empty( $s['email'] ) ) {
 		$rows[] = '<li><span>Почта</span><a href="mailto:' . esc_attr( $s['email'] ) . '" data-contact="email">' . esc_html( $s['email'] ) . '</a></li>';
 	}
-	if ( ! empty( $s['telegram'] ) ) {
-		$rows[] = '<li><span>Telegram</span><a href="' . esc_url( $s['telegram'] ) . '" data-contact="telegram" rel="noopener">' . esc_html( preg_replace( '#^https?://#', '', $s['telegram'] ) ) . '</a></li>';
+	if ( ! empty( $s['phone'] ) ) {
+		$rows[] = '<li><span>Телефон</span><a href="tel:' . esc_attr( preg_replace( '/[^\d+]/', '', $s['phone'] ) ) . '" data-contact="phone">' . esc_html( $s['phone'] ) . '</a></li>';
 	}
-	if ( ! empty( $s['messenger_url'] ) ) {
-		$rows[] = '<li><span>' . esc_html( $s['messenger'] ?: 'Мессенджер' ) . '</span><a href="' . esc_url( $s['messenger_url'] ) . '" data-contact="messenger" rel="noopener">' . esc_html( $s['messenger_url'] ) . '</a></li>';
+	if ( ! empty( $s['tg_channel_url'] ) ) {
+		$rows[] = '<li><span>Канал</span><a href="' . esc_url( $s['tg_channel_url'] ) . '" data-contact="telegram_channel" target="_blank" rel="noopener">' . esc_html( preg_replace( '#^https?://#', '', $s['tg_channel_url'] ) ) . '</a></li>';
+	}
+	if ( ! empty( $s['max_channel_url'] ) ) {
+		$rows[] = '<li><span>Канал в MAX</span><a href="' . esc_url( $s['max_channel_url'] ) . '" data-contact="max_channel" target="_blank" rel="noopener">' . esc_html( preg_replace( '#^https?://#', '', $s['max_channel_url'] ) ) . '</a></li>';
 	}
 	if ( ! empty( $s['city'] ) ) {
 		$rows[] = '<li><span>Город</span><span>' . esc_html( $s['city'] ) . '</span></li>';

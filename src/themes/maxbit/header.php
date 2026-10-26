@@ -9,13 +9,8 @@
 <link rel="manifest" href="<?php echo esc_url( get_theme_file_uri( 'assets/brand/site.webmanifest' ) ); ?>">
 <meta name="theme-color" content="#0F172A">
 <link rel="preload" href="<?php echo esc_url( get_theme_file_uri( 'assets/fonts/golos-text-cyrillic.woff2' ) ); ?>" as="font" type="font/woff2" crossorigin>
-<?php if ( is_front_page() ) : ?>
-<link rel="preload" as="image" href="<?php echo esc_url( get_theme_file_uri( 'assets/img/hero-processes-1380.webp' ) ); ?>" media="(min-width: 1201px)" fetchpriority="high">
-<link rel="preload" as="image" href="<?php echo esc_url( get_theme_file_uri( 'assets/img/hero-processes-1100.webp' ) ); ?>" media="(min-width: 621px) and (max-width: 1200px)" fetchpriority="high">
-<link rel="preload" as="image" href="<?php echo esc_url( get_theme_file_uri( 'assets/img/hero-processes-840.webp' ) ); ?>" media="(max-width: 620px)" fetchpriority="high">
-<?php endif; ?>
 <?php wp_head(); ?>
-<noscript><style>.mb-nav{display:flex!important;position:static;flex-direction:column;align-items:stretch;box-shadow:none}.mb-nav__toggle{display:none!important}</style></noscript>
+<noscript><style>.mb-nav{display:flex!important;position:static;flex-direction:column;align-items:stretch;background:#fff;color:#0F172A;padding:8px 0 16px}.mb-nav__menu a{color:#0F172A!important;font-size:1rem!important;padding:10px 0!important}.mb-nav__toggle{display:none!important}.mb-reveal{opacity:1!important;transform:none!important}</style></noscript>
 </head>
 <body <?php body_class(); ?>>
 <?php wp_body_open(); ?>
@@ -28,7 +23,9 @@
 		<a class="mb-logo" href="<?php echo esc_url( home_url( '/' ) ); ?>" aria-label="MAXBIT — Ваша команда цифрового развития, на главную">
 			<span class="mb-logo__full"><?php echo maxbit_brand_svg( 'v2/MAXBIT_compact_light.svg' ); ?><span class="mb-logo__tagline">Ваша команда цифрового развития</span></span>
 			<span class="mb-logo__mark"><?php echo maxbit_brand_svg( 'v2/MAXBIT_compact_light.svg' ); ?></span>
+			<span class="mb-logo__mark mb-logo__mark--dark" aria-hidden="true"><?php echo maxbit_brand_svg( 'v2/MAXBIT_compact_dark.svg' ); ?></span>
 		</a>
+		<a class="mb-btn mb-btn--primary mb-btn--small mb-header__cta-mobile" href="<?php echo esc_url( maxbit_cta_url() ); ?>">Обсудить</a>
 		<button class="mb-nav__toggle" aria-expanded="false" aria-controls="mb-menu" type="button"><span class="mb-nav__bar" aria-hidden="true"></span><span class="mb-nav__label">Меню</span></button>
 		<nav class="mb-nav" id="mb-menu" aria-label="Основное меню">
 			<?php
@@ -41,6 +38,22 @@
 			) );
 			?>
 			<a class="mb-btn mb-btn--primary mb-nav__cta" href="<?php echo esc_url( maxbit_cta_url() ); ?>">Обсудить задачу</a>
+			<?php
+			$s = maxbit_theme_settings();
+			$nav_contacts = array();
+			if ( ! empty( $s['tg_bot_url'] ) ) {
+				$nav_contacts[] = '<a href="' . esc_url( $s['tg_bot_url'] ) . '" data-contact="telegram" target="_blank" rel="noopener">Написать в Telegram ››</a>';
+			}
+			if ( ! empty( $s['max_bot_url'] ) ) {
+				$nav_contacts[] = '<a href="' . esc_url( $s['max_bot_url'] ) . '" data-contact="max" target="_blank" rel="noopener">Написать в MAX ››</a>';
+			}
+			if ( ! empty( $s['email'] ) ) {
+				$nav_contacts[] = '<a href="mailto:' . esc_attr( $s['email'] ) . '" data-contact="email">' . esc_html( $s['email'] ) . '</a>';
+			}
+			if ( $nav_contacts ) {
+				echo '<div class="mb-nav__contacts">' . implode( '', $nav_contacts ) . '</div>';
+			}
+			?>
 		</nav>
 	</div>
 </header>

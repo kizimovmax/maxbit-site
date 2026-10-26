@@ -168,6 +168,8 @@ function maxbit_lead_process( array $in ): array {
 	$topic   = sanitize_key( $in['topic'] ?? 'general' );
 	$source  = mb_substr( sanitize_text_field( $in['source'] ?? '' ), 0, 200 );
 	$client_key = substr( preg_replace( '/[^a-zA-Z0-9\-]/', '', (string) ( $in['client_key'] ?? '' ) ), 0, 64 );
+	$quiz    = substr( preg_replace( '/[^0-9,]/', '', (string) ( $in['quiz'] ?? '' ) ), 0, 64 );
+	$variant = 'magnet' === ( $in['variant'] ?? '' ) ? 'magnet' : 'full';
 
 	$errors = array();
 	if ( mb_strlen( $name ) < 2 ) {
@@ -183,6 +185,11 @@ function maxbit_lead_process( array $in ): array {
 	$consent = in_array( (string) ( $in['consent'] ?? '' ), array( '1', 'on', 'true', 'yes' ), true );
 	if ( ! $consent ) {
 		$errors['consent'] = 'Нужно согласие на обработку персональных данных — без него мы не можем принять обращение.';
+	}
+	$transfer_required = '1' === (string) maxbit_get_settings()['transfer_consent'];
+	$consent_transfer  = in_array( (string) ( $in['consent_transfer'] ?? '' ), array( '1', 'on', 'true', 'yes' ), true );
+	if ( $transfer_required && ! $consent_transfer ) {
+		$errors['consent_transfer'] = 'Нужно согласие на передачу данных — без него обращение не может быть передано в систему учёта.';
 	}
 	if ( $errors ) {
 		return $fail( 'validation', 'Проверьте заполнение полей.', $errors );
@@ -217,7 +224,7 @@ function maxbit_lead_process( array $in ): array {
 		if ( maxbit_lead_rate_limited() ) {
 			return $fail( 'rate_limited', 'Слишком много попыток. Подождите несколько минут и повторите.' );
 		}
-		return maxbit_lead_store( compact( 'name', 'contact', 'message', 'topic', 'source', 'client_key', 'fingerprint' ) + array( 'page' => mb_substr( sanitize_text_field( $in['page'] ?? '' ), 0, 300 ) ) );
+		return maxbit_lead_store( compact( 'name', 'contact', 'message', 'topic', 'source', 'client_key', 'fingerprint', 'quiz', 'variant' ) + array( 'page' => mb_substr( sanitize_text_field( $in['page'] ?? '' ), 0, 300 ), 'consent_transfer' => $consent_transfer ? '1' : '0' ) );
 	} finally {
 		maxbit_lock_release( $lock_name );
 	}
@@ -259,6 +266,9 @@ function maxbit_lead_store( array $d ): array {
 		'_mb_ip_hash'     => maxbit_client_ip_hash(),
 		'_mb_delivery_status'   => maxbit_delivery_url() ? 'pending' : 'disabled',
 		'_mb_delivery_attempts' => 0,
+		'_mb_quiz'        => $d['quiz'] ?? '',
+		'_mb_variant'     => $d['variant'] ?? 'full',
+		'_mb_consent_transfer' => $d['consent_transfer'] ?? '0',
 	);
 	$rollback = static function () use ( $post_id ) {
 		wp_delete_post( $post_id, true );
@@ -291,7 +301,12 @@ function maxbit_lead_store( array $d ): array {
 }
 
 function maxbit_lead_success( int $post_id, bool $duplicate ): array {
+	$materials = array();
+	if ( 'magnet' === get_post_meta( $post_id, '_mb_variant', true ) && function_exists( 'maxbit_material_links' ) ) {
+		$materials = maxbit_material_links( $post_id );
+	}
 	return array(
+		'materials'  => $materials,
 		'ok'         => true,
 		'code'       => $duplicate ? 'duplicate' : 'accepted',
 		'request_id' => get_post_meta( $post_id, '_mb_request_id', true ),

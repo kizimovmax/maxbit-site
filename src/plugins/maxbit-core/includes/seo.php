@@ -130,17 +130,23 @@ add_action( 'wp_head', function () {
 
 /** Картинка для соцсетей: миниатюра записи, иначе брендовая из темы (1200×630). */
 function maxbit_og_image(): array {
+	static $cache = null;
+	if ( null !== $cache ) {
+		return $cache;
+	}
 	if ( is_singular() && has_post_thumbnail() ) {
 		$img = wp_get_attachment_image_src( get_post_thumbnail_id(), 'large' );
 		if ( $img ) {
-			return array( 'url' => $img[0], 'w' => $img[1], 'h' => $img[2] );
+			return $cache = array( 'url' => $img[0], 'w' => $img[1], 'h' => $img[2], 'custom' => true );
 		}
 	}
+	$og   = array();
 	$file = get_theme_file_path( 'assets/brand/og-default.png' );
 	if ( is_file( $file ) ) {
-		return array( 'url' => get_theme_file_uri( 'assets/brand/og-default.png' ), 'w' => 1200, 'h' => 630 );
+		$og = array( 'url' => get_theme_file_uri( 'assets/brand/og-default.png' ), 'w' => 1200, 'h' => 630 );
 	}
-	return array();
+	$og = apply_filters( 'maxbit_og_image', $og ); // 0.4.1: генерация в стиле «Графит» (includes/og.php)
+	return $cache = is_array( $og ) ? $og : array();
 }
 
 /**
@@ -280,7 +286,12 @@ function maxbit_org_schema(): array {
 		$cp['email'] = $s['email'];
 		$org['email'] = $s['email'];
 	}
-	if ( isset( $cp['telephone'] ) || isset( $cp['email'] ) ) {
+	if ( ! empty( $s['tg_bot_url'] ) ) {
+		$cp['url'] = $s['tg_bot_url'];
+	} elseif ( ! empty( $s['max_bot_url'] ) ) {
+		$cp['url'] = $s['max_bot_url'];
+	}
+	if ( isset( $cp['telephone'] ) || isset( $cp['email'] ) || isset( $cp['url'] ) ) {
 		$org['contactPoint'] = $cp;
 	}
 	if ( ! empty( $s['city'] ) ) {
@@ -498,9 +509,19 @@ add_action( 'init', function () {
 	if ( ! empty( $s['phone'] ) ) {
 		$out .= '- Телефон: ' . $s['phone'] . "\n";
 	}
-	if ( ! empty( $s['telegram'] ) ) {
-		$out .= '- Telegram: ' . $s['telegram'] . "\n";
+	if ( ! empty( $s['tg_bot_url'] ) ) {
+		$out .= '- Написать в Telegram: ' . $s['tg_bot_url'] . "\n";
 	}
+	if ( ! empty( $s['max_bot_url'] ) ) {
+		$out .= '- Написать в MAX: ' . $s['max_bot_url'] . "\n";
+	}
+	if ( ! empty( $s['tg_channel_url'] ) ) {
+		$out .= '- Канал с материалами (Telegram): ' . $s['tg_channel_url'] . "\n";
+	}
+	if ( ! empty( $s['max_channel_url'] ) ) {
+		$out .= '- Канал с материалами (MAX): ' . $s['max_channel_url'] . "\n";
+	}
+	$out .= "\n## Как читать этот сайт\n- Решения описывают один участок процесса: для кого, как устроен путь заказа, что входит в работу, что получает клиент.\n- Статьи «Практики» — разборы и чек-листы, применимые без MAXBIT.\n- Кейсы публикуются только с письменного разрешения клиента; без разрешения — обобщённые примеры с пометкой «условный пример».\n- Цены на сайте не публикуются; порядок формирования стоимости описан на странице «Как формируется стоимость», если она опубликована.\n";
 	status_header( 200 );
 	header( 'Content-Type: text/plain; charset=utf-8' );
 	header( 'Cache-Control: public, max-age=3600' );
@@ -508,37 +529,7 @@ add_action( 'init', function () {
 	exit;
 } );
 
-/** Яндекс Метрика и cookie-уведомление — только production и только при заданном счётчике. */
-function maxbit_metrika_id(): string {
-	if ( 'production' !== MAXBIT_ENV ) {
-		return '';
-	}
-	return (string) maxbit_get_settings()['metrika_id'];
-}
-add_action( 'wp_head', function () {
-	$id = maxbit_metrika_id();
-	if ( ! $id || is_admin() ) {
-		return;
-	}
-	?>
-<script>(function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};m[i].l=1*new Date();for(var j=0;j<document.scripts.length;j++){if(document.scripts[j].src===r){return;}}k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})(window,document,"script","https://mc.yandex.ru/metrika/tag.js","ym");ym(<?php echo (int) $id; ?>,"init",{clickmap:true,trackLinks:true,accurateTrackBounce:true,webvisor:false});window.addEventListener("maxbit:track",function(e){try{ym(<?php echo (int) $id; ?>,"reachGoal",e.detail.event,e.detail.params||{});}catch(_){}});</script>
-<noscript><div><img src="https://mc.yandex.ru/watch/<?php echo (int) $id; ?>" style="position:absolute;left:-9999px" alt=""></div></noscript>
-	<?php
-}, 30 );
-add_action( 'wp_footer', function () {
-	$s = maxbit_get_settings();
-	if ( ! maxbit_metrika_id() || '1' !== (string) $s['cookie_notice'] ) {
-		return;
-	}
-	$policy = function_exists( 'maxbit_legal_url' ) ? maxbit_legal_url( 'policy' ) : home_url( '/politika-obrabotki-personalnyh-dannyh/' );
-	?>
-<div class="mb-cookie" id="mb-cookie" role="region" aria-label="Уведомление об использовании cookie" hidden>
-	<p>Сайт использует cookie и Яндекс Метрику для статистики посещений. Продолжая пользоваться сайтом, вы соглашаетесь с <a href="<?php echo esc_url( $policy ); ?>">политикой обработки данных</a>.</p>
-	<button type="button" class="mb-btn mb-btn--small" id="mb-cookie-ok">Понятно</button>
-</div>
-<script>(function(){var k='mb_cookie_ok',b=document.getElementById('mb-cookie');if(!b)return;try{if(localStorage.getItem(k))return;}catch(e){}b.hidden=false;document.getElementById('mb-cookie-ok').addEventListener('click',function(){b.hidden=true;try{localStorage.setItem(k,'1');}catch(e){}});})();</script>
-	<?php
-}, 40 );
+/* Метрика и согласие на cookie — includes/consent.php (0.4.1). */
 
 /** Кеш страницы: любое обновление записи сбрасывает кеш объектов и даёт сигнал внешнему кешу (если появится). */
 add_action( 'save_post', function ( int $post_id ) {
