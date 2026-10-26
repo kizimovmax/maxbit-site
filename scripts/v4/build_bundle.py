@@ -159,14 +159,13 @@ CONTACT_TEXT = 'На бесплатной первой встрече позна
 
 def home():
     hero = section(columns([
-        p('MAXBIT — ваша команда цифрового развития', 'mb-eyebrow')
-        + h(1, 'Цифровое развитие производственных компаний')
+        h(1, 'Цифровое развитие производственных компаний')
         + p('Помогаем производственным предприятиям улучшать бизнес-процессы, сокращать ручную работу и связывать разрозненные системы.', 'mb-hero__lead')
         + p('Разбираемся в задачах бизнеса, выбираем подходящие решения, внедряем изменения и сопровождаем их в ежедневной работе.', 'mb-hero__text')
         + buttons([('Обсудить задачу за 30 минут', '#contact', False), ('Посмотреть реализованные проекты', '/proekty/', True)], 'mb-hero__actions')
         + sc('[maxbit_messengers kind="bots" style="inline" label="Первый разговор — бесплатно"]')
     ], 'mb-hero__cols'), 'mb-hero')
-    sit = section(head('Когда привычный порядок работы перестаёт помогать', 'Проблема может быть в одном процессе или на стыке нескольких подразделений. Начинаем с конкретной ситуации и смотрим, что мешает работе.')
+    sit = section(head('С чем к нам приходят', 'Проблема может быть в одном процессе или на стыке нескольких подразделений. Начинаем с конкретной ситуации и смотрим, что мешает работе.')
                   + columns([h(3, t) + p(d) for t, d in SIT], 'mb-tiles mb-situations'), 'mb-section--surface')
     cards = []
     for i, (t, d, link, url) in enumerate(DIRS):
@@ -187,15 +186,16 @@ def home():
     results = section(head('Что проверяем вместе с вами') + columns([h(3, t) + p(d) for t, d in RESULTS], 'mb-results'), 'mb-section--surface')
     projects = section(head('Как это работает на практике', 'Задачи компаний, внесённые изменения и работа решений в реальных процессах.')
                        + sc('[maxbit_projects_cards ids="gk-vpk,lentochka,paritet-alyans"]')
-                       + p('<a class="mb-btn mb-btn--link" href="/proekty/">Все проекты</a>', 'mb-section__after'), '', 'projects')
-    reviews = section(head('Отзывы клиентов') + sc('[maxbit_reviews initial="3"]'), 'mb-section--surface', 'reviews')
+                       + p('<a class="mb-btn mb-btn--link" href="/proekty/">Все проекты</a>', 'mb-section__after'), 'mb-section--surface', 'projects')
+    reviews = section(head('Отзывы клиентов') + sc('[maxbit_reviews initial="3"]'), '', 'reviews')
     practice = section(head('Материалы для самостоятельного разбора', 'Статьи и чек-листы о процессах, данных и цифровых инструментах. Их можно использовать в работе самостоятельно.')
                        + sc('[maxbit_practice_cards diagnostic="1"]')
                        + sc('[maxbit_quiz collapsed="1"]')
-                       + p('<a class="mb-btn mb-btn--link" href="/praktika/">Все материалы</a>', 'mb-section__after'))
+                       + p('<a class="mb-btn mb-btn--link" href="/praktika/">Все материалы</a>', 'mb-section__after'), 'mb-section--magnets', 'materials')
     faqs = section(faq(FAQ, anchor='faq'))
     contact = section(form(id='contact', purposes='1', heading='Обсудим вашу задачу за 30 минут', text=CONTACT_TEXT), 'mb-section--contact')
-    return hero + sit + dirs + steps + regular + results + projects + reviews + practice + faqs + contact
+    # Блок «Что проверяем вместе с вами» (results) убран с главной по решению владельца 26.10.
+    return hero + sit + dirs + steps + regular + projects + reviews + practice + faqs + contact
 
 # ------------------------------------------------------------------ «Как работаем» (§4)
 def how():
@@ -245,7 +245,7 @@ def about():
     c += h(2, 'Как проверяем результат')
     c += p('Перед началом согласуем задачу, ответственность и критерии готовности. Проверяем рабочие сценарии, использование решения сотрудниками и необходимые материалы. Измеримые изменения показываем на основе подтверждённых данных.')
     c += h(2, 'Контакты')
-    c += p('Обсудить задачу, получить коммерческое предложение или презентацию можно через форму, в Telegram или MAX. Работаем с клиентами по всей России.')
+    c += p('Обсудить задачу или получить коммерческое предложение можно через форму, в Telegram или MAX. Работаем с клиентами по всей России.')
     c += sc('[maxbit_messengers kind="bots"]')
     c += form(id='contact', purposes='1', heading='Обсудим вашу задачу за 30 минут', text=CONTACT_TEXT)
     for frag in ['Подробные описания подготовлены для', 'Для реализации привлекаются специалисты']:

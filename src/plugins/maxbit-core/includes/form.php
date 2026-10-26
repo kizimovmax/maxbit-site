@@ -71,7 +71,7 @@ function maxbit_render_form( array $args = array() ): string {
 			<?php if ( $choose ) : ?>
 			<fieldset class="mb-form__row mb-form__purposes">
 				<legend>Цель обращения</legend>
-				<?php foreach ( array( 'discuss', 'kp', 'presentation' ) as $pk ) : ?>
+				<?php /* Презентация в форме не предлагается (решение владельца 26.10); ссылку можно выдать вручную из заявки. */ foreach ( array( 'discuss', 'kp' ) as $pk ) : ?>
 				<label class="mb-chip"><input type="radio" name="purpose" value="<?php echo esc_attr( $pk ); ?>" <?php checked( ( $state['values']['purpose'] ?? $purpose ), $pk ); ?>><span><?php echo esc_html( $purposes[ $pk ] ); ?></span></label>
 				<?php endforeach; ?>
 			</fieldset>
@@ -109,7 +109,7 @@ function maxbit_render_form( array $args = array() ): string {
 			</div>
 			<div class="mb-form__actions">
 				<button type="submit" class="mb-btn mb-btn--primary"><?php echo esc_html( $args['button'] ); ?></button>
-				<?php if ( $choose || in_array( $purpose, array( 'kp', 'presentation' ), true ) ) : ?><p class="mb-form__note mb-form__note--inline">Если вы запросили КП или презентацию, отправим ссылку после получения заявки.</p><?php endif; ?>
+				<?php if ( $choose || in_array( $purpose, array( 'kp', 'presentation' ), true ) ) : ?><p class="mb-form__note mb-form__note--inline">Если вы запросили коммерческое предложение, отправим ссылку после получения заявки.</p><?php endif; ?>
 			</div>
 			<?php if ( $magnet ) : ?>
 				<p class="mb-form__note">Материалы откроются сразу после отправки; ссылки именные и действуют 7 дней. Пишем только по этому обращению, без рассылок.</p>

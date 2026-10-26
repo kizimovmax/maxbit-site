@@ -36,7 +36,7 @@ $sample    = '1' === get_post_meta( $id, '_mb_is_sample', true );
 		?>
 		<?php maxbit_theme_updated(); ?>
 	</article>
-	<aside class="mb-aside mb-aside--case" aria-label="Связанные решения">
+	<aside class="mb-aside mb-aside--case" aria-label="Связанные решения"><div class="mb-aside__sticky">
 		<?php if ( is_array( $links ) && $links ) : ?>
 		<div class="mb-aside__links">
 			<p class="mb-aside__title">Связанные решения</p>
@@ -47,7 +47,7 @@ $sample    = '1' === get_post_meta( $id, '_mb_is_sample', true );
 		<?php $bots = maxbit_theme_msg( 'bots', false ); if ( $bots ) : ?>
 		<div class="mb-aside__card"><p class="mb-aside__title">Похожая задача?</p><p>Первый разговор — бесплатно, примерно 30 минут.</p><?php echo $bots; // phpcs:ignore ?></div>
 		<?php endif; ?>
-	</aside>
+	</div></aside>
 	<?php
 	$others = function_exists( 'maxbit_public_projects' ) ? maxbit_public_projects( 3, array( $id ) ) : array();
 	if ( $others && function_exists( 'maxbit_project_card_html' ) ) :

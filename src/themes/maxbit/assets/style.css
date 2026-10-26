@@ -1,4 +1,4 @@
-/* MAXBIT theme 0.7.0 — визуальная система «X-геометрия / Графит» (решение владельца 26.10.2026).
+/* MAXBIT theme 0.7.1 — визуальная система «X-геометрия / Графит» (решение владельца 26.10.2026).
    Тёмные диагональные блоки (15° от вертикали), X-фигура из двух шевронов логотипа, срезы углов 45°,
    крупные номера секций, синий — только для действий, номеров и одного акцента на экран.
    Все формы — CSS (clip-path) и инлайн-SVG; растровых картинок в теме нет. Шрифт Golos Text (OFL) в комплекте
@@ -1017,6 +1017,69 @@ html.js .mb-quiz.is-collapsed .mb-quiz__head { margin-bottom: 0; }
 .mb-aside__card .mb-msg { margin-top: 12px; }
 
 /* ---------- Печать: чек-листы и решения печатают ---------- */
+/* =====================================================================================================
+   0.7.1 — замечания владельца 26.10.2026
+   ===================================================================================================== */
+/* Закреплённая шапка под панелью администратора WordPress (у посетителей панели нет) */
+.admin-bar .mb-header { top: 32px; }
+@media (max-width: 782px) { .admin-bar .mb-header { top: 46px; } }
+@media (max-width: 600px) { .admin-bar .mb-header { top: 0; } }
+
+/* Первый экран: приглашение к самодиагностике сверху, X из логотипа ниже; призрачного номера нет */
+.mb-hero .mb-hero__cols > .mb-hero__art { justify-content: flex-start; gap: 40px; padding: 72px 0 56px 80px; }
+.mb-hero__x { position: static; transform: none; align-self: flex-end; width: min(78%, 340px); margin-top: auto; }
+.mb-hero__teaser { max-width: 320px; gap: 14px; }
+.mb-hero__teaser-title { font-size: 1.4rem; }
+.mb-hero__teaser .mb-btn { color: #fff; border-bottom: 0; padding: 0 30px 0 22px; margin-top: 6px; font-size: .9rem; min-height: 48px; }
+.mb-hero__teaser .mb-btn:hover { color: #fff; }
+@media (max-width: 900px) {
+  .mb-hero .mb-hero__cols > .mb-hero__art { padding: 48px var(--pad) 28px; gap: 24px; }
+  .mb-hero__x { width: 150px; }
+  .mb-hero__teaser { max-width: 420px; }
+}
+@media (max-width: 620px) { .mb-hero__x { width: 120px; } .mb-hero__teaser-title { font-size: 1.2rem; } .mb-hero__teaser .mb-btn { width: 100%; } }
+
+/* X на тёмной плите внутренних страниц (обзор Битрикс24, материалы) — как в логотипе */
+.mb-b24-hero::after, .mb-mat-hero::after { background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 139 110'%3E%3Cpath d='M100 0H139L89 55L139 110H100L50 55Z' fill='%232563EB'/%3E%3Cpath d='M0 0H39L89 55L39 110H0L50 55Z' fill='%23FFFFFF'/%3E%3C/svg%3E") center / contain no-repeat; -webkit-mask: none; mask: none; aspect-ratio: 139 / 110; }
+
+/* Мессенджеры у форм: подпись отдельной строкой, кнопки подряд */
+.mb-msg__label { flex: 0 0 100%; }
+
+/* Боковая колонка: закрепляется только в пределах основного текста и не наезжает на блоки ниже */
+.mb-page--aside > .mb-aside { position: static; align-self: stretch; display: block; }
+.mb-aside__sticky { position: sticky; top: 104px; display: grid; gap: 14px; }
+.mb-aside--case .mb-aside__sticky { display: flex; flex-direction: column; gap: 16px; }
+.admin-bar .mb-aside__sticky { top: 136px; }
+
+/* Шаги «Как проходит работа»: текст по ширине с переносами */
+.mb-how__steps p { text-align: justify; hyphens: auto; -webkit-hyphens: auto; }
+
+/* Каталог решений: обзор Битрикс24 — спокойная светлая карточка-строка */
+.mb-ccard--overview { background: var(--surface); border-color: var(--surface); }
+.mb-ccard--overview:hover { background: #E3EAF5; }
+.mb-ccard--overview .mb-ccard__label { color: var(--accent); font-size: .7rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; margin: 0 0 8px; }
+
+/* Главная: материалы (лид-магниты) на тёмном фоне, самодиагностика — главный акцент */
+.mb-section--magnets { background: var(--graphite); color: #fff; position: relative; overflow: hidden; isolation: isolate; }
+.mb-section--magnets .mb-section__head h2, .mb-section--magnets .mb-section__head h2::before { color: #fff; }
+.mb-section--magnets .mb-section__head p { color: var(--text-dark); }
+.mb-section--magnets .mb-card--practice { background: var(--graphite-2); border-color: var(--graphite-2); }
+.mb-section--magnets .mb-card--practice::after { background: var(--accent); }
+.mb-section--magnets .mb-card--practice .mb-card__label { color: var(--sky); }
+.mb-section--magnets .mb-card--practice .mb-card__title, .mb-section--magnets .mb-card--practice .mb-card__title a { color: #fff; }
+.mb-section--magnets .mb-card--practice .mb-card__title a:hover { color: var(--sky); }
+.mb-section--magnets .mb-card--practice .mb-card__text { color: var(--text-dark); }
+.mb-section--magnets .mb-card--diagnostic { background: var(--accent); border-color: var(--accent); }
+.mb-section--magnets .mb-card--diagnostic .mb-card__label { color: #fff; opacity: .85; }
+.mb-section--magnets .mb-card--diagnostic .mb-card__text { color: #fff; }
+.mb-section--magnets .mb-card--diagnostic .mb-btn--primary { background: #fff; color: var(--ink); }
+.mb-section--magnets .mb-card--diagnostic .mb-btn--primary::after { color: var(--accent); }
+.mb-section--magnets .mb-card--diagnostic .mb-btn--primary:hover { background: var(--surface); color: var(--ink); }
+.mb-section--magnets .mb-quiz { background: var(--graphite-2); }
+.mb-section--magnets .mb-quiz::after { background: var(--graphite); }
+.mb-section--magnets .mb-section__after .mb-btn--link { color: #fff; }
+.mb-section--magnets .mb-section__after .mb-btn--link:hover { color: var(--sky); }
+
 @media print {
   @page { margin: 16mm; }
   body { font-size: 11pt; color: #000; background: #fff; }

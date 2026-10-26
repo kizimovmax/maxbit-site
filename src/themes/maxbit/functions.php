@@ -116,15 +116,15 @@ function maxbit_brand_svg( string $file ): string {
 }
 
 /**
- * X-фигура системы «Графит»: графитовый › слева, синий ‹ справа поверх. Плечи 45°, толщина — половина ширины,
- * зазор между вершинами — половина толщины (правила: reports/design/GRAPHITE.md). Декоративна, без текста.
- * На тёмном фоне графитовый шеврон — графит-2 (#1E293B); на светлом — графит.
+ * X из логотипа FINAL_v2 (геометрия взята из assets/brand/v2/MAXBIT_compact_*.svg без изменений):
+ * синий ‹ снизу, второй шеврон › поверх. На тёмном фоне второй шеврон белый (как в инверсном логотипе),
+ * на светлом — графит. Декоративный, без текста.
  */
 function maxbit_theme_x_svg( string $class = '', bool $on_dark = true ): string {
-	$dark = $on_dark ? '#1E293B' : '#0F172A';
-	return '<svg class="' . esc_attr( $class ) . '" viewBox="0 0 520 496" width="520" height="496" aria-hidden="true" focusable="false">'
-		. '<path d="M 110 0 L 340 248 L 110 496 L 0 496 L 230 248 L 0 0 Z" fill="' . $dark . '"/>'
-		. '<path d="M 410 0 L 180 248 L 410 496 L 520 496 L 290 248 L 520 0 Z" fill="#2563EB"/>'
+	$top = $on_dark ? '#FFFFFF' : '#0F172A';
+	return '<svg class="' . esc_attr( $class ) . '" viewBox="0 0 139 110" width="139" height="110" aria-hidden="true" focusable="false">'
+		. '<path d="M100 0H139L89 55L139 110H100L50 55Z" fill="#2563EB"/>'
+		. '<path d="M0 0H39L89 55L39 110H0L50 55Z" fill="' . $top . '"/>'
 		. '</svg>';
 }
 
@@ -316,7 +316,7 @@ add_filter( 'wp_nav_menu_objects', function ( array $items ) {
 /** Боковая колонка длинных страниц: компактный призыв; на узких экранах не показывается. Только оформление, без обещаний. */
 function maxbit_theme_aside(): void {
 	?>
-	<aside class="mb-aside" aria-label="Обсудить задачу">
+	<aside class="mb-aside" aria-label="Обсудить задачу"><div class="mb-aside__sticky">
 		<?php $bots = maxbit_theme_msg( 'bots', false ); if ( $bots ) : ?>
 		<div class="mb-aside__card">
 			<p class="mb-aside__title">Написать нам</p>
@@ -329,7 +329,7 @@ function maxbit_theme_aside(): void {
 		if ( $cl && 'publish' === $cl->post_status && get_the_ID() !== $cl->ID ) : ?>
 		<a class="mb-aside__link" href="<?php echo esc_url( get_permalink( $cl ) ); ?>"><span class="mb-ico" style="--i: var(--i-pdf)"></span><span>Чек-лист: 12 пунктов перед передачей заказа в производство</span></a>
 		<?php endif; ?>
-	</aside>
+	</div></aside>
 	<?php
 }
 
@@ -364,22 +364,16 @@ add_filter( 'nav_menu_css_class', function ( array $classes, $item ) {
 }, 10, 2 );
 
 /**
- * Первый экран главной (0.6.0): вместо растровой иллюстрации — графитовая диагональная плита с X-фигурой,
- * «призрачным» номером 01, анонсом первого допущенного решения и тремя принципами. Подставляется фильтром
- * вывода в колонки первого экрана — содержание страницы в базе не меняется. Картинок нет: LCP — заголовок.
+ * Первый экран главной: графитовая диагональная плита с X из логотипа и приглашением к самодиагностике
+ * (лид-магнит, замечание владельца 26.10). Подставляется фильтром вывода — содержание страницы в базе не меняется.
+ * Ссылка ведёт к блоку самодиагностики и раскрывает вопросы (quiz.js, data-mb-open). Без самодиагностики — только X.
  */
 function maxbit_theme_hero_art_html(): string {
 	$teaser = '';
-	$pr = function_exists( 'maxbit_projects_by_slugs' ) ? maxbit_projects_by_slugs( array( 'gk-vpk' ) ) : array();
-	if ( ! $pr && function_exists( 'maxbit_public_projects' ) ) {
-		$pr = maxbit_public_projects( 1 );
+	if ( shortcode_exists( 'maxbit_quiz' ) ) {
+		$teaser = '<div class="mb-hero__teaser"><p class="mb-hero__teaser-label">Самодиагностика · 3 минуты</p><p class="mb-hero__teaser-title">Где теряются данные и договорённости на вашем участке</p><a class="mb-btn mb-btn--primary" href="#diagnostic" data-mb-open="diagnostic" data-event="quiz_open_hero">Пройти самодиагностику</a></div>';
 	}
-	if ( $pr ) {
-		$client = get_post_meta( $pr[0]->ID, '_mb_pf_client', true );
-		$title  = get_post_meta( $pr[0]->ID, '_mb_card_title', true ) ?: get_the_title( $pr[0] );
-		$teaser = '<div class="mb-hero__teaser"><p class="mb-hero__teaser-label">Проект · ' . esc_html( $client ) . '</p><p class="mb-hero__teaser-title">' . esc_html( $title ) . '</p><a href="' . esc_url( get_permalink( $pr[0] ) ) . '">Посмотреть проект ››</a></div>';
-	}
-	return '<div class="mb-hero__art">' . maxbit_theme_x_svg( 'mb-hero__x', true ) . '<span class="mb-hero__ghost" aria-hidden="true">01</span>' . $teaser . '</div>';
+	return '<div class="mb-hero__art">' . $teaser . maxbit_theme_x_svg( 'mb-hero__x', true ) . '</div>';
 }
 add_filter( 'the_content', function ( string $html ): string {
 	if ( ! is_front_page() || ! in_the_loop() || ! is_main_query() || false === strpos( $html, 'mb-hero__cols' ) || false !== strpos( $html, 'mb-hero__art' ) ) {

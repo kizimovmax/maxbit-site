@@ -1,0 +1,42 @@
+{
+ "home": [
+  [
+   "<!-- wp:paragraph {\"className\":\"mb-eyebrow\"} -->\n<p class=\"mb-eyebrow\">MAXBIT — ваша команда цифрового развития</p>\n<!-- /wp:paragraph -->\n",
+   ""
+  ],
+  [
+   "<h2 class=\"wp-block-heading\">Когда привычный порядок работы перестаёт помогать</h2>",
+   "<h2 class=\"wp-block-heading\">С чем к нам приходят</h2>"
+  ],
+  [
+   "<!-- wp:group {\"className\": \"mb-section mb-section--surface\", \"layout\": {\"type\": \"constrained\"}} -->\n<div class=\"wp-block-group mb-section mb-section--surface\"><!-- wp:group {\"className\": \"mb-section__head\", \"layout\": {\"type\": \"constrained\"}} -->\n<div class=\"wp-block-group mb-section__head\"><!-- wp:heading -->\n<h2 class=\"wp-block-heading\">Что проверяем вместе с вами</h2>\n<!-- /wp:heading -->\n</div>\n<!-- /wp:group -->\n<!-- wp:columns {\"className\":\"mb-results\"} -->\n<div class=\"wp-block-columns mb-results\"><!-- wp:column -->\n<div class=\"wp-block-column\"><!-- wp:heading {\"level\": 3} -->\n<h3 class=\"wp-block-heading\">Понятен порядок работы</h3>\n<!-- /wp:heading -->\n<!-- wp:paragraph -->\n<p>У процесса есть согласованные этапы, ответственные и правила передачи информации. Сотрудники знают, где посмотреть актуальные данные и что делать дальше.</p>\n<!-- /wp:paragraph -->\n</div>\n<!-- /wp:column -->\n<!-- wp:column -->\n<div class=\"wp-block-column\"><!-- wp:heading {\"level\": 3} -->\n<h3 class=\"wp-block-heading\">Изменения используются</h3>\n<!-- /wp:heading -->\n<!-- wp:paragraph -->\n<p>Проверяем рабочие ситуации вместе с участниками, обучаем сотрудников и разбираем причины обхода системы. Передаём правила работы и необходимые материалы.</p>\n<!-- /wp:paragraph -->\n</div>\n<!-- /wp:column -->\n<!-- wp:column -->\n<div class=\"wp-block-column\"><!-- wp:heading {\"level\": 3} -->\n<h3 class=\"wp-block-heading\">Есть основания для следующих решений</h3>\n<!-- /wp:heading -->\n<!-- wp:paragraph -->\n<p>Сравниваем согласованные показатели с исходной ситуацией и обсуждаем замечания. Измеримые эффекты показываем там, где есть данные для сравнения.</p>\n<!-- /wp:paragraph -->\n</div>\n<!-- /wp:column -->\n</div>\n<!-- /wp:columns -->\n</div>\n<!-- /wp:group -->\n",
+   ""
+  ],
+  [
+   "<!-- wp:group {\"anchor\": \"projects\", \"className\": \"mb-section\", \"layout\"",
+   "<!-- wp:group {\"anchor\": \"projects\", \"className\": \"mb-section mb-section--surface\", \"layout\""
+  ],
+  [
+   "<div id=\"projects\" class=\"wp-block-group mb-section\">",
+   "<div id=\"projects\" class=\"wp-block-group mb-section mb-section--surface\">"
+  ],
+  [
+   "<!-- wp:group {\"anchor\": \"reviews\", \"className\": \"mb-section mb-section--surface\", \"layout\"",
+   "<!-- wp:group {\"anchor\": \"reviews\", \"className\": \"mb-section\", \"layout\""
+  ],
+  [
+   "<div id=\"reviews\" class=\"wp-block-group mb-section mb-section--surface\">",
+   "<div id=\"reviews\" class=\"wp-block-group mb-section\">"
+  ],
+  [
+   "<!-- wp:group {\"className\": \"mb-section\", \"layout\": {\"type\": \"constrained\"}} -->\n<div class=\"wp-block-group mb-section\"><!-- wp:group {\"className\": \"mb-section__head\", \"layout\": {\"type\": \"constrained\"}} -->\n<div class=\"wp-block-group mb-section__head\"><!-- wp:heading -->\n<h2 class=\"wp-block-heading\">Материалы для самостоятельного разбора</h2>",
+   "<!-- wp:group {\"anchor\": \"materials\", \"className\": \"mb-section mb-section--magnets\", \"layout\": {\"type\": \"constrained\"}} -->\n<div id=\"materials\" class=\"wp-block-group mb-section mb-section--magnets\"><!-- wp:group {\"className\": \"mb-section__head\", \"layout\": {\"type\": \"constrained\"}} -->\n<div class=\"wp-block-group mb-section__head\"><!-- wp:heading -->\n<h2 class=\"wp-block-heading\">Материалы для самостоятельного разбора</h2>"
+  ]
+ ],
+ "o-kompanii": [
+  [
+   "<p>Обсудить задачу, получить коммерческое предложение или презентацию можно через форму, в Telegram или MAX.",
+   "<p>Обсудить задачу или получить коммерческое предложение можно через форму, в Telegram или MAX."
+  ]
+ ]
+}
