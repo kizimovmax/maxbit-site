@@ -23,6 +23,7 @@
     var count = dlg.querySelector('.mb-viewer__count');
     var prev = dlg.querySelector('.mb-viewer__prev');
     var next = dlg.querySelector('.mb-viewer__next');
+    var nav = dlg.querySelector('.mb-viewer__nav');
     var docs = [], idx = 0, opener = null;
     function show(i) {
       idx = (i + docs.length) % docs.length;
@@ -32,6 +33,7 @@
       open.href = d.u;
       count.textContent = docs.length > 1 ? d.t + ' · документ ' + (idx + 1) + ' из ' + docs.length : d.t;
       prev.hidden = next.hidden = docs.length < 2;
+      nav.style.display = docs.length < 2 ? 'none' : ''; // .mb-btn задаёт display и перекрывает [hidden]
     }
     box.addEventListener('click', function (e) {
       var a = e.target.closest('[data-review]');
