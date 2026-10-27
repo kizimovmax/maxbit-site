@@ -2,7 +2,7 @@
 /**
  * Plugin Name: MAXBIT Core
  * Description: Типы материалов, связи, SEO-поля, допуск к публикации и серверный приём обращений для сайта MAXBIT. Не зависит от темы.
- * Version: 0.5.4
+ * Version: 0.5.5
  * Requires at least: 6.6
  * Requires PHP: 8.1
  * Author: MAXBIT
@@ -11,7 +11,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'MAXBIT_CORE_VERSION', '0.5.4' );
+define( 'MAXBIT_CORE_VERSION', '0.5.5' );
 define( 'MAXBIT_CORE_DIR', plugin_dir_path( __FILE__ ) );
 define( 'MAXBIT_CORE_URL', plugin_dir_url( __FILE__ ) );
 

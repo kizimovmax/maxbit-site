@@ -34,6 +34,15 @@ $sample    = '1' === get_post_meta( $id, '_mb_is_sample', true );
 		}
 		if ( $rows ) { echo '<dl class="mb-case">' . $rows . '</dl>'; } // phpcs:ignore
 		?>
+		<?php
+		$rev = function_exists( 'maxbit_case_review_ids' ) ? maxbit_case_review_ids( get_post() ) : array();
+		if ( $rev && shortcode_exists( 'maxbit_reviews' ) ) {
+			$html = do_shortcode( '[maxbit_reviews initial="9" ids="' . esc_attr( implode( ',', $rev ) ) . '"]' );
+			if ( false !== strpos( $html, 'mb-review"' ) ) {
+				echo '<section class="mb-case-review" aria-labelledby="mb-case-review-h"><h2 id="mb-case-review-h">Отзыв клиента</h2>' . $html . '</section>'; // phpcs:ignore
+			}
+		}
+		?>
 		<?php maxbit_theme_updated(); ?>
 	</article>
 	<aside class="mb-aside mb-aside--case" aria-label="Связанные решения"><div class="mb-aside__sticky">

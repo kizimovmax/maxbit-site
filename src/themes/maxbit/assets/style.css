@@ -1087,6 +1087,12 @@ html.js .mb-quiz.is-collapsed .mb-quiz__head { margin-bottom: 0; }
 .mb-tiles.mb-situations .wp-block-column { display: flex; flex-direction: column; }
 .mb-tiles.mb-situations .wp-block-column > .mb-tile__more { margin: auto 0 0; padding-top: 14px; text-align: left; }
 .mb-home .mb-section--surface > .mb-section__after { margin-top: 28px; }
+/* Отзывы на странице проектов и в конце кейса */
+.mb-reviews-page { margin-top: 64px; }
+.mb-reviews-page__lead { color: var(--ink-2); margin: -6px 0 24px; max-width: 640px; }
+.mb-case-review { margin-top: 48px; padding-top: 32px; border-top: 2px solid var(--ink); }
+.mb-case-review h2 { font-size: 1.6rem; margin: 0 0 20px; }
+.mb-case-review .mb-reviews__grid { grid-template-columns: 1fr; }
 /* Страница 404 */
 .mb-404 { position: relative; overflow: hidden; isolation: isolate; background: #fff; }
 .mb-404::before { content: ""; position: absolute; inset: 0; z-index: -1; background: var(--graphite); clip-path: polygon(66% 0, 100% 0, 100% 100%, 56% 100%); }

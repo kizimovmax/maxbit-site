@@ -26,8 +26,12 @@ function maxbit_review_img( string $file ): array {
 }
 
 add_shortcode( 'maxbit_reviews', function ( $atts ) {
-	$a = shortcode_atts( array( 'initial' => '3' ), $atts );
+	$a = shortcode_atts( array( 'initial' => '3', 'ids' => '' ), $atts );
 	$items = maxbit_reviews_data();
+	if ( '' !== trim( (string) $a['ids'] ) ) { // только указанные отзывы (например, отзыв клиента в конце кейса)
+		$want  = array_filter( array_map( 'trim', explode( ',', (string) $a['ids'] ) ) );
+		$items = array_values( array_filter( $items, fn( $r ) => in_array( $r['id'] ?? '', $want, true ) ) );
+	}
 	if ( ! $items ) {
 		return maxbit_can_preview() ? '<div class="mb-editor-note" role="note"><strong>Служебная заметка.</strong> Отзывы появятся после установки комплекта содержания v4.</div>' : '';
 	}
@@ -67,3 +71,16 @@ add_shortcode( 'maxbit_reviews', function ( $atts ) {
 		. '<div class="mb-viewer__nav"><button type="button" class="mb-btn mb-btn--secondary mb-viewer__prev">‹ Предыдущий</button><button type="button" class="mb-btn mb-btn--secondary mb-viewer__next">Следующий ›</button></div></div></div></dialog>';
 	return $out . '</div>';
 } );
+
+/**
+ * Отзыв клиента к кейсу (решение владельца 27.10: если по клиенту есть и кейс, и отзыв — отзыв в конце кейса).
+ * Связь: мета кейса _mb_review_ids (через запятую) или соответствие по умолчанию ниже (подтверждается владельцем).
+ */
+function maxbit_case_review_ids( WP_Post $p ): array {
+	$meta = trim( (string) get_post_meta( $p->ID, '_mb_review_ids', true ) );
+	if ( '' !== $meta ) {
+		return 'none' === $meta ? array() : array_filter( array_map( 'trim', explode( ',', $meta ) ) );
+	}
+	$map = apply_filters( 'maxbit_case_review_map', array( 'gk-vpk' => array( 'vpk' ), 'ngsk' => array( 'ngsk' ) ) );
+	return $map[ $p->post_name ] ?? array();
+}

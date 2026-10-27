@@ -206,7 +206,8 @@ def home():
     contact = section(form(id='contact', purposes='1', heading='Обсудим вашу задачу за 30 минут', text=CONTACT_TEXT), 'mb-section--contact')
     # Блок «Что проверяем вместе с вами» (results) убран с главной по решению владельца 26.10.
     # Блок 02 «С какими задачами помогаем» (dirs) убран 27.10: ситуации блока 01 ведут на решения (вариант Г1).
-    return hero + sit + steps + regular + projects + reviews + practice + faqs + contact
+    # Отзывы убраны с главной 27.10 — показываются на странице проектов и в конце кейсов.
+    return hero + sit + steps + regular + projects + practice + faqs + contact
 
 # ------------------------------------------------------------------ «Как работаем» (§4)
 def how():

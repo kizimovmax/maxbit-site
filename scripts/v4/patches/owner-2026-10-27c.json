@@ -1,0 +1,8 @@
+{
+ "home": [
+  [
+   "<!-- wp:group {\"anchor\": \"reviews\", \"className\": \"mb-section\", \"layout\": {\"type\": \"constrained\"}} -->\n<div id=\"reviews\" class=\"wp-block-group mb-section\"><!-- wp:group {\"className\": \"mb-section__head\", \"layout\": {\"type\": \"constrained\"}} -->\n<div class=\"wp-block-group mb-section__head\"><!-- wp:heading -->\n<h2 class=\"wp-block-heading\">Отзывы клиентов</h2>\n<!-- /wp:heading -->\n</div>\n<!-- /wp:group -->\n<!-- wp:shortcode -->\n[maxbit_reviews initial=\"3\"]\n<!-- /wp:shortcode -->\n</div>\n<!-- /wp:group -->\n",
+   ""
+  ]
+ ]
+}
