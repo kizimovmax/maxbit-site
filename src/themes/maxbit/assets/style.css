@@ -1177,6 +1177,13 @@ html.js .mb-quiz.is-collapsed .mb-quiz__head { margin-bottom: 0; }
 .mb-sol__extra-item p:last-child { margin: 0; }
 @media (max-width: 900px) { .mb-sol__body, .mb-sol__extra { grid-template-columns: 1fr; } .mb-sol__head { gap: 14px; } }
 @media (max-width: 620px) { .mb-sol__actions, .mb-sol__actions .mb-btn { width: 100%; } }
+/* Статусы и сертификаты */
+.mb-certs { margin: 40px 0 8px; }
+.mb-certs__heading { margin: 0 0 18px; }
+.mb-content .mb-reviews--certs .mb-reviews__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.mb-cert .mb-review__topic { text-align: left; }
+.mb-certs__note { margin-top: 10px; }
+@media (max-width: 620px) { .mb-content .mb-reviews--certs .mb-reviews__grid { grid-template-columns: 1fr; } }
 /* Страница 404 */
 .mb-404 { position: relative; overflow: hidden; isolation: isolate; background: #fff; }
 .mb-404::before { content: ""; position: absolute; inset: 0; z-index: -1; background: var(--graphite); clip-path: polygon(66% 0, 100% 0, 100% 100%, 56% 100%); }

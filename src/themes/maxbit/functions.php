@@ -4,7 +4,7 @@
  */
 defined( 'ABSPATH' ) || exit;
 
-define( 'MAXBIT_THEME_VERSION', '0.9.1' );
+define( 'MAXBIT_THEME_VERSION', '0.9.2' );
 
 /**
  * Тема работает и без модуля maxbit-core (без формы, типов и допуска). Обёртки с префиксом maxbit_theme_
@@ -415,6 +415,20 @@ function maxbit_theme_services(): array {
 			array( 'id' => 'kontur-diadok', 'name' => 'Контур.Диадок', 'kind' => 'ЭДО', 'about' => 'Сервис электронного документооборота с контрагентами.', 'do' => 'связываем отправку и статусы документов с карточками сделок в CRM.', 'case_keys' => array( 'Диадок' ) ),
 		) ),
 	);
+	// Статусы партнёра — из модуля (только действующие документы), со ссылкой на раздел «Статусы и сертификаты».
+	if ( function_exists( 'maxbit_cert_status_line' ) ) {
+		foreach ( $g as &$grp ) {
+			foreach ( $grp['items'] as &$it ) {
+				$line = maxbit_cert_status_line( $it['id'] );
+				if ( $line ) {
+					$it['partner']     = $line;
+					$it['certificate'] = home_url( '/o-kompanii/#certificates' );
+				}
+			}
+			unset( $it );
+		}
+		unset( $grp );
+	}
 	return (array) apply_filters( 'maxbit_services', $g );
 }
 

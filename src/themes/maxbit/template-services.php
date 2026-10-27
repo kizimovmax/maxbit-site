@@ -62,7 +62,7 @@ $cases  = function ( array $keys ): array {
 				<h3><?php echo esc_html( $s['name'] ); ?></h3>
 				<p><?php echo esc_html( $s['about'] ); ?></p>
 				<p class="mb-svc-card__do"><strong>Что делаем:</strong> <?php echo esc_html( $s['do'] ); ?></p>
-				<?php if ( ! empty( $s['partner'] ) ) : ?><p class="mb-svc-card__partner"><?php echo esc_html( $s['partner'] ); ?><?php if ( ! empty( $s['certificate'] ) ) : ?> · <a href="<?php echo esc_url( $s['certificate'] ); ?>">Сертификат</a><?php endif; ?></p><?php endif; ?>
+				<?php if ( ! empty( $s['partner'] ) ) : ?><p class="mb-svc-card__partner"><?php echo esc_html( $s['partner'] ); ?><?php if ( ! empty( $s['certificate'] ) ) : ?> · <a href="<?php echo esc_url( $s['certificate'] ); ?>">Документы</a><?php endif; ?></p><?php endif; ?>
 				<?php if ( $pr ) : ?><p class="mb-svc-card__cases">В проектах: <?php echo implode( ', ', array_map( fn( $p ) => '<a href="' . esc_url( get_permalink( $p ) ) . '">' . esc_html( get_post_meta( $p->ID, '_mb_pf_client', true ) ?: get_the_title( $p ) ) . '</a>', $pr ) ); // phpcs:ignore ?></p><?php endif; ?>
 				<?php if ( ! empty( $s['url'] ) ) : ?><a class="mb-ccard__more" href="<?php echo esc_url( home_url( $s['url'] ) ); ?>"><?php echo esc_html( $s['url_label'] ?? 'Подробнее' ); ?></a><?php endif; ?>
 			</article>

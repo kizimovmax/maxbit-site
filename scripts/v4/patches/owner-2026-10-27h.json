@@ -1,0 +1,14 @@
+{
+ "o-kompanii": [
+  [
+   "е подтверждённых данных.</p>\n<!-- /wp:paragraph -->\n<!-- wp:",
+   "е подтверждённых данных.</p>\n<!-- /wp:paragraph -->\n<!-- wp:shortcode -->\n[maxbit_certificates heading=\"Статусы и сертификаты\"]\n<!-- /wp:shortcode -->\n<!-- wp:"
+  ]
+ ],
+ "bitrix24": [
+  [
+   "-->\n</div>\n<!-- /wp:column -->\n</div>\n<!-- /wp:columns -->\n<",
+   "-->\n</div>\n<!-- /wp:column -->\n</div>\n<!-- /wp:columns -->\n<!-- wp:shortcode -->\n[maxbit_certificates service=\"bitrix24\" heading=\"Статус партнёра 1С-Битрикс\"]\n<!-- /wp:shortcode -->\n<"
+  ]
+ ]
+}
