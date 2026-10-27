@@ -1124,6 +1124,13 @@ html.js .mb-quiz.is-collapsed .mb-quiz__head { margin-bottom: 0; }
   .mb-svc-link span { max-width: none; }
   .mb-svc-node { min-height: 0; }
 }
+/* «Как мы работаем»: цикл регулярного развития внутри тёмного блока шагов */
+.mb-how > .mb-cycle--dark, .mb-how > .mb-how__note { max-width: none !important; margin-left: 0 !important; margin-right: 0 !important; }
+.mb-cycle--dark { margin: 32px 0 14px; }
+.mb-cycle--dark li { background: var(--graphite-2); color: #fff; min-height: 52px; font-size: .84rem; }
+.mb-cycle--dark li:nth-child(3) { background: var(--accent); }
+.mb-how__note { color: var(--text-dark); font-size: .85rem; margin: 0 0 8px; }
+.mb-how__steps > .wp-block-column:last-child h3 { color: var(--sky); }
 /* Страница 404 */
 .mb-404 { position: relative; overflow: hidden; isolation: isolate; background: #fff; }
 .mb-404::before { content: ""; position: absolute; inset: 0; z-index: -1; background: var(--graphite); clip-path: polygon(66% 0, 100% 0, 100% 100%, 56% 100%); }
