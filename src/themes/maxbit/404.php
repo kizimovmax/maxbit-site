@@ -15,8 +15,8 @@ $links = array(
 	<div class="mb-container mb-404__inner">
 		<div class="mb-404__text">
 			<p class="mb-404__code" aria-hidden="true">404</p>
-			<h1 id="mb-404-h" class="mb-404__title">Такой страницы нет</h1>
-			<p class="mb-404__lead">Возможно, адрес набран с ошибкой или страница переехала. Начните с главной или найдите нужное через поиск.</p>
+			<h1 id="mb-404-h" class="mb-404__title">Упс, кажется, такой страницы нет</h1>
+			<p class="mb-404__lead">Похоже, адрес набран с ошибкой или страница переехала. Начните с главной или найдите нужное через поиск.</p>
 			<div class="mb-404__actions">
 				<a class="mb-btn mb-btn--primary" href="<?php echo esc_url( home_url( '/' ) ); ?>">На главную</a>
 				<a class="mb-btn mb-btn--secondary" href="<?php echo esc_url( home_url( '/#contact' ) ); ?>">Обсудить задачу</a>

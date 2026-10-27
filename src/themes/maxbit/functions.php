@@ -1,10 +1,10 @@
 <?php
 /**
- * MAXBIT theme 0.7.0 «Графит» + содержание v4. Тема — только оформление. Типы, поля, форма, согласия, SEO — в модуле maxbit-core.
+ * MAXBIT theme 0.7.3 «Графит» + содержание v4. Тема — только оформление. Типы, поля, форма, согласия, SEO — в модуле maxbit-core.
  */
 defined( 'ABSPATH' ) || exit;
 
-define( 'MAXBIT_THEME_VERSION', '0.7.0' );
+define( 'MAXBIT_THEME_VERSION', '0.7.3' );
 
 /**
  * Тема работает и без модуля maxbit-core (без формы, типов и допуска). Обёртки с префиксом maxbit_theme_
@@ -52,8 +52,10 @@ add_action( 'after_setup_theme', function () {
 } );
 
 add_action( 'wp_enqueue_scripts', function () {
-	wp_enqueue_style( 'maxbit', get_theme_file_uri( 'assets/style.css' ), array(), MAXBIT_THEME_VERSION );
-	wp_enqueue_script( 'maxbit-theme', get_theme_file_uri( 'assets/theme.js' ), array(), MAXBIT_THEME_VERSION, array( 'strategy' => 'defer', 'in_footer' => true ) );
+	// Версия файла = версия темы + время изменения: браузеры не держат старые стили после обновления.
+	$ver = function ( string $f ) { $p = get_theme_file_path( $f ); return MAXBIT_THEME_VERSION . '.' . ( file_exists( $p ) ? filemtime( $p ) : 0 ); };
+	wp_enqueue_style( 'maxbit', get_theme_file_uri( 'assets/style.css' ), array(), $ver( 'assets/style.css' ) );
+	wp_enqueue_script( 'maxbit-theme', get_theme_file_uri( 'assets/theme.js' ), array(), $ver( 'assets/theme.js' ), array( 'strategy' => 'defer', 'in_footer' => true ) );
 	wp_dequeue_style( 'wp-block-library-theme' );
 	wp_dequeue_style( 'classic-theme-styles' );
 	wp_dequeue_style( 'global-styles' ); // цвета/шрифты уже в assets/style.css через те же токены

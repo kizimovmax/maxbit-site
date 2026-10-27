@@ -1,4 +1,4 @@
-/* MAXBIT theme 0.7.2 — визуальная система «X-геометрия / Графит» (решение владельца 26.10.2026).
+/* MAXBIT theme 0.7.3 — визуальная система «X-геометрия / Графит» (решение владельца 26.10.2026).
    Тёмные диагональные блоки (15° от вертикали), X-фигура из двух шевронов логотипа, срезы углов 45°,
    крупные номера секций, синий — только для действий, номеров и одного акцента на экран.
    Все формы — CSS (clip-path) и инлайн-SVG; растровых картинок в теме нет. Шрифт Golos Text (OFL) в комплекте
@@ -1087,7 +1087,7 @@ html.js .mb-quiz.is-collapsed .mb-quiz__head { margin-bottom: 0; }
 .mb-404 { position: relative; overflow: hidden; isolation: isolate; background: #fff; }
 .mb-404::before { content: ""; position: absolute; inset: 0; z-index: -1; background: var(--graphite); clip-path: polygon(66% 0, 100% 0, 100% 100%, 56% 100%); }
 .mb-404__inner { display: grid; grid-template-columns: minmax(0, 640px) minmax(0, 1fr); gap: 40px; align-items: center; min-height: 560px; padding-top: 56px; padding-bottom: 64px; }
-.mb-404__code { margin: 0 0 8px; font-size: clamp(5rem, 12vw, 9rem); font-weight: 900; letter-spacing: -.06em; line-height: .85; color: var(--accent); }
+.mb-404__code { margin: 0 0 12px; font-size: clamp(7.5rem, 22vw, 15rem); font-weight: 900; letter-spacing: -.06em; line-height: .85; color: var(--accent); }
 .mb-404__title { margin: 0 0 16px; font-size: clamp(2.2rem, 4vw, 3.2rem); }
 .mb-404__lead { margin: 0 0 28px; max-width: 520px; color: var(--ink-2); font-size: 1.05rem; line-height: 1.6; }
 .mb-404__actions { display: flex; flex-wrap: wrap; gap: 12px; }
