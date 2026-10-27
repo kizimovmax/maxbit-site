@@ -123,6 +123,15 @@ SIT = [
 ]
 for t, d in SIT:
     assert t in TZ and d in TZ, t
+# Ситуация на главной → страница решения (решение владельца 27.10, вариант Г1)
+SIT_LINK = {
+    'Не видно, что происходит с заказами': '/resheniya/zakaz-pod-kontrolem/',
+    'Руководитель собирает картину вручную': '/tekhnologii/bitrix24-dlya-proizvodstva/',
+    'Подразделения работают несогласованно': '/resheniya/zakaz-pod-kontrolem/',
+    'Сотрудники заняты повторяющимися действиями': '/resheniya/integraciya-bitrix24-i-1c/',
+    'Программы есть, а общей работы нет': '/resheniya/integraciya-bitrix24-i-1c/',
+    'Компания выросла, процессы — ещё нет': '/tekhnologii/bitrix24-dlya-proizvodstva/',
+}
 DIRS = [
     ('Управление заказами и исполнением', 'Проектируем путь заказа от заявки до исполнения, отгрузки и оплаты. Определяем этапы, обязательные данные, ответственных и правила изменения договорённостей.', 'Управление производственными заказами', '/resheniya/zakaz-pod-kontrolem/'),
     ('Битрикс24 для производственных компаний', 'Настраиваем и развиваем Битрикс24 с учётом рабочих процессов компании. Связываем задачи сотрудников, согласования и взаимодействие подразделений.', 'Битрикс24 для производства', '/tekhnologii/bitrix24-dlya-proizvodstva/'),
@@ -166,7 +175,8 @@ def home():
         + sc('[maxbit_messengers kind="bots" style="inline" label="Первый разговор — бесплатно"]')
     ], 'mb-hero__cols'), 'mb-hero')
     sit = section(head('Узнаёте свою ситуацию?', 'Проблема может быть в одном процессе или на стыке нескольких подразделений. Начинаем с конкретной ситуации и смотрим, что мешает работе.')
-                  + columns([h(3, t) + p(d) for t, d in SIT], 'mb-tiles mb-situations'), 'mb-section--surface')
+                  + columns([h(3, t) + p(d) + p(f'<a class="mb-btn mb-btn--link" href="{SIT_LINK[t]}">Как решаем</a>', 'mb-tile__more') for t, d in SIT], 'mb-tiles mb-situations')
+                  + p('<a class="mb-btn mb-btn--link" href="/resheniya/">Все решения</a>', 'mb-section__after'), 'mb-section--surface')
     cards = []
     for i, (t, d, link, url) in enumerate(DIRS):
         cards.append(raw(f'<div class="mb-solution-card"><h3>{t}</h3><p>{d}</p><p><a class="mb-btn mb-btn--link" href="{url}">{link}</a></p></div>'))
@@ -195,7 +205,8 @@ def home():
     faqs = section(faq(FAQ, anchor='faq'))
     contact = section(form(id='contact', purposes='1', heading='Обсудим вашу задачу за 30 минут', text=CONTACT_TEXT), 'mb-section--contact')
     # Блок «Что проверяем вместе с вами» (results) убран с главной по решению владельца 26.10.
-    return hero + sit + dirs + steps + regular + projects + reviews + practice + faqs + contact
+    # Блок 02 «С какими задачами помогаем» (dirs) убран 27.10: ситуации блока 01 ведут на решения (вариант Г1).
+    return hero + sit + steps + regular + projects + reviews + practice + faqs + contact
 
 # ------------------------------------------------------------------ «Как работаем» (§4)
 def how():
