@@ -4,7 +4,7 @@
  */
 defined( 'ABSPATH' ) || exit;
 
-define( 'MAXBIT_THEME_VERSION', '0.9.0' );
+define( 'MAXBIT_THEME_VERSION', '0.9.1' );
 
 /**
  * Тема работает и без модуля maxbit-core (без формы, типов и допуска). Обёртки с префиксом maxbit_theme_
