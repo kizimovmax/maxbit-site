@@ -70,10 +70,11 @@ check "sources_private не в site/" "! find $ROOT/site -iname '*AI_PRACTICUM_O
 check "в src нет цен исходника" "! grep -rq '350–450\|550–700\|30–60 тыс' $ROOT/src"
 
 echo "== A04/A05 публичные страницы (аноним) =="
-for u in / /resheniya/ /resheniya/zakaz-pod-kontrolem/ /tekhnologii/bitrix24-dlya-proizvodstva/ /kak-rabotaem/ /o-kompanii/ /praktika/ /praktika/kartochka-proizvodstvennogo-zakaza/ /proekty/; do
+for u in / /resheniya/ /resheniya/zakaz-pod-kontrolem/ /tekhnologii/bitrix24-dlya-proizvodstva/ /kak-rabotaem/ /o-kompanii/ /baza-znaniy/ /baza-znaniy/kartochka-proizvodstvennogo-zakaza/ /proekty/; do
   c=$(code "$u"); check "$u → 200 и один H1" "[ $c = 200 ] && [ \$(grep -o '<h1' /tmp/mb_body | wc -l) = 1 ]"
 done
 c=$(code /tekhnologii/); check "/tekhnologii/ — «Сервисы и интеграции» (200) или служебный редирект (301)" "[ $c = 200 ] || [ $c = 301 ]"
+c=$(code /praktika/kartochka-proizvodstvennogo-zakaza/); check "старый адрес /praktika/… → 301 на /baza-znaniy/…" "[ $c = 301 ]"
 c=$(code /net-takoy-stranicy/); check "404 отдаётся" "[ $c = 404 ]"
 code / >/dev/null
 check "главная: canonical, description, noindex (local), JSON-LD Organization" "grep -q 'rel=\"canonical\"' /tmp/mb_body && grep -q 'name=\"description\"' /tmp/mb_body && grep -q 'noindex' /tmp/mb_body && grep -q '\"Organization\"' /tmp/mb_body"
@@ -142,7 +143,7 @@ c=$(curl -s -b /tmp/mb_c_adm -o /tmp/mb_body -w '%{http_code}' "$BASE/wp-admin/e
 c=$(curl -s -b /tmp/mb_c_adm -o /tmp/mb_body -w '%{http_code}' "$BASE/"); check "администратор: главная 200, ИИ-блока на главной нет" "[ $c = 200 ] && ! grep -q 'ii-praktikum' /tmp/mb_body"
 code / >/dev/null; check "v0.3: аноним не видит служебных заметок и пустых разделов" "! grep -q 'mb-editor-note\|Служебная заметка' /tmp/mb_body"
 code /o-kompanii/ >/dev/null; check "v0.3: «О компании» анонимно без пустых заголовков «Компетенции»/«Проекты»" "! grep -q 'Компетенции и подтверждения' /tmp/mb_body && grep -q 'Команда и руководство' /tmp/mb_body"
-for u in /resheniya/integraciya-bitrix24-i-1c/ /osnovatel/ /praktika/chek-list-peredacha-zakaza-v-proizvodstvo/; do c=$(code "$u"); check "v0.3: $u → 200 и один H1" "[ $c = 200 ] && [ \$(grep -o '<h1' /tmp/mb_body | wc -l) = 1 ]"; done
+for u in /resheniya/integraciya-bitrix24-i-1c/ /osnovatel/ /baza-znaniy/chek-list-peredacha-zakaza-v-proizvodstvo/; do c=$(code "$u"); check "v0.3: $u → 200 и один H1" "[ $c = 200 ] && [ \$(grep -o '<h1' /tmp/mb_body | wc -l) = 1 ]"; done
 c=$(code /wp-content/plugins/maxbit-core/assets/files/chek-list-peredacha-zakaza-v-proizvodstvo.pdf); check "v0.3: чек-лист PDF отдаётся свободно" "[ $c = 200 ]"
 code / >/dev/null; check "v0.3: подпись бренда в шапке, старой подписи нет" "grep -q 'Ваша команда цифрового развития' /tmp/mb_body && ! grep -q 'Системы управления бизнесом' /tmp/mb_body"
 check "v4: главная — цифровое развитие; удалённые формулировки не вернулись" "grep -q 'Цифровое развитие производственных компаний' /tmp/mb_body && ! grep -q 'Условный пример\|Цех делает не то\|Если хотя бы одна ситуация\|Каждое направление — отдельная страница' /tmp/mb_body"
@@ -215,8 +216,8 @@ code /wp-sitemap-posts-mb_solution-1.xml >/dev/null; check "sitemap решени
 c=$(code /wp-sitemap-posts-mb_project-1.xml); check "sitemap проектов: образец отсутствует" "[ $c = 404 ] || ! grep -q 'obrazets\|$(slug $P_SAMPLE)' /tmp/mb_body"
 code /wp-sitemap-posts-page-1.xml >/dev/null; check "sitemap страниц: «Технологии» есть только как страница сервисов" "! grep -q 'tekhnologii/<' /tmp/mb_body || curl -s \"$BASE/tekhnologii/\" | grep -q mb-svc-map"
 code /robots.txt >/dev/null; check "production robots: Sitemap: указан" "grep -q '^Sitemap:' /tmp/mb_body"
-code "/praktika/page/2/" >/dev/null; c=$(code "/praktika/page/2/"); check "MB-10: несуществующая страница пагинации → 404" "[ $c = 404 ]"
-code /praktika/ >/dev/null; check "MB-10: canonical первой страницы списка — сама страница" "grep -q 'rel=\"canonical\" href=\"[^\"]*/praktika/\"' /tmp/mb_body"
+code "/baza-znaniy/page/2/" >/dev/null; c=$(code "/baza-znaniy/page/2/"); check "MB-10: несуществующая страница пагинации → 404" "[ $c = 404 ]"
+code /baza-znaniy/ >/dev/null; check "MB-10: canonical первой страницы списка — сама страница" "grep -q 'rel=\"canonical\" href=\"[^\"]*/baza-znaniy/\"' /tmp/mb_body"
 stop_server
 $WP option update blog_public 0 >/dev/null
 start_server local

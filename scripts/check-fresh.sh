@@ -21,7 +21,7 @@ $WP post get 2 --field=post_name 2>/dev/null | grep -q sample-page && ok "пер
 $WP eval-file scripts/seed.php >/tmp/mb_fresh_seed.log 2>&1 && ok "seed.php первый запуск: $(grep -c 'создано' /tmp/mb_fresh_seed.log) материалов создано" || fail "seed"
 [ "$($WP post get 2 --field=post_status 2>/dev/null)" = trash ] && ok "образец ядра #2 в корзине (не удалён безвозвратно)" || fail "образец ядра: $($WP post get 2 --field=post_status 2>/dev/null)"
 $WP eval-file scripts/seed.php >/tmp/mb_fresh_seed2.log 2>&1; grep -q "создано" /tmp/mb_fresh_seed2.log && fail "повторный seed что-то создал" || ok "повторный seed ничего не создал и не удалил"
-[ "$($WP option get permalink_structure)" = "/praktika/%postname%/" ] && ok "пермалинки /praktika/%postname%/" || fail "пермалинки: $($WP option get permalink_structure)"
+[ "$($WP option get permalink_structure)" = "/baza-znaniy/%postname%/" ] && ok "пермалинки /baza-znaniy/%postname%/" || fail "пермалинки: $($WP option get permalink_structure)"
 # Содержание v4 (как на стенде): комплект из logs/v4 (локальный, не в Git); без него v4-проверки будут красными.
 if [ -f "$ROOT/logs/v4/content-v4.bin" ] && [ -f "$ROOT/logs/v4/content-v4.key" ]; then
   $WP maxbit v4 --bundle="$ROOT/logs/v4/content-v4.bin" --key="$(cat "$ROOT/logs/v4/content-v4.key")" --apply >/tmp/mb_fresh_v4.log 2>&1 && ok "комплект содержания v4 применён: $(tail -1 /tmp/mb_fresh_v4.log)" || fail "комплект v4: $(tail -2 /tmp/mb_fresh_v4.log)"

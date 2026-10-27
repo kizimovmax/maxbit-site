@@ -29,7 +29,7 @@ function maxbit_og_label( int $post_id ): string {
 		return 'Кейс';
 	}
 	if ( 'post' === $p->post_type ) {
-		return 'chek-list-peredacha-zakaza-v-proizvodstvo' === $p->post_name ? 'Чек-лист' : 'Практика';
+		return 'chek-list-peredacha-zakaza-v-proizvodstvo' === $p->post_name ? 'Чек-лист' : 'База знаний';
 	}
 	return 'MAXBIT';
 }

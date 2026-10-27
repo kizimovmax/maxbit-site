@@ -4,7 +4,7 @@
  */
 defined( 'ABSPATH' ) || exit;
 
-define( 'MAXBIT_THEME_VERSION', '0.8.3' );
+define( 'MAXBIT_THEME_VERSION', '0.9.0' );
 
 /**
  * Тема работает и без модуля maxbit-core (без формы, типов и допуска). Обёртки с префиксом maxbit_theme_
@@ -416,4 +416,12 @@ function maxbit_theme_services(): array {
 		) ),
 	);
 	return (array) apply_filters( 'maxbit_services', $g );
+}
+
+/** Ссылка «Сервисы и интеграции» в конце страниц решений и Битрикс24 для производства (если страница сервисов включена). */
+function maxbit_theme_services_link(): void {
+	if ( ! function_exists( 'maxbit_tech_hub_active' ) || ! maxbit_tech_hub_active() ) {
+		return;
+	}
+	echo '<p class="mb-svc-cta"><span>Битрикс24, 1С, ЭДО, телефония и мессенджеры — как связываем сервисы компании.</span> <a class="mb-btn mb-btn--link" href="' . esc_url( home_url( '/tekhnologii/' ) ) . '">Сервисы и интеграции</a></p>';
 }

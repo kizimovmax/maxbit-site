@@ -9,7 +9,7 @@ $mb_link = function ( string $path, string $label ) {
 	} elseif ( str_starts_with( $path, 'resheniya/' ) ) {
 		$p = get_posts( array( 'post_type' => 'mb_solution', 'name' => substr( $path, 10 ), 'post_status' => 'publish', 'numberposts' => 1 ) );
 		$ok = $p && ( ! function_exists( 'maxbit_is_publicly_visible' ) || maxbit_is_publicly_visible( $p[0]->ID ) );
-	} elseif ( '' !== $path && 'praktika' !== $path ) {
+	} elseif ( '' !== $path && ! in_array( $path, array( 'praktika', 'baza-znaniy' ), true ) ) {
 		$p = get_page_by_path( $path );
 		$ok = $p && 'publish' === $p->post_status;
 	}
@@ -34,7 +34,7 @@ $channels = maxbit_theme_msg( 'channels', true );
 		<nav class="mb-footer__col" aria-label="Компания">
 			<p class="mb-footer__col-title">Компания</p>
 			<ul class="mb-footer__menu">
-				<?php echo $mb_link( '', 'Главная' ) . $mb_link( 'kak-rabotaem', 'Как работаем' ) . $mb_link( 'proekty', 'Проекты' ) . $mb_link( 'praktika', 'Практика' ) . $mb_link( 'o-kompanii', 'О компании' ); // phpcs:ignore ?>
+				<?php echo $mb_link( '', 'Главная' ) . $mb_link( 'kak-rabotaem', 'Как работаем' ) . $mb_link( 'proekty', 'Проекты' ) . $mb_link( (string) get_page_uri( (int) get_option( 'page_for_posts' ) ), 'База знаний' ) . $mb_link( 'o-kompanii', 'О компании' ); // phpcs:ignore ?>
 			</ul>
 		</nav>
 		<div class="mb-footer__col">

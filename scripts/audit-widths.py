@@ -3,7 +3,7 @@
 import asyncio, os, sys
 from playwright.async_api import async_playwright
 BASE=os.environ.get('MAXBIT_BASE','http://127.0.0.1:8080')
-PAGES=['/','/resheniya/','/resheniya/zakaz-pod-kontrolem/','/resheniya/integraciya-bitrix24-i-1c/','/tekhnologii/bitrix24-dlya-proizvodstva/','/kak-rabotaem/','/praktika/','/praktika/chek-list-peredacha-zakaza-v-proizvodstvo/','/praktika/kartochka-proizvodstvennogo-zakaza/','/o-kompanii/','/osnovatel/','/proekty/','/net-takoy/']
+PAGES=['/','/resheniya/','/resheniya/zakaz-pod-kontrolem/','/resheniya/integraciya-bitrix24-i-1c/','/tekhnologii/bitrix24-dlya-proizvodstva/','/kak-rabotaem/','/baza-znaniy/','/baza-znaniy/chek-list-peredacha-zakaza-v-proizvodstvo/','/baza-znaniy/kartochka-proizvodstvennogo-zakaza/','/o-kompanii/','/osnovatel/','/proekty/','/net-takoy/']
 WIDTHS=[int(w) for w in (sys.argv[1:] or ['320','360','390','768','1024','1280','1440'])]
 async def main():
     bad=0

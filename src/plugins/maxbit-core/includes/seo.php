@@ -31,7 +31,7 @@ function maxbit_document_title(): string {
 	if ( is_home() ) {
 		$pp = (int) get_option( 'page_for_posts' );
 		$t  = $pp ? (string) get_post_meta( $pp, '_mb_seo_title', true ) : '';
-		return ( $t ?: 'Практика: статьи, чек-листы и разборы для руководителя производства — MAXBIT' ) . $suffix;
+		return ( $t ?: 'База знаний: статьи, чек-листы и разборы для руководителя производства — MAXBIT' ) . $suffix;
 	}
 	if ( is_post_type_archive( 'mb_solution' ) ) {
 		return ( maxbit_seo_archive( '/resheniya/', 'title' ) ?: 'Решения для производственных компаний | MAXBIT' ) . $suffix;
@@ -177,7 +177,7 @@ function maxbit_show_updated_date(): bool {
 		return false;
 	}
 	$slug = get_post_field( 'post_name', get_queried_object_id() );
-	return ! in_array( $slug, array( 'politika-obrabotki-personalnyh-dannyh', 'soglasie-na-obrabotku-personalnyh-dannyh', 'proekty', 'praktika', 'resheniya' ), true );
+	return ! in_array( $slug, array( 'politika-obrabotki-personalnyh-dannyh', 'soglasie-na-obrabotku-personalnyh-dannyh', 'proekty', 'praktika', 'baza-znaniy', 'resheniya' ), true );
 }
 
 /** Строка «Обновлено: 16.10.2026» для темы. */
@@ -250,7 +250,7 @@ function maxbit_breadcrumbs(): array {
 		$items[] = array( 'Проекты', get_post_type_archive_link( 'mb_project' ) );
 		$items[] = array( get_post_meta( get_queried_object_id(), '_mb_pf_client', true ) ?: get_the_title(), '' );
 	} elseif ( is_singular( 'post' ) ) {
-		$items[] = array( 'Практика', get_permalink( (int) get_option( 'page_for_posts' ) ) );
+		$items[] = array( 'База знаний', get_permalink( (int) get_option( 'page_for_posts' ) ) );
 		$items[] = array( get_the_title(), '' );
 	} elseif ( is_page() ) {
 		$post = get_queried_object();
@@ -259,7 +259,7 @@ function maxbit_breadcrumbs(): array {
 		}
 		$items[] = array( 'bitrix24' === $post->post_name && ! $post->post_parent ? 'Битрикс24' : get_the_title(), '' );
 	} elseif ( is_home() ) {
-		$items[] = array( 'Практика', '' );
+		$items[] = array( 'База знаний', '' );
 	} elseif ( is_post_type_archive( 'mb_solution' ) ) {
 		$items[] = array( 'Решения', '' );
 	} elseif ( is_post_type_archive( 'mb_project' ) ) {
@@ -522,7 +522,7 @@ add_action( 'init', function () {
 			$out .= '- [' . $label . '](' . get_permalink( $pg ) . ")\n";
 		}
 	}
-	$out .= "\n## Практика (статьи и чек-листы)\n";
+	$out .= "\n## База знаний (статьи и чек-листы)\n";
 	foreach ( get_posts( array( 'post_type' => 'post', 'post_status' => 'publish', 'numberposts' => 30 ) ) as $p ) {
 		$out .= '- [' . $p->post_title . '](' . get_permalink( $p ) . ")\n";
 	}

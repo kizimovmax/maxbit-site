@@ -176,7 +176,7 @@ def home():
     ], 'mb-hero__cols'), 'mb-hero')
     sit = section(head('Узнаёте свою ситуацию?', 'Проблема может быть в одном процессе или на стыке нескольких подразделений. Начинаем с конкретной ситуации и смотрим, что мешает работе.')
                   + columns([h(3, t) + p(d) + p(f'<a class="mb-btn mb-btn--link" href="{SIT_LINK[t]}">Как решаем</a>', 'mb-tile__more') for t, d in SIT], 'mb-tiles mb-situations')
-                  + p('<a class="mb-btn mb-btn--link" href="/resheniya/">Все решения</a>', 'mb-section__after'), 'mb-section--surface')
+                  + p('<a class="mb-btn mb-btn--link" href="/resheniya/">Все решения</a> <a class="mb-btn mb-btn--link" href="/tekhnologii/">Сервисы и интеграции</a>', 'mb-section__after mb-links'), 'mb-section--surface')
     cards = []
     for i, (t, d, link, url) in enumerate(DIRS):
         cards.append(raw(f'<div class="mb-solution-card"><h3>{t}</h3><p>{d}</p><p><a class="mb-btn mb-btn--link" href="{url}">{link}</a></p></div>'))
@@ -192,7 +192,7 @@ def home():
         ('Дальше — регулярное развитие', 'После запуска не уходим: вместе с руководителем выбираем следующие приоритеты, внедряем и проверяем, как изменения работают.'),
     ]
     steps = section(head('Как мы работаем')
-                    + group(columns([h(3, t) + p(d) for t, d in how_steps], 'mb-how__steps')
+                    + group(columns([h(3, t) + p(d) + (p('<a href="/tekhnologii/">С какими сервисами работаем</a>', 'mb-how__more') if i == 2 else '') for i, (t, d) in enumerate(how_steps)], 'mb-how__steps')
                             + raw('<ol class="mb-cycle mb-cycle--dark" aria-label="Порядок регулярной работы"><li>Обсуждаем задачи</li><li>Выбираем приоритет</li><li>Внедряем</li><li>Проверяем</li><li>Планируем следующий шаг</li></ol>')
                             + p('Основной формат — ежемесячная работа: задачи и встречи в пределах часов выбранного пакета. Почасовой формат — отдельно, без пакета.', 'mb-how__note'), 'mb-how')
                     + buttons([('Обсудить задачу за 30 минут', '#contact', False)], 'mb-how__actions')
@@ -205,7 +205,7 @@ def home():
     practice = section(head('Материалы для самостоятельного разбора', 'Статьи и чек-листы о процессах, данных и цифровых инструментах. Их можно использовать в работе самостоятельно.')
                        + sc('[maxbit_practice_cards diagnostic="1"]')
                        + sc('[maxbit_quiz collapsed="1"]')
-                       + p('<a class="mb-btn mb-btn--link" href="/praktika/">Все материалы</a>', 'mb-section__after'), 'mb-section--magnets', 'materials')
+                       + p('<a class="mb-btn mb-btn--link" href="/baza-znaniy/">Перейти в базу знаний</a>', 'mb-section__after'), 'mb-section--magnets', 'materials')
     faqs = section(faq(FAQ, anchor='faq'))
     contact = section(form(id='contact', purposes='1', heading='Обсудим вашу задачу за 30 минут', text=CONTACT_TEXT), 'mb-section--contact')
     # Блок «Что проверяем вместе с вами» (results) убран с главной по решению владельца 26.10.
@@ -324,7 +324,7 @@ def b24():
                  + columns([h(3, 'Разобрать задачу') + p('Процесс, участники и текущие системы.'), h(3, 'Настроить решение') + p('CRM, задачи, автоматизация и интеграции.'), h(3, 'Запустить в работу') + p('Обучение, проверка и дальнейшее сопровождение.')], 'mb-results'))
     c += section(head('Примеры наших проектов') + sc('[maxbit_projects_cards ids="gk-vpk,lentochka,helper-med"]')
                  + p('<a class="mb-btn mb-btn--link" href="/proekty/">Все проекты</a>', 'mb-section__after')
-                 + p('Прикладные решения: <a href="/tekhnologii/bitrix24-dlya-proizvodstva/">Битрикс24 для производства</a> · <a href="/resheniya/integraciya-bitrix24-i-1c/">Интеграция Битрикс24 и 1С</a> · <a href="/resheniya/zakaz-pod-kontrolem/">Управление производственными заказами</a>', 'mb-small'),
+                 + p('Прикладные решения: <a href="/tekhnologii/bitrix24-dlya-proizvodstva/">Битрикс24 для производства</a> · <a href="/resheniya/integraciya-bitrix24-i-1c/">Интеграция Битрикс24 и 1С</a> · <a href="/resheniya/zakaz-pod-kontrolem/">Управление производственными заказами</a> · <a href="/tekhnologii/">Все сервисы и интеграции</a>', 'mb-small'),
                  'mb-section--surface', 'mb-b24-projects')
     c += section(form(id='mb-b24-contact', purpose='b24', heading='Обсудим вашу задачу', text='Расскажите, что хотите организовать или улучшить. Оставьте заявку или напишите в Telegram или MAX.'), 'mb-section--contact')
     return c
@@ -552,7 +552,7 @@ def build():
         'projects': cases(),
         'materials': {'kp': kp(), 'prezentaciya': pres()},
         'reviews': reviews(),
-        'menu': [('Решения', '/resheniya/'), ('Как работаем', '/kak-rabotaem/'), ('Проекты', '/proekty/'), ('Практика', '/praktika/'), ('О компании', '/o-kompanii/')],
+        'menu': [('Решения', '/resheniya/'), ('Сервисы', '/tekhnologii/'), ('Проекты', '/proekty/'), ('Как работаем', '/kak-rabotaem/'), ('База знаний', '/baza-znaniy/'), ('О компании', '/o-kompanii/')],
     }
     for t in ('home', 'kak-rabotaem', 'o-kompanii'):
         assert 'depbz' not in data['pages'][t]['content'] and '+7' not in data['pages'][t]['content']

@@ -9,6 +9,7 @@
 		<article class="mb-article">
 			<h1 class="mb-page__title"><?php the_title(); ?></h1>
 			<div class="mb-content"><?php the_content(); ?></div>
+			<?php if ( str_starts_with( (string) get_page_uri( get_the_ID() ), 'tekhnologii/' ) ) { maxbit_theme_services_link(); } ?>
 			<?php maxbit_theme_updated(); ?>
 		</article>
 		<?php maxbit_theme_aside(); ?>

@@ -77,12 +77,12 @@ function maxbit_v4_resolve( string $url ): ?WP_Post {
 		$id = (int) get_option( 'page_on_front' );
 		return $id ? get_post( $id ) : null;
 	}
-	if ( 'praktika' === $path ) {
+	if ( in_array( $path, array( 'praktika', 'baza-znaniy' ), true ) ) {
 		$id = (int) get_option( 'page_for_posts' );
 		return $id ? get_post( $id ) : null;
 	}
 	$parts = explode( '/', $path );
-	$map = array( 'resheniya' => 'mb_solution', 'proekty' => 'mb_project', 'praktika' => 'post' );
+	$map = array( 'resheniya' => 'mb_solution', 'proekty' => 'mb_project', 'praktika' => 'post', 'baza-znaniy' => 'post' );
 	if ( 2 === count( $parts ) && isset( $map[ $parts[0] ] ) ) {
 		$p = get_posts( array( 'post_type' => $map[ $parts[0] ], 'name' => $parts[1], 'post_status' => array( 'publish', 'draft', 'private', 'pending' ), 'numberposts' => 1, 'suppress_filters' => true ) );
 		return $p ? $p[0] : null;

@@ -3,7 +3,7 @@
 	<?php maxbit_the_breadcrumbs(); ?>
 	<?php maxbit_preview_banner( get_the_ID() ); ?>
 	<article class="mb-article">
-		<p class="mb-eyebrow"><?php echo 'chek-list-peredacha-zakaza-v-proizvodstvo' === get_post()->post_name ? 'Чек-лист' : 'Практика'; ?></p>
+		<p class="mb-eyebrow"><?php echo 'chek-list-peredacha-zakaza-v-proizvodstvo' === get_post()->post_name ? 'Чек-лист' : 'База знаний'; ?></p>
 		<h1 class="mb-page__title"><?php the_title(); ?></h1>
 		<p class="mb-article__meta">MAXBIT · <time datetime="<?php echo esc_attr( get_the_date( 'c' ) ); ?>"><?php echo esc_html( maxbit_theme_date_ru( get_the_ID() ) ); ?></time><?php if ( get_post_meta( get_the_ID(), '_mb_content_updated', true ) && function_exists( 'maxbit_content_modified' ) ) : ?> · обновлено <time datetime="<?php echo esc_attr( maxbit_content_modified( get_the_ID(), 'c' ) ); ?>"><?php echo esc_html( maxbit_content_modified( get_the_ID(), 'd.m.Y' ) ); ?></time><?php endif; ?>
 			<?php if ( function_exists( 'maxbit_reading_time' ) ) : ?> · <?php echo esc_html( maxbit_reading_time( get_the_ID() ) ); ?><?php endif; ?>

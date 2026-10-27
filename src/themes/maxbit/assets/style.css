@@ -78,13 +78,14 @@ strong { font-weight: 700; }
 .mb-logo__mark svg { width: 124px; height: auto; display: block; }
 .mb-nav { display: flex; align-items: center; gap: 30px; margin-left: auto; }
 .mb-nav__menu { list-style: none; margin: 0; padding: 0; display: flex; gap: 6px; }
-.mb-nav__menu a { display: inline-block; color: var(--ink); text-decoration: none; font-weight: 600; font-size: .875rem; padding: 8px 12px; position: relative; }
+.mb-nav__menu a { display: inline-block; color: var(--ink); text-decoration: none; font-weight: 600; font-size: .875rem; padding: 8px 12px; position: relative; white-space: nowrap; }
+@media (min-width: 1181px) and (max-width: 1380px) { .mb-nav__menu a { padding: 8px 8px; } .mb-nav { gap: 18px; } .mb-logo__tagline, .mb-logo__full::after { display: none; } }
 .mb-nav__menu a:hover { color: var(--accent); }
 .mb-nav__menu .current-menu-item > a, .mb-nav__menu .current-menu-ancestor > a { color: var(--ink); }
 .mb-nav__menu .current-menu-item > a::after, .mb-nav__menu .current-menu-ancestor > a::after { content: ""; position: absolute; left: 12px; right: 12px; bottom: 2px; height: 2px; background: var(--accent); }
 .mb-nav__cta { font-size: .875rem; min-height: 46px; padding: 0 22px 0 20px; gap: 10px; }
 .mb-nav__toggle { display: none; }
-@media (max-width: 900px) {
+@media (max-width: 1180px) { /* 6 пунктов меню: бургер до 1180px */
   .mb-header__inner { min-height: 64px; gap: 10px; }
   .mb-logo__full { display: none; }
   .mb-logo__mark { display: block; }
@@ -113,7 +114,7 @@ strong { font-weight: 700; }
   .mb-nav__contacts { display: flex; flex-direction: column; gap: 4px; margin: 18px 0 0; font-size: .95rem; }
   .mb-nav__contacts a { color: #fff; text-decoration: none; }
 }
-@media (min-width: 901px) { .mb-header .mb-header__cta-mobile, .mb-nav__contacts { display: none; } }
+@media (min-width: 1181px) { .mb-header .mb-header__cta-mobile, .mb-nav__contacts { display: none; } }
 @media (max-width: 620px) { .mb-logo__mark svg { width: 118px; } }
 
 /* ---------- Кнопки: срез 45°, маркер «››» ---------- */
@@ -1132,6 +1133,13 @@ html.js .mb-quiz.is-collapsed .mb-quiz__head { margin-bottom: 0; }
 .mb-cycle--dark li:nth-child(3) { background: var(--accent); }
 .mb-how__note { color: var(--text-dark); font-size: .85rem; margin: 0 0 8px; }
 .mb-how__steps > .wp-block-column:last-child { border-top-color: var(--hair-dark); } /* все шаги одинаковые (решение владельца 27.10) */
+/* Ссылки на «Сервисы и интеграции» */
+.mb-section__after.mb-links { display: flex; flex-wrap: wrap; gap: 12px 32px; }
+.mb-how__more { margin: 12px 0 0; font-size: .85rem; font-weight: 700; }
+.mb-how__more a { color: #fff; text-decoration: underline; text-decoration-color: var(--accent); text-underline-offset: 3px; }
+.mb-how__more a::after { content: " ››"; color: var(--sky); }
+.mb-svc-cta { margin: 32px 0 0; padding: 18px 22px; background: var(--surface); display: flex; flex-wrap: wrap; gap: 10px 24px; align-items: center; justify-content: space-between; }
+.mb-svc-cta span { color: var(--ink-2); font-size: .92rem; }
 /* Страница 404 */
 .mb-404 { position: relative; overflow: hidden; isolation: isolate; background: #fff; }
 .mb-404::before { content: ""; position: absolute; inset: 0; z-index: -1; background: var(--graphite); clip-path: polygon(66% 0, 100% 0, 100% 100%, 56% 100%); }

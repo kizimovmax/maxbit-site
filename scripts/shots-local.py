@@ -10,8 +10,8 @@ PAGES = [
     ('home', '/'), ('resheniya', '/resheniya/'), ('bitrix24', '/bitrix24/'), ('kak-rabotaem', '/kak-rabotaem/'),
     ('o-kompanii', '/o-kompanii/'), ('osnovatel', '/osnovatel/'), ('zakaz', '/resheniya/zakaz-pod-kontrolem/'),
     ('b24-proizv', '/tekhnologii/bitrix24-dlya-proizvodstva/'), ('integraciya', '/resheniya/integraciya-bitrix24-i-1c/'),
-    ('proekty', '/proekty/'), ('praktika', '/praktika/'), ('chek-list', '/praktika/chek-list-peredacha-zakaza-v-proizvodstvo/'),
-    ('kartochka', '/praktika/kartochka-proizvodstvennogo-zakaza/'), ('gk-vpk', '/proekty/gk-vpk/'), ('lentochka', '/proekty/lentochka/'),
+    ('proekty', '/proekty/'), ('praktika', '/baza-znaniy/'), ('chek-list', '/baza-znaniy/chek-list-peredacha-zakaza-v-proizvodstvo/'),
+    ('kartochka', '/baza-znaniy/kartochka-proizvodstvennogo-zakaza/'), ('gk-vpk', '/proekty/gk-vpk/'), ('lentochka', '/proekty/lentochka/'),
     ('paritet', '/proekty/paritet-alyans/'), ('avtospeccentr', '/proekty/avtospeccentr/'), ('cupol365', '/proekty/cupol365/'),
     ('helper-med', '/proekty/helper-med/'), ('ngsk', '/proekty/ngsk/'), ('404', '/net-takoy/'),
 ] + [(n, u) for n, u in (('kp', os.environ.get('MAXBIT_KP', '')), ('prezentaciya', os.environ.get('MAXBIT_PRES', ''))) if u]

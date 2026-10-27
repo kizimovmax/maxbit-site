@@ -5,7 +5,7 @@ import re, html, os, sys
 root=os.path.dirname(os.path.dirname(os.path.abspath(__file__))); snap=os.path.join(root,'reports/html-snapshots')
 pages=[('/', '01-glavnaya.html','Главная'),('/resheniya/','02-resheniya.html','Решения'),('/resheniya/zakaz-pod-kontrolem/','03-zakaz-pod-kontrolem.html','Заказ под контролем'),
 ('/tekhnologii/bitrix24-dlya-proizvodstva/','04-bitrix24.html','Битрикс24'),('/kak-rabotaem/','05-kak-rabotaem.html','Как работаем'),('/o-kompanii/','06-o-kompanii.html','О компании'),
-('/praktika/','07-praktika.html','Практика'),('/praktika/kartochka-proizvodstvennogo-zakaza/','08-statya.html','Статья'),('/proekty/','09-proekty-pusto.html','Проекты'),('/404/','10-404.html','404'),
+('/baza-znaniy/','07-praktika.html','Практика'),('/baza-znaniy/kartochka-proizvodstvennogo-zakaza/','08-statya.html','Статья'),('/proekty/','09-proekty-pusto.html','Проекты'),('/404/','10-404.html','404'),
 ('/resheniya/ii-praktikum/','11-ii-praktikum-AUTH-PREVIEW.html','ИИ-Практикум (закрытый просмотр)'),('/proekty/obrazets-struktury-keysa/','12-obrazets-keysa-AUTH-PREVIEW.html','Образец кейса (закрытый просмотр)'),('/glavnaya-auth/','13-glavnaya-AUTH-PREVIEW.html','Главная (закрытый просмотр)')]
 css=open(os.path.join(root,'src/themes/maxbit/assets/style.css')).read()
 def body_of(s):

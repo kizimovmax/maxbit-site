@@ -8,7 +8,7 @@ $links = array(
 	array( get_post_type_archive_link( 'mb_solution' ), 'Решения', 'Заказы, Битрикс24, интеграция с 1С' ),
 	array( get_post_type_archive_link( 'mb_project' ), 'Проекты', 'Задачи компаний и что изменили' ),
 	array( home_url( '/kak-rabotaem/' ), 'Как работаем', 'Первая встреча, формат и шаги' ),
-	array( home_url( '/praktika/' ), 'Практика', 'Статьи, чек-лист и самодиагностика' ),
+	array( get_permalink( (int) get_option( 'page_for_posts' ) ), 'База знаний', 'Статьи, чек-лист и самодиагностика' ),
 );
 ?>
 <section class="mb-404" aria-labelledby="mb-404-h">

@@ -1,7 +1,7 @@
 <?php get_header(); ?>
 <div class="mb-container mb-page">
 	<?php maxbit_the_breadcrumbs(); ?>
-	<h1 class="mb-page__title">Практика</h1>
+	<h1 class="mb-page__title">База знаний</h1>
 	<p class="mb-lead">Статьи и чек-листы о процессах, данных и цифровых инструментах. Их можно использовать в работе самостоятельно.</p>
 	<?php if ( have_posts() ) : ?>
 		<div class="mb-grid mb-grid--2 mb-grid--practice">

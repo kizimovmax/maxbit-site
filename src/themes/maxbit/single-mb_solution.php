@@ -4,6 +4,7 @@
 	<?php maxbit_preview_banner( get_the_ID() ); ?>
 	<article class="mb-article mb-article--solution">
 		<div class="mb-content"><?php the_content(); ?></div>
+		<?php maxbit_theme_services_link(); ?>
 		<?php maxbit_theme_updated(); ?>
 	</article>
 	<?php maxbit_theme_aside(); ?>

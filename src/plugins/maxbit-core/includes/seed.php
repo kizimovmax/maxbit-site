@@ -355,7 +355,7 @@ function maxbit_seed_run(): array {
 
 	/* ---------- Практика (архив статей) ---------- */
 	$praktika_id = maxbit_seed_item( 'page-praktika', array(
-		'post_type' => 'page', 'post_status' => 'publish', 'post_title' => 'Практика', 'post_name' => 'praktika', 'post_content' => '',
+		'post_type' => 'page', 'post_status' => 'publish', 'post_title' => 'База знаний', 'post_name' => 'baza-znaniy', 'post_content' => '',
 	), array(
 		'_mb_seo_title' => 'Практика: статьи, чек-листы и разборы для руководителя производства — MAXBIT',
 		'_mb_seo_description' => 'Разборы типовых проблем производственных компаний, чек-листы и инструкции по учёту заказов, Битрикс24 и 1С. Пишут практики MAXBIT.',
@@ -671,7 +671,7 @@ function maxbit_seed_run(): array {
 		. maxbit_sb_h( 2, '6. Где фиксируем проблему' ) . maxbit_sb_p( 'Для риска или задержки полезно указывать причину, владельца решения и следующее действие. Формулировка «снабжение задерживает» не говорит, что требуется сделать. Конкретная запись вроде «получить подтверждённую дату поставки» задаёт действие; срок и ответственного нужно согласовать отдельно.' )
 		. maxbit_sb_h( 2, '7. Кто поддерживает актуальность' ) . maxbit_sb_p( 'Для каждого важного поля назначьте источник и правило изменения: сотрудник, документ или интеграция. Не заставляйте нескольких людей независимо поддерживать один статус. Перед запуском проверьте обычный маршрут, возврат на доработку, изменение спецификации и сбой обмена.' )
 		. maxbit_sb_h( 2, 'Границы модели' ) . maxbit_sb_group( maxbit_sb_p( 'Это отправная точка для обсуждения, а не готовый стандарт для любого производства. Она не заменяет технологические карты, детальное планирование оборудования или учётную систему. Начните с одного характерного заказа и определите, какие сведения действительно нужны его участникам.' ), 'mb-boundaries', true )
-		. maxbit_sb_p( '<strong>Следующий шаг.</strong> Проверьте свой следующий заказ по <a href="/praktika/chek-list-peredacha-zakaza-v-proizvodstvo/">чек-листу передачи заказа в производство</a>, посмотрите решение <a href="/resheniya/zakaz-pod-kontrolem/">«Управление производственными заказами»</a> или расскажите MAXBIT, где информация теряется в вашем процессе.' );
+		. maxbit_sb_p( '<strong>Следующий шаг.</strong> Проверьте свой следующий заказ по <a href="/baza-znaniy/chek-list-peredacha-zakaza-v-proizvodstvo/">чек-листу передачи заказа в производство</a>, посмотрите решение <a href="/resheniya/zakaz-pod-kontrolem/">«Управление производственными заказами»</a> или расскажите MAXBIT, где информация теряется в вашем процессе.' );
 
 	$art_id = maxbit_seed_item( 'post-kartochka', array(
 		'post_type' => 'post', 'post_status' => 'publish', 'post_title' => 'Что должно быть в карточке производственного заказа', 'post_name' => 'kartochka-proizvodstvennogo-zakaza', 'post_content' => $art,
@@ -709,7 +709,7 @@ function maxbit_seed_run(): array {
 		. maxbit_sb_p( 'Проверяйте чек-лист в момент передачи заказа из продаж в производство — тот, кто принимает заказ в цех, проходит по пунктам и либо принимает, либо возвращает с указанием, чего не хватает. Через месяц посмотрите, какие пункты чаще всего не заполнены: это и есть места, где процесс нужно менять в первую очередь.' )
 		. maxbit_sb_h( 2, 'Границы' )
 		. maxbit_sb_group( maxbit_sb_p( 'Чек-лист — отправная точка, а не стандарт для любого производства. Для серийного производства пункты будут другими; для позаказного — часто нужны дополнительные (чертежи, допуски, согласование с конструктором). Дополните список под свой процесс.' ), 'mb-boundaries', true )
-		. maxbit_sb_p( '<strong>Следующий шаг.</strong> Если пункты систематически не заполняются — проблема не в дисциплине, а в процессе. Посмотрите, <a href="/praktika/kartochka-proizvodstvennogo-zakaza/">что должно быть в карточке производственного заказа</a>, или <a href="/resheniya/zakaz-pod-kontrolem/">как мы настраиваем управление заказами</a>.' )
+		. maxbit_sb_p( '<strong>Следующий шаг.</strong> Если пункты систематически не заполняются — проблема не в дисциплине, а в процессе. Посмотрите, <a href="/baza-znaniy/kartochka-proizvodstvennogo-zakaza/">что должно быть в карточке производственного заказа</a>, или <a href="/resheniya/zakaz-pod-kontrolem/">как мы настраиваем управление заказами</a>.' )
 		. maxbit_sb_sc( '[maxbit_form topic="checklist" heading="Обсудить задачу" text="Проверили заказ по чек-листу и увидели, где теряется процесс? На первой встрече обсудим вашу ситуацию и возможные следующие шаги."]' );
 
 	$cl_id = maxbit_seed_item( 'post-checklist-peredacha', array(
@@ -854,8 +854,8 @@ function maxbit_seed_run(): array {
 	if ( ! get_option( 'page_for_posts' ) ) {
 		update_option( 'page_for_posts', $praktika_id );
 	}
-	if ( '/praktika/%postname%/' !== get_option( 'permalink_structure' ) && ! get_option( 'maxbit_seed_done' ) ) {
-		$GLOBALS['wp_rewrite']->set_permalink_structure( '/praktika/%postname%/' );
+	if ( ! in_array( get_option( 'permalink_structure' ), array( '/baza-znaniy/%postname%/', '/praktika/%postname%/' ), true ) && ! get_option( 'maxbit_seed_done' ) ) {
+		$GLOBALS['wp_rewrite']->set_permalink_structure( '/baza-znaniy/%postname%/' );
 	}
 	if ( ! get_option( 'maxbit_seed_done' ) ) {
 		update_option( 'blogname', 'MAXBIT' );
@@ -870,7 +870,7 @@ function maxbit_seed_run(): array {
 		array( 'menu-item-title' => 'Решения', 'menu-item-type' => 'post_type_archive', 'menu-item-object' => 'mb_solution' ),
 		array( 'menu-item-title' => 'Проекты', 'menu-item-type' => 'post_type_archive', 'menu-item-object' => 'mb_project' ),
 		array( 'menu-item-title' => 'Как работаем', 'menu-item-type' => 'post_type', 'menu-item-object' => 'page', 'menu-item-object-id' => $how_id ),
-		array( 'menu-item-title' => 'Практика', 'menu-item-type' => 'post_type', 'menu-item-object' => 'page', 'menu-item-object-id' => $praktika_id ),
+		array( 'menu-item-title' => 'База знаний', 'menu-item-type' => 'post_type', 'menu-item-object' => 'page', 'menu-item-object-id' => $praktika_id ),
 		array( 'menu-item-title' => 'О компании', 'menu-item-type' => 'post_type', 'menu-item-object' => 'page', 'menu-item-object-id' => $about_id ),
 	) );
 	maxbit_seed_menu( 'Меню в подвале', 'footer', array(
@@ -878,7 +878,7 @@ function maxbit_seed_run(): array {
 		array( 'menu-item-title' => 'Битрикс24 для производства', 'menu-item-type' => 'post_type', 'menu-item-object' => 'page', 'menu-item-object-id' => $b24_id ),
 		array( 'menu-item-title' => 'Интеграция Битрикс24 и 1С', 'menu-item-type' => 'post_type', 'menu-item-object' => 'mb_solution', 'menu-item-object-id' => $integ_id ),
 		array( 'menu-item-title' => 'Как работаем', 'menu-item-type' => 'post_type', 'menu-item-object' => 'page', 'menu-item-object-id' => $how_id ),
-		array( 'menu-item-title' => 'Практика', 'menu-item-type' => 'post_type', 'menu-item-object' => 'page', 'menu-item-object-id' => $praktika_id ),
+		array( 'menu-item-title' => 'База знаний', 'menu-item-type' => 'post_type', 'menu-item-object' => 'page', 'menu-item-object-id' => $praktika_id ),
 		array( 'menu-item-title' => 'О компании и контакты', 'menu-item-type' => 'post_type', 'menu-item-object' => 'page', 'menu-item-object-id' => $about_id ),
 		array( 'menu-item-title' => 'Политика обработки персональных данных', 'menu-item-type' => 'post_type', 'menu-item-object' => 'page', 'menu-item-object-id' => $policy_id ),
 	) );
