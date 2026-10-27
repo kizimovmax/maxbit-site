@@ -198,7 +198,7 @@ def home():
                     + buttons([('Обсудить задачу за 30 минут', '#contact', False)], 'mb-how__actions')
                     + p('<a class="mb-btn mb-btn--link" href="/kak-rabotaem/">Подробнее о формате работы</a>', 'mb-section__after'))
     results = section(head('Что проверяем вместе с вами') + columns([h(3, t) + p(d) for t, d in RESULTS], 'mb-results'), 'mb-section--surface')
-    projects = section(head('Как это работает на практике', 'Задачи компаний, внесённые изменения и работа решений в реальных процессах.')
+    projects = section(head('Реализованные проекты', 'Задачи компаний, внесённые изменения и работа решений в реальных процессах.')
                        + sc('[maxbit_projects_cards ids="gk-vpk,lentochka,paritet-alyans"]')
                        + p('<a class="mb-btn mb-btn--link" href="/proekty/">Все проекты</a>', 'mb-section__after'), 'mb-section--surface', 'projects')
     reviews = section(head('Отзывы клиентов') + sc('[maxbit_reviews initial="3"]'), '', 'reviews')
