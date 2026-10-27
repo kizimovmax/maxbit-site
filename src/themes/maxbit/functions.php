@@ -4,7 +4,7 @@
  */
 defined( 'ABSPATH' ) || exit;
 
-define( 'MAXBIT_THEME_VERSION', '0.9.2' );
+define( 'MAXBIT_THEME_VERSION', '0.10.0' );
 
 /**
  * Тема работает и без модуля maxbit-core (без формы, типов и допуска). Обёртки с префиксом maxbit_theme_
@@ -371,8 +371,12 @@ add_filter( 'nav_menu_css_class', function ( array $classes, $item ) {
  * Ссылка ведёт к блоку самодиагностики и раскрывает вопросы (quiz.js, data-mb-open). Без самодиагностики — только X.
  */
 function maxbit_theme_hero_art_html(): string {
+	// Первый экран: предложение «Пилотный проект за наш счёт» (решение владельца 27.10); без страницы пилота — самодиагностика.
 	$teaser = '';
-	if ( shortcode_exists( 'maxbit_quiz' ) ) {
+	$pilot  = get_page_by_path( 'pilotnyj-proekt' );
+	if ( $pilot && 'publish' === $pilot->post_status ) {
+		$teaser = '<div class="mb-hero__teaser"><p class="mb-hero__teaser-label">Пилотный проект</p><p class="mb-hero__teaser-title">Одну задачу — за наш счёт</p><p class="mb-hero__teaser-text">Чтобы вы оценили нашу работу на деле. Участие — после разбора задачи.</p><a class="mb-btn mb-btn--primary" href="' . esc_url( get_permalink( $pilot ) ) . '" data-event="pilot_open_hero">Условия и анкета</a></div>';
+	} elseif ( shortcode_exists( 'maxbit_quiz' ) ) {
 		$teaser = '<div class="mb-hero__teaser"><p class="mb-hero__teaser-label">Самодиагностика · 3 минуты</p><p class="mb-hero__teaser-title">Где теряются информация и задачи в вашей компании?</p><a class="mb-btn mb-btn--primary" href="#diagnostic" data-mb-open="diagnostic" data-event="quiz_open_hero">Пройти самодиагностику</a></div>';
 	}
 	return '<div class="mb-hero__art">' . $teaser . maxbit_theme_x_svg( 'mb-hero__x', true ) . '</div>';

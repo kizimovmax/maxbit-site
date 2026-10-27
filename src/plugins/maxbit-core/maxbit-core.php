@@ -2,7 +2,7 @@
 /**
  * Plugin Name: MAXBIT Core
  * Description: Типы материалов, связи, SEO-поля, допуск к публикации и серверный приём обращений для сайта MAXBIT. Не зависит от темы.
- * Version: 0.6.1
+ * Version: 0.7.0
  * Requires at least: 6.6
  * Requires PHP: 8.1
  * Author: MAXBIT
@@ -11,7 +11,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'MAXBIT_CORE_VERSION', '0.6.1' );
+define( 'MAXBIT_CORE_VERSION', '0.7.0' );
 define( 'MAXBIT_CORE_DIR', plugin_dir_path( __FILE__ ) );
 define( 'MAXBIT_CORE_URL', plugin_dir_url( __FILE__ ) );
 
@@ -59,6 +59,7 @@ function maxbit_lead_topics(): array {
 		'checklist'     => 'После чек-листа',
 		'about'         => 'Со страницы компании',
 		'diagnostic'    => 'Самодиагностика участка',
+		'pilot'         => 'Пилотный проект',
 		'project'       => 'Со страницы проекта',
 		'b24'           => 'Обзор Битрикс24',
 		'material'      => 'Со страницы материала (КП/презентация)',
@@ -77,6 +78,7 @@ function maxbit_lead_purposes(): array {
 		'b24'          => 'Обсудить внедрение Битрикс24',
 		'tariff'       => 'Обсудить тариф',
 		'hourly'       => 'Обсудить почасовую работу',
+		'pilot'        => 'Пилотный проект за наш счёт',
 	);
 }
 
@@ -129,6 +131,7 @@ require_once MAXBIT_CORE_DIR . 'includes/update.php';
 require_once MAXBIT_CORE_DIR . 'includes/v4.php';
 require_once MAXBIT_CORE_DIR . 'includes/kb.php';
 require_once MAXBIT_CORE_DIR . 'includes/certificates.php';
+require_once MAXBIT_CORE_DIR . 'includes/catalog.php';
 
 register_activation_hook( __FILE__, function () {
 	maxbit_register_post_types();

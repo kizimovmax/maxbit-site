@@ -1031,6 +1031,7 @@ html.js .mb-quiz.is-collapsed .mb-quiz__head { margin-bottom: 0; }
 .mb-hero__x { position: static; transform: none; align-self: flex-end; width: min(78%, 340px); margin-top: auto; }
 .mb-hero__teaser { max-width: 320px; gap: 14px; }
 .mb-hero__teaser-title { font-size: 1.4rem; }
+.mb-hero__teaser-text { margin: 0; color: var(--text-dark); font-size: .9rem; line-height: 1.5; text-align: inherit !important; hyphens: manual !important; }
 .mb-hero__teaser .mb-btn { color: #fff; border-bottom: 0; padding: 0 30px 0 22px; margin-top: 6px; font-size: .9rem; min-height: 48px; }
 .mb-hero__teaser .mb-btn:hover { color: #fff; }
 @media (max-width: 900px) {
@@ -1184,6 +1185,40 @@ html.js .mb-quiz.is-collapsed .mb-quiz__head { margin-bottom: 0; }
 .mb-cert .mb-review__topic { text-align: left; }
 .mb-certs__note { margin-top: 10px; }
 @media (max-width: 620px) { .mb-content .mb-reviews--certs .mb-reviews__grid { grid-template-columns: 1fr; } }
+/* Решения: каталог по пути заказа */
+.mb-cat2__path { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; margin: 8px 0 48px; }
+.mb-cat2__path a { display: flex; align-items: center; gap: 10px; min-height: 64px; padding: 10px 26px 10px 16px; background: var(--surface); color: var(--ink); text-decoration: none; font-weight: 800; font-size: .86rem; line-height: 1.25; clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 50%, calc(100% - 16px) 100%, 0 100%, 16px 50%); }
+.mb-cat2__path a:first-child { clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 50%, calc(100% - 16px) 100%, 0 100%); }
+.mb-cat2__path a span { flex: none; width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center; background: var(--accent); color: #fff; font-size: .78rem; }
+.mb-cat2__path a:hover { background: var(--ink); color: #fff; }
+.mb-cat2__group { margin: 0 0 48px; }
+.mb-cat2__group-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 24px; margin-bottom: 20px; }
+.mb-cat2__group-head h2 { margin: 0; font-size: clamp(1.6rem, 2.6vw, 2.1rem); }
+.mb-cat2__group-head p { margin: 0; color: var(--ink-2); }
+.mb-cat2__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.mb-cat2__card { position: relative; display: flex; flex-direction: column; border: 2px solid var(--ink); padding: 26px 28px; background: #fff; scroll-margin-top: 110px; }
+.mb-cat2__num { margin: 0 0 6px; font-size: 2rem; font-weight: 900; letter-spacing: -.06em; line-height: .9; color: var(--accent); }
+.mb-cat2__card h3 { margin: 0 0 8px; font-size: 1.35rem; }
+.mb-cat2__card h3 a { color: var(--ink); text-decoration: none; }
+.mb-cat2__card h3 a:hover { color: var(--accent); }
+.mb-cat2__text { color: var(--ink-2); margin: 0 0 14px; font-size: .94rem; line-height: 1.55; }
+.mb-cat2__label { margin: 0 0 8px; font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; font-weight: 800; color: var(--accent); }
+.mb-cat2__problems { list-style: none; margin: 0 0 14px; padding: 0; display: grid; gap: 6px; }
+.mb-cat2__problems li { background: var(--surface); padding: 10px 14px; font-size: .9rem; line-height: 1.45; }
+.mb-cat2__cases { font-size: .86rem; color: var(--ink-2); margin: 0 0 14px; }
+.mb-cat2__cases span { font-weight: 700; color: var(--ink); }
+.mb-cat2__cases a { color: var(--ink); text-decoration-color: var(--accent); text-underline-offset: 3px; }
+.mb-cat2__more { margin-top: auto; }
+.mb-sol-problems { list-style: none; padding: 0; display: grid; gap: 8px; }
+.mb-sol-problems li { background: var(--surface); padding: 12px 16px; }
+.mb-pilot-cta { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px 40px; background: var(--graphite); color: #fff; padding: clamp(24px, 3.5vw, 40px); margin: 0 0 56px; clip-path: polygon(0 0, 100% 0, 100% calc(100% - 28px), calc(100% - 28px) 100%, 0 100%); }
+.mb-pilot-cta h2 { color: #fff; margin: 0 0 8px; font-size: clamp(1.5rem, 2.6vw, 2rem); }
+.mb-pilot-cta p { color: var(--text-dark); margin: 0; max-width: 640px; }
+.mb-pilot-cta .mb-pilot-cta__label { color: var(--sky); font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; font-weight: 800; margin-bottom: 8px; }
+.mb-form select { width: 100%; min-height: 52px; padding: 0 14px; border: 2px solid var(--ink); background: #fff; font: inherit; border-radius: 0; }
+@media (max-width: 1100px) { .mb-cat2__path { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 900px) { .mb-cat2__grid { grid-template-columns: 1fr; } }
+@media (max-width: 620px) { .mb-cat2__path { grid-template-columns: 1fr; } .mb-cat2__path a, .mb-cat2__path a:first-child { clip-path: none; min-height: 48px; } .mb-cat2__card { padding: 22px; } }
 /* Страница 404 */
 .mb-404 { position: relative; overflow: hidden; isolation: isolate; background: #fff; }
 .mb-404::before { content: ""; position: absolute; inset: 0; z-index: -1; background: var(--graphite); clip-path: polygon(66% 0, 100% 0, 100% 100%, 56% 100%); }

@@ -34,7 +34,7 @@ $channels = maxbit_theme_msg( 'channels', true );
 		<nav class="mb-footer__col" aria-label="Компания">
 			<p class="mb-footer__col-title">Компания</p>
 			<ul class="mb-footer__menu">
-				<?php echo $mb_link( '', 'Главная' ) . $mb_link( 'kak-rabotaem', 'Как работаем' ) . $mb_link( 'proekty', 'Проекты' ) . $mb_link( (string) get_page_uri( (int) get_option( 'page_for_posts' ) ), 'База знаний' ) . $mb_link( 'o-kompanii', 'О компании' ); // phpcs:ignore ?>
+				<?php echo $mb_link( '', 'Главная' ) . $mb_link( 'kak-rabotaem', 'Как работаем' ) . $mb_link( 'proekty', 'Проекты' ) . $mb_link( (string) get_page_uri( (int) get_option( 'page_for_posts' ) ), 'База знаний' ) . $mb_link( 'pilotnyj-proekt', 'Пилотный проект' ) . $mb_link( 'o-kompanii', 'О компании' ); // phpcs:ignore ?>
 			</ul>
 		</nav>
 		<div class="mb-footer__col">

@@ -195,6 +195,11 @@ function maxbit_lead_process( array $in ): array {
 	if ( $transfer_required && ! $consent_transfer ) {
 		$errors['consent_transfer'] = 'Нужно согласие на передачу данных — без него обращение не может быть передано в систему учёта.';
 	}
+	if ( 'pilot' === $purpose ) { // анкета пилотного проекта: проверка и сборка ответов в текст заявки
+		[ $perr, $message ] = maxbit_pilot_collect( $in, $message );
+		$errors += $perr;
+		$topic   = 'pilot';
+	}
 	if ( $errors ) {
 		return $fail( 'validation', 'Проверьте заполнение полей.', $errors );
 	}

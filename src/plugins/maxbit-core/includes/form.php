@@ -22,6 +22,11 @@ function maxbit_render_form( array $args = array() ): string {
 		'quiz'     => '',          // итог самодиагностики (только цифры), уходит в заявку
 	) );
 	$magnet = 'magnet' === $args['variant'];
+	$pilot  = 'pilot' === $args['variant'];
+	if ( $pilot ) {
+		$args['purpose'] = 'pilot';
+		$args['topic']   = 'pilot';
+	}
 	$s_all  = maxbit_get_settings();
 	$transfer = '1' === (string) $s_all['transfer_consent'];
 	$topic = array_key_exists( $args['topic'], maxbit_lead_topics() ) ? $args['topic'] : 'general';
@@ -87,12 +92,15 @@ function maxbit_render_form( array $args = array() ): string {
 				<p class="mb-form__hint" id="<?php echo $uid; ?>-contact-hint">Email или имя пользователя в Telegram/MAX</p>
 				<p class="mb-form__error" id="<?php echo $uid; ?>-contact-err"><?php echo esc_html( $state['fields']['contact'] ?? '' ); ?></p>
 			</div>
+			<?php if ( $pilot ) { echo maxbit_pilot_fields( $uid, $state ); } // phpcs:ignore ?>
 			<?php if ( ! $magnet ) : ?>
 			<div class="mb-form__row">
-				<label for="<?php echo $uid; ?>-message">Коротко о задаче</label>
+				<label for="<?php echo $uid; ?>-message"><?php echo $pilot ? 'Какую задачу хотите решить пилотом <span aria-hidden="true">*</span>' : 'Коротко о задаче'; // phpcs:ignore ?></label>
 				<textarea id="<?php echo $uid; ?>-message" name="message" rows="4" maxlength="2000"><?php echo esc_textarea( $state['values']['message'] ?? '' ); ?></textarea>
+				<?php if ( $pilot ) : ?><p class="mb-form__error" id="<?php echo $uid; ?>-message-err"><?php echo esc_html( $state['fields']['message'] ?? '' ); ?></p><?php endif; ?>
 			</div>
 			<?php endif; ?>
+			<?php if ( $pilot ) { echo maxbit_pilot_terms( $uid, $state ); } // phpcs:ignore ?>
 			<div class="mb-form__row mb-form__row--consent">
 				<label class="mb-check" for="<?php echo $uid; ?>-consent">
 					<input id="<?php echo $uid; ?>-consent" name="consent" type="checkbox" value="1" required aria-required="true" aria-describedby="<?php echo $uid; ?>-consent-err" <?php checked( ! empty( $state['values']['consent'] ) ); ?>>
@@ -206,6 +214,11 @@ function maxbit_lead_admin_post(): void {
 			'topic'   => sanitize_key( $in['topic'] ?? '' ),
 			'purpose' => sanitize_key( $in['purpose'] ?? '' ),
 		);
+		foreach ( array_merge( array_keys( maxbit_pilot_questions() ), array( 'pilot_terms' ) ) as $pk ) {
+			if ( isset( $in[ $pk ] ) ) {
+				$flash['values'][ $pk ] = mb_substr( sanitize_text_field( (string) $in[ $pk ] ), 0, 200 );
+			}
+		}
 	}
 	set_transient( 'mb_flash_' . $receipt, $flash, 10 * MINUTE_IN_SECONDS );
 	nocache_headers();
@@ -420,3 +433,70 @@ add_shortcode( 'maxbit_practice_block', function ( $atts ) {
 	$out .= '<p class="mb-practice__all"><a class="mb-btn mb-btn--link" href="' . esc_url( get_permalink( (int) get_option( 'page_for_posts' ) ) ) . '">Все материалы</a></p></div>';
 	return $out;
 } );
+
+/** Вопросы анкеты пилотного проекта (решение владельца 27.10). Ответы собираются в текст заявки. */
+function maxbit_pilot_questions(): array {
+	return array(
+		'pilot_company'  => array( 'Компания', 'text', true, array() ),
+		'pilot_industry' => array( 'Чем занимается компания', 'select', true, array( 'Производство', 'Торгово-производственная компания', 'Торговля и дистрибуция', 'Услуги', 'Другое' ) ),
+		'pilot_staff'    => array( 'Сколько сотрудников', 'select', true, array( 'до 20', '20–50', '50–200', 'более 200' ) ),
+		'pilot_systems'  => array( 'Какие системы уже используете', 'text', false, array() ),
+		'pilot_role'     => array( 'Ваша роль', 'select', true, array( 'Собственник', 'Руководитель компании', 'Руководитель подразделения', 'Специалист' ) ),
+		'pilot_owner'    => array( 'Кто со стороны компании будет участвовать в пилоте', 'text', false, array() ),
+		'pilot_next'     => array( 'Готовы ли после пилота обсуждать регулярную работу', 'select', true, array( 'Да, готовы обсуждать', 'Пока не знаем' ) ),
+	);
+}
+
+function maxbit_pilot_fields( string $uid, array $state ): string {
+	$out = '';
+	foreach ( maxbit_pilot_questions() as $k => $q ) {
+		[ $label, $type, $req, $opts ] = $q;
+		$id  = $uid . '-' . $k;
+		$val = (string) ( $state['values'][ $k ] ?? '' );
+		$out .= '<div class="mb-form__row"><label for="' . esc_attr( $id ) . '">' . esc_html( $label ) . ( $req ? ' <span aria-hidden="true">*</span>' : '' ) . '</label>';
+		if ( 'select' === $type ) {
+			$out .= '<select id="' . esc_attr( $id ) . '" name="' . esc_attr( $k ) . '"' . ( $req ? ' required aria-required="true"' : '' ) . ' aria-describedby="' . esc_attr( $id ) . '-err"><option value="">Выберите</option>';
+			foreach ( $opts as $o ) {
+				$out .= '<option' . selected( $val, $o, false ) . '>' . esc_html( $o ) . '</option>';
+			}
+			$out .= '</select>';
+		} else {
+			$ph   = 'pilot_systems' === $k ? ' placeholder="Например: Битрикс24, 1С, таблицы"' : '';
+			$out .= '<input id="' . esc_attr( $id ) . '" name="' . esc_attr( $k ) . '" type="text" maxlength="200"' . $ph . ( $req ? ' required aria-required="true"' : '' ) . ' aria-describedby="' . esc_attr( $id ) . '-err" value="' . esc_attr( $val ) . '">';
+		}
+		$out .= '<p class="mb-form__error" id="' . esc_attr( $id ) . '-err">' . esc_html( $state['fields'][ $k ] ?? '' ) . '</p></div>';
+	}
+	return $out;
+}
+
+function maxbit_pilot_terms( string $uid, array $state ): string {
+	$out = '<div class="mb-form__row mb-form__row--consent"><label class="mb-check" for="' . esc_attr( $uid ) . '-pilot_terms"><input id="' . esc_attr( $uid ) . '-pilot_terms" name="pilot_terms" type="checkbox" value="1" required aria-required="true" aria-describedby="' . esc_attr( $uid ) . '-pilot_terms-err"' . checked( ! empty( $state['values']['pilot_terms'] ), true, false ) . '><span>Понимаю условия: решение об участии принимает MAXBIT; пилот оформляется договором с символической оплатой 1 ₽.</span></label><p class="mb-form__error" id="' . esc_attr( $uid ) . '-pilot_terms-err">' . esc_html( $state['fields']['pilot_terms'] ?? '' ) . '</p></div>';
+	return $out;
+}
+
+/** Проверка и сборка ответов анкеты пилота в текст заявки. Возвращает [ошибки, текст]. */
+function maxbit_pilot_collect( array $in, string $message ): array {
+	$errors = array();
+	$lines  = array( 'Анкета пилотного проекта:' );
+	foreach ( maxbit_pilot_questions() as $k => $q ) {
+		[ $label, $type, $req, $opts ] = $q;
+		$v = trim( mb_substr( sanitize_text_field( (string) ( $in[ $k ] ?? '' ) ), 0, 200 ) );
+		if ( 'select' === $type && '' !== $v && ! in_array( $v, $opts, true ) ) {
+			$v = '';
+		}
+		if ( $req && '' === $v ) {
+			$errors[ $k ] = 'Заполните это поле.';
+		}
+		$lines[] = '— ' . $label . ': ' . ( '' === $v ? 'не указано' : $v );
+	}
+	if ( ! in_array( (string) ( $in['pilot_terms'] ?? '' ), array( '1', 'on', 'true', 'yes' ), true ) ) {
+		$errors['pilot_terms'] = 'Подтвердите, что ознакомились с условиями пилота.';
+	}
+	if ( mb_strlen( $message ) < 10 ) {
+		$errors['message'] = 'Опишите задачу хотя бы в одном предложении.';
+	}
+	$lines[] = '';
+	$lines[] = 'Задача для пилота:';
+	$lines[] = $message;
+	return array( $errors, mb_substr( implode( "\n", $lines ), 0, 4000 ) );
+}
