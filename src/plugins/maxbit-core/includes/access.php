@@ -15,7 +15,7 @@ add_action( 'template_redirect', function () {
 		}
 	}
 	// Служебная родительская страница «Технологии» — не рубрика: перенаправляем на единственный вход.
-	if ( is_page( 'tekhnologii' ) ) {
+	if ( is_page( 'tekhnologii' ) && ! maxbit_tech_hub_active() ) {
 		$child = get_page_by_path( 'tekhnologii/bitrix24-dlya-proizvodstva' );
 		if ( $child && 'publish' === $child->post_status ) {
 			wp_safe_redirect( get_permalink( $child ), 301 );
@@ -30,6 +30,9 @@ add_action( 'template_redirect', function () {
 
 /** ID служебных страниц (родитель-редирект «Технологии»). */
 function maxbit_service_page_ids(): array {
+	if ( maxbit_tech_hub_active() ) {
+		return array(); // «Технологии» стала страницей «Сервисы и интеграции» — обычная страница
+	}
 	$p = get_page_by_path( 'tekhnologii' );
 	return $p ? array( (int) $p->ID ) : array();
 }
@@ -119,7 +122,7 @@ add_action( 'pre_get_posts', function ( WP_Query $q ) {
 	// Поиск и RSS: только страницы и статьи, без решений/проектов вообще (их и так мало, а утечка недопустима).
 	if ( $q->is_search() || $q->is_feed() ) {
 		$q->set( 'post_type', array( 'post', 'page' ) );
-		$tekh = get_page_by_path( 'tekhnologii' );
+		$tekh = maxbit_tech_hub_active() ? null : get_page_by_path( 'tekhnologii' );
 		if ( $tekh ) {
 			$q->set( 'post__not_in', array( $tekh->ID ) );   // служебная страница-редирект
 		}
@@ -295,4 +298,14 @@ function maxbit_adjacent_where( string $where, $in_same_term, $excluded, $taxono
 		return $where;
 	}
 	return $where . ' AND 1=0';
+}
+
+/** /tekhnologii/ — страница «Сервисы и интеграции», если у неё выбран шаблон темы template-services.php. */
+function maxbit_tech_hub_active(): bool {
+	static $on = null;
+	if ( null === $on ) {
+		$p  = get_page_by_path( 'tekhnologii' );
+		$on = $p && 'publish' === $p->post_status && 'template-services.php' === get_page_template_slug( $p );
+	}
+	return $on;
 }

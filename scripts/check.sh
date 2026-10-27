@@ -73,7 +73,7 @@ echo "== A04/A05 публичные страницы (аноним) =="
 for u in / /resheniya/ /resheniya/zakaz-pod-kontrolem/ /tekhnologii/bitrix24-dlya-proizvodstva/ /kak-rabotaem/ /o-kompanii/ /praktika/ /praktika/kartochka-proizvodstvennogo-zakaza/ /proekty/; do
   c=$(code "$u"); check "$u → 200 и один H1" "[ $c = 200 ] && [ \$(grep -o '<h1' /tmp/mb_body | wc -l) = 1 ]"
 done
-c=$(code /tekhnologii/); check "/tekhnologii/ → 301" "[ $c = 301 ]"
+c=$(code /tekhnologii/); check "/tekhnologii/ — «Сервисы и интеграции» (200) или служебный редирект (301)" "[ $c = 200 ] || [ $c = 301 ]"
 c=$(code /net-takoy-stranicy/); check "404 отдаётся" "[ $c = 404 ]"
 code / >/dev/null
 check "главная: canonical, description, noindex (local), JSON-LD Organization" "grep -q 'rel=\"canonical\"' /tmp/mb_body && grep -q 'name=\"description\"' /tmp/mb_body && grep -q 'noindex' /tmp/mb_body && grep -q '\"Organization\"' /tmp/mb_body"
@@ -213,7 +213,7 @@ check "sitemap: нет провайдера users" "! grep -q 'users' /tmp/mb_bo
 c=$(code /wp-sitemap-users-1.xml); check "sitemap авторов → 404" "[ $c = 404 ]"
 code /wp-sitemap-posts-mb_solution-1.xml >/dev/null; check "sitemap решений: допущенное есть, недопущенное и черновик — нет" "grep -q \"$(slug $S_PUB_OK)\" /tmp/mb_body && ! grep -q \"$(slug $S_PUB_NOOK)\|$(slug $S_DRAFT)\" /tmp/mb_body"
 c=$(code /wp-sitemap-posts-mb_project-1.xml); check "sitemap проектов: образец отсутствует" "[ $c = 404 ] || ! grep -q 'obrazets\|$(slug $P_SAMPLE)' /tmp/mb_body"
-code /wp-sitemap-posts-page-1.xml >/dev/null; check "sitemap страниц: служебная «Технологии» (noindex) отсутствует" "! grep -q 'tekhnologii/<' /tmp/mb_body"
+code /wp-sitemap-posts-page-1.xml >/dev/null; check "sitemap страниц: «Технологии» есть только как страница сервисов" "! grep -q 'tekhnologii/<' /tmp/mb_body || curl -s \"$BASE/tekhnologii/\" | grep -q mb-svc-map"
 code /robots.txt >/dev/null; check "production robots: Sitemap: указан" "grep -q '^Sitemap:' /tmp/mb_body"
 code "/praktika/page/2/" >/dev/null; c=$(code "/praktika/page/2/"); check "MB-10: несуществующая страница пагинации → 404" "[ $c = 404 ]"
 code /praktika/ >/dev/null; check "MB-10: canonical первой страницы списка — сама страница" "grep -q 'rel=\"canonical\" href=\"[^\"]*/praktika/\"' /tmp/mb_body"

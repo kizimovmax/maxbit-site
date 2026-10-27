@@ -21,6 +21,9 @@ function maxbit_document_title(): string {
 		if ( is_front_page() ) {
 			return 'MAXBIT — внешняя команда цифрового развития производственных компаний';
 		}
+		if ( function_exists( 'maxbit_tech_hub_active' ) && maxbit_tech_hub_active() && is_page( 'tekhnologii' ) ) {
+			return 'Сервисы и интеграции: Битрикс24, 1С, ЭДО, телефония | MAXBIT';
+		}
 		return get_the_title( $id ) . ' — MAXBIT';
 	}
 	$pg = max( 1, (int) get_query_var( 'paged' ) );
@@ -251,7 +254,7 @@ function maxbit_breadcrumbs(): array {
 		$items[] = array( get_the_title(), '' );
 	} elseif ( is_page() ) {
 		$post = get_queried_object();
-		if ( $post->post_parent && 'tekhnologii' !== get_post( $post->post_parent )->post_name ) {
+		if ( $post->post_parent && ( 'tekhnologii' !== get_post( $post->post_parent )->post_name || ( function_exists( 'maxbit_tech_hub_active' ) && maxbit_tech_hub_active() ) ) ) {
 			$items[] = array( get_the_title( $post->post_parent ), get_permalink( $post->post_parent ) );
 		}
 		$items[] = array( 'bitrix24' === $post->post_name && ! $post->post_parent ? 'Битрикс24' : get_the_title(), '' );

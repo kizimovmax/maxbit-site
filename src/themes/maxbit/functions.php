@@ -4,7 +4,7 @@
  */
 defined( 'ABSPATH' ) || exit;
 
-define( 'MAXBIT_THEME_VERSION', '0.7.5' );
+define( 'MAXBIT_THEME_VERSION', '0.8.0' );
 
 /**
  * Тема работает и без модуля maxbit-core (без формы, типов и допуска). Обёртки с префиксом maxbit_theme_
@@ -268,7 +268,7 @@ add_filter( 'maxbit_project_card_html', function ( $html, WP_Post $p, bool $feat
 	$title  = get_post_meta( $p->ID, '_mb_card_title', true ) ?: get_the_title( $p );
 	$text   = get_post_meta( $p->ID, '_mb_card_text', true ) ?: get_the_excerpt( $p );
 	$tags   = array_filter( array_map( 'trim', explode( ',', (string) get_post_meta( $p->ID, '_mb_case_tags', true ) ) ) );
-	$out  = '<article class="mb-pcard' . ( $featured ? ' mb-pcard--dark' : '' ) . '">';
+	$out  = '<article class="mb-pcard">'; // все карточки проектов одинаковые (решение владельца 27.10)
 	$out .= '<p class="mb-pcard__client">' . esc_html( $client ) . '</p>';
 	$out .= '<h3 class="mb-pcard__title"><a href="' . esc_url( get_permalink( $p ) ) . '">' . esc_html( $title ) . '</a></h3>';
 	$out .= '<p class="mb-pcard__text">' . esc_html( $text ) . '</p>';
@@ -391,3 +391,29 @@ add_filter( 'the_content', function ( string $html ): string {
 	}
 	return preg_replace( '/class="wp-block-group mb-section (?!mb-hero)/u', 'class="wp-block-group mb-reveal mb-section ', $html );
 }, 22 );
+
+/**
+ * Сервисы и интеграции (страница /tekhnologii/, шаблон template-services.php). Фундамент раздела, 27.10:
+ * список согласован владельцем; описания «Что делаем» — черновик на проверку. Статус партнёра и сертификат
+ * не заполнены — выводятся только при наличии. Расширяется фильтром maxbit_services.
+ */
+function maxbit_theme_services(): array {
+	$g = array(
+		array( 'map' => 'core', 'title' => 'CRM и управление работой', 'flow' => '', 'items' => array(
+			array( 'id' => 'bitrix24', 'name' => 'Битрикс24', 'kind' => 'CRM и совместная работа', 'about' => 'CRM, задачи, проекты, документы и общение сотрудников в одной системе.', 'do' => 'внедряем и настраиваем под процессы компании, связываем с учётом, документооборотом, телефонией и мессенджерами.', 'url' => '/bitrix24/', 'url_label' => 'Возможности Битрикс24', 'case_keys' => array( 'Битрикс24' ) ),
+		) ),
+		array( 'map' => 'left', 'title' => 'Каналы общения с клиентами', 'flow' => 'заявки, переписка, звонки', 'items' => array(
+			array( 'id' => 'wazzup', 'name' => 'Wazzup', 'kind' => 'Мессенджеры в CRM', 'about' => 'Подключает переписку с клиентами в мессенджерах к CRM.', 'do' => 'настраиваем, чтобы сообщения клиентов попадали в Битрикс24 и обрабатывались в карточке клиента вместе со сделкой.', 'case_keys' => array( 'Wazzup' ) ),
+			array( 'id' => 'uis', 'name' => 'UIS', 'kind' => 'Телефония', 'about' => 'Облачная телефония: виртуальная АТС, запись разговоров, статистика звонков.', 'do' => 'связываем с Битрикс24: звонки фиксируются в CRM, записи разговоров доступны в карточке клиента.', 'case_keys' => array( 'UIS' ) ),
+		) ),
+		array( 'map' => 'right', 'title' => 'Учёт и бухгалтерия', 'flow' => 'клиенты, товары, счета, оплаты', 'items' => array(
+			array( 'id' => '1c', 'name' => '1С', 'kind' => 'Учётные системы', 'about' => 'Программы для бухгалтерии, торговли и производственного учёта.', 'do' => 'настраиваем обмен с Битрикс24: клиенты, товары, счета, оплаты и отгрузки без двойного ввода.', 'url' => '/resheniya/integraciya-bitrix24-i-1c/', 'url_label' => 'Интеграция Битрикс24 и 1С', 'case_keys' => array( '1С' ) ),
+			array( 'id' => 'kontur-elba', 'name' => 'Контур.Эльба', 'kind' => 'Онлайн-бухгалтерия', 'about' => 'Онлайн-бухгалтерия для ИП и небольших компаний.', 'do' => 'помогаем связать работу с клиентами в CRM и бухгалтерский учёт.', 'case_keys' => array( 'Эльба' ) ),
+		) ),
+		array( 'map' => 'bottom', 'title' => 'Электронный документооборот', 'flow' => 'документы и статусы подписания', 'items' => array(
+			array( 'id' => 'saby', 'name' => 'Saby (СБИС)', 'kind' => 'ЭДО и отчётность', 'about' => 'Электронный документооборот с контрагентами и отчётность.', 'do' => 'настраиваем подписание и отправку документов — счетов, УПД — из Битрикс24.', 'case_keys' => array( 'СБИС', 'Saby' ) ),
+			array( 'id' => 'kontur-diadok', 'name' => 'Контур.Диадок', 'kind' => 'ЭДО', 'about' => 'Сервис электронного документооборота с контрагентами.', 'do' => 'связываем отправку и статусы документов с карточками сделок в CRM.', 'case_keys' => array( 'Диадок' ) ),
+		) ),
+	);
+	return (array) apply_filters( 'maxbit_services', $g );
+}

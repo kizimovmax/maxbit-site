@@ -28,7 +28,7 @@ $channels = maxbit_theme_msg( 'channels', true );
 		<nav class="mb-footer__col" aria-label="Решения">
 			<p class="mb-footer__col-title">Решения</p>
 			<ul class="mb-footer__menu">
-				<?php echo $mb_link( 'resheniya/zakaz-pod-kontrolem', 'Управление заказами и исполнением' ) . $mb_link( 'bitrix24', 'Битрикс24: возможности и внедрение' ) . $mb_link( 'tekhnologii/bitrix24-dlya-proizvodstva', 'Битрикс24 для производства' ) . $mb_link( 'resheniya/integraciya-bitrix24-i-1c', 'Интеграция Битрикс24 и 1С' ); // phpcs:ignore ?>
+				<?php echo $mb_link( 'resheniya/zakaz-pod-kontrolem', 'Управление заказами и исполнением' ) . $mb_link( 'bitrix24', 'Битрикс24: возможности и внедрение' ) . $mb_link( 'tekhnologii/bitrix24-dlya-proizvodstva', 'Битрикс24 для производства' ) . $mb_link( 'resheniya/integraciya-bitrix24-i-1c', 'Интеграция Битрикс24 и 1С' ) . ( function_exists( 'maxbit_tech_hub_active' ) && maxbit_tech_hub_active() ? $mb_link( 'tekhnologii', 'Сервисы и интеграции' ) : '' ); // phpcs:ignore ?>
 			</ul>
 		</nav>
 		<nav class="mb-footer__col" aria-label="Компания">
