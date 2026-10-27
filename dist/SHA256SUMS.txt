@@ -1,3 +1,3 @@
-ce301e27171b4f47e7e812e0e0b7b7db5f4ea1b30ee034da6f57c29c6346b11e  MAXBIT_site_src.zip
+6249e2c865fb66128e56b3bedad2388879326857fcf4a7aff65faa948cb3e28d  MAXBIT_site_src.zip
 76d43dddec238b4efe206bdee03ed109db3de7c55e7137bc37f2d899f2d88199  maxbit-core-0.5.6.zip
-b1cd0ef2b068e6591c8278031247cbf6544cc9dec8440119472aff8c51e6dc31  maxbit-theme-0.8.1.zip
+86e04578c4017b1e7a55ecedc84e82b19028fdd44f22eed512dcaf7bb8eb6ed7  maxbit-theme-0.8.2.zip
