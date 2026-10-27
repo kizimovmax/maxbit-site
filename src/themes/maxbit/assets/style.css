@@ -1,4 +1,4 @@
-/* MAXBIT theme 0.7.1 — визуальная система «X-геометрия / Графит» (решение владельца 26.10.2026).
+/* MAXBIT theme 0.7.2 — визуальная система «X-геометрия / Графит» (решение владельца 26.10.2026).
    Тёмные диагональные блоки (15° от вертикали), X-фигура из двух шевронов логотипа, срезы углов 45°,
    крупные номера секций, синий — только для действий, номеров и одного акцента на экран.
    Все формы — CSS (clip-path) и инлайн-SVG; растровых картинок в теме нет. Шрифт Golos Text (OFL) в комплекте
@@ -1051,8 +1051,11 @@ html.js .mb-quiz.is-collapsed .mb-quiz__head { margin-bottom: 0; }
 .mb-aside--case .mb-aside__sticky { display: flex; flex-direction: column; gap: 16px; }
 .admin-bar .mb-aside__sticky { top: 136px; }
 
-/* Шаги «Как проходит работа»: текст по ширине с переносами */
-.mb-how__steps p { text-align: justify; hyphens: auto; -webkit-hyphens: auto; }
+/* Текст по ширине с переносами — во всех коротких карточках (решение владельца 27.10) */
+.mb-how__steps p, .mb-card__text, .mb-tiles .wp-block-column p, .mb-solution-card p, .mb-ccard p, .mb-b24-card > p, .mb-b24-more__item p,
+.mb-b24-ai__card > p, .mb-aside__card p, .mb-review__topic, .mb-cards-wide p, .mb-grid .mb-card p, .mb-practice__magnet p,
+.mb-hero__teaser-text, .mb-pres__steps li p { text-align: justify; hyphens: auto; -webkit-hyphens: auto; }
+.mb-ccard p.mb-ccard__label, .mb-card__label, .mb-ccard__big { text-align: left; }
 
 /* Каталог решений: обзор Битрикс24 — спокойная светлая карточка-строка */
 .mb-ccard--overview { background: var(--surface); border-color: var(--surface); }
@@ -1079,6 +1082,42 @@ html.js .mb-quiz.is-collapsed .mb-quiz__head { margin-bottom: 0; }
 .mb-section--magnets .mb-quiz::after { background: var(--graphite); }
 .mb-section--magnets .mb-section__after .mb-btn--link { color: #fff; }
 .mb-section--magnets .mb-section__after .mb-btn--link:hover { color: var(--sky); }
+
+/* Страница 404 */
+.mb-404 { position: relative; overflow: hidden; isolation: isolate; background: #fff; }
+.mb-404::before { content: ""; position: absolute; inset: 0; z-index: -1; background: var(--graphite); clip-path: polygon(66% 0, 100% 0, 100% 100%, 56% 100%); }
+.mb-404__inner { display: grid; grid-template-columns: minmax(0, 640px) minmax(0, 1fr); gap: 40px; align-items: center; min-height: 560px; padding-top: 56px; padding-bottom: 64px; }
+.mb-404__code { margin: 0 0 8px; font-size: clamp(5rem, 12vw, 9rem); font-weight: 900; letter-spacing: -.06em; line-height: .85; color: var(--accent); }
+.mb-404__title { margin: 0 0 16px; font-size: clamp(2.2rem, 4vw, 3.2rem); }
+.mb-404__lead { margin: 0 0 28px; max-width: 520px; color: var(--ink-2); font-size: 1.05rem; line-height: 1.6; }
+.mb-404__actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.mb-404__search { margin-top: 32px; max-width: 520px; }
+.mb-404__search label { display: block; font-size: .85rem; font-weight: 700; color: var(--ink-2); margin-bottom: 8px; }
+.mb-404__search-row { display: flex; gap: 10px; }
+.mb-404__search input { flex: 1; min-width: 0; min-height: 52px; padding: 0 16px; border: 2px solid var(--ink); font: inherit; border-radius: 0; }
+.mb-404__search input:focus { outline: 3px solid var(--accent); outline-offset: 0; }
+.mb-404__art { display: flex; justify-content: flex-end; }
+.mb-404__x { width: min(100%, 360px); height: auto; }
+.mb-404__more { padding-top: 56px; padding-bottom: 72px; }
+.mb-404__more-title { font-size: 1.5rem; margin: 0 0 20px; }
+.mb-404__links { list-style: none; margin: 0 0 28px; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+.mb-404__links a { display: flex; flex-direction: column; gap: 8px; height: 100%; padding: 22px 22px 24px; border: 2px solid var(--ink); color: var(--ink); text-decoration: none; transition: background-color .2s var(--ease); }
+.mb-404__links a:hover { background: var(--surface); }
+.mb-404__link-title { font-weight: 800; font-size: 1.1rem; }
+.mb-404__link-title::after { content: " ››"; color: var(--accent); }
+.mb-404__link-text { color: var(--ink-2); font-size: .9rem; line-height: 1.5; }
+@media (max-width: 900px) {
+  .mb-404::before { display: none; }
+  .mb-404__inner { grid-template-columns: 1fr; min-height: 0; padding-top: 36px; padding-bottom: 0; gap: 28px; }
+  .mb-404__art { margin: 0 calc(-1 * var(--pad)); padding: 32px var(--pad); background: var(--graphite); clip-path: polygon(0 18px, 100% 0, 100% 100%, 0 100%); }
+  .mb-404__x { width: 130px; }
+  .mb-404__links { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 620px) {
+  .mb-404__links { grid-template-columns: 1fr; gap: 10px; }
+  .mb-404__actions .mb-btn { flex: 1 1 100%; }
+  .mb-404__search-row { flex-direction: column; }
+}
 
 @media print {
   @page { margin: 16mm; }

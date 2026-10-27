@@ -371,7 +371,7 @@ add_filter( 'nav_menu_css_class', function ( array $classes, $item ) {
 function maxbit_theme_hero_art_html(): string {
 	$teaser = '';
 	if ( shortcode_exists( 'maxbit_quiz' ) ) {
-		$teaser = '<div class="mb-hero__teaser"><p class="mb-hero__teaser-label">Самодиагностика · 3 минуты</p><p class="mb-hero__teaser-title">Где теряются данные и договорённости на вашем участке</p><a class="mb-btn mb-btn--primary" href="#diagnostic" data-mb-open="diagnostic" data-event="quiz_open_hero">Пройти самодиагностику</a></div>';
+		$teaser = '<div class="mb-hero__teaser"><p class="mb-hero__teaser-label">Самодиагностика · 3 минуты</p><p class="mb-hero__teaser-title">Где теряются информация и задачи в вашей компании?</p><a class="mb-btn mb-btn--primary" href="#diagnostic" data-mb-open="diagnostic" data-event="quiz_open_hero">Пройти самодиагностику</a></div>';
 	}
 	return '<div class="mb-hero__art">' . $teaser . maxbit_theme_x_svg( 'mb-hero__x', true ) . '</div>';
 }

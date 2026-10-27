@@ -165,7 +165,7 @@ def home():
         + buttons([('Обсудить задачу за 30 минут', '#contact', False), ('Посмотреть реализованные проекты', '/proekty/', True)], 'mb-hero__actions')
         + sc('[maxbit_messengers kind="bots" style="inline" label="Первый разговор — бесплатно"]')
     ], 'mb-hero__cols'), 'mb-hero')
-    sit = section(head('С чем к нам приходят', 'Проблема может быть в одном процессе или на стыке нескольких подразделений. Начинаем с конкретной ситуации и смотрим, что мешает работе.')
+    sit = section(head('Узнаёте свою ситуацию?', 'Проблема может быть в одном процессе или на стыке нескольких подразделений. Начинаем с конкретной ситуации и смотрим, что мешает работе.')
                   + columns([h(3, t) + p(d) for t, d in SIT], 'mb-tiles mb-situations'), 'mb-section--surface')
     cards = []
     for i, (t, d, link, url) in enumerate(DIRS):

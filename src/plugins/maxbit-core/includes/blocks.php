@@ -120,7 +120,7 @@ add_shortcode( 'maxbit_practice_cards', function ( $atts ) {
 		$out .= '<article class="mb-card mb-card--practice"><p class="mb-card__label">' . $label . '</p><h3 class="mb-card__title"><a href="' . esc_url( get_permalink( $p ) ) . '">' . esc_html( get_the_title( $p ) ) . '</a></h3>' . ( has_excerpt( $p ) ? '<p class="mb-card__text">' . esc_html( get_the_excerpt( $p ) ) . '</p>' : '' ) . '</article>';
 	}
 	if ( '1' === $a['diagnostic'] && shortcode_exists( 'maxbit_quiz' ) ) {
-		$out .= '<article class="mb-card mb-card--diagnostic"><p class="mb-card__label">Самодиагностика · 3 минуты</p><h3 class="mb-card__title">Где теряются данные и договорённости на вашем участке</h3><p class="mb-card__text">7 вопросов, результат сразу на экране. Материалы для разбора — по ссылке после ввода контакта.</p><p><a class="mb-btn mb-btn--primary" href="#diagnostic" data-mb-open="diagnostic">Пройти самодиагностику</a></p></article>';
+		$out .= '<article class="mb-card mb-card--diagnostic"><p class="mb-card__label">Самодиагностика · 3 минуты</p><h3 class="mb-card__title">Где теряются информация и задачи в вашей компании?</h3><p class="mb-card__text">7 вопросов, результат сразу на экране. Материалы для разбора — по ссылке после ввода контакта.</p><p><a class="mb-btn mb-btn--primary" href="#diagnostic" data-mb-open="diagnostic">Пройти самодиагностику</a></p></article>';
 	}
 	return $out . '</div>';
 } );
