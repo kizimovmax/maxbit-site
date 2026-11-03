@@ -1278,9 +1278,9 @@ html.js .mb-quiz.is-collapsed .mb-quiz__head { margin-bottom: 0; }
 }
 
 /* ---------- Основатель: первый экран с портретом (03.11) ---------- */
-.mb-founder-hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); background: #F2F1EF; min-height: clamp(560px, 72vh, 680px); overflow: hidden; }
+.mb-founder-hero { display: grid; grid-template-columns: minmax(0, min(50%, 760px)) minmax(0, 1fr); background: #F2F1EF; min-height: clamp(560px, 72vh, 680px); overflow: hidden; }
 .mb-founder-hero__photo { position: relative; margin-right: -96px; clip-path: polygon(0 0, 100% 0, calc(100% - 96px) 100%, 0 100%); background: #CFCFCB; }
-.mb-founder-hero__photo img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 28%; }
+.mb-founder-hero__photo img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 18%; }
 .mb-founder-hero__body { position: relative; z-index: 1; padding: 56px max(var(--pad), calc((100vw - var(--max)) / 2)) 64px 120px; display: flex; flex-direction: column; justify-content: center; }
 .mb-founder-hero__body .mb-crumbs { margin: 0 0 40px; }
 .mb-founder-hero__label { margin: 0 0 14px; color: var(--accent); font-size: .78rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
@@ -1297,9 +1297,9 @@ html.js .mb-quiz.is-collapsed .mb-quiz__head { margin-bottom: 0; }
 .mb-page--founder { padding-top: 24px; }
 .mb-page--founder .mb-content h2[id] { scroll-margin-top: 110px; }
 @media (max-width: 1100px) { .mb-founder-hero__body { padding-left: 96px; } }
-@media (max-width: 760px) {
+@media (max-width: 900px) {
 	.mb-founder-hero { grid-template-columns: 1fr; min-height: 0; }
-	.mb-founder-hero__photo { margin-right: 0; aspect-ratio: 4 / 4.2; clip-path: polygon(0 0, 100% 0, 100% calc(100% - 44px), 0 100%); }
+	.mb-founder-hero__photo { margin-right: 0; aspect-ratio: 4 / 4.2; max-height: 78vh; clip-path: polygon(0 0, 100% 0, 100% calc(100% - 44px), 0 100%); }
 	.mb-founder-hero__body { padding: 8px var(--pad) 40px; }
 	.mb-founder-hero__body .mb-crumbs { order: 9; margin: 28px 0 0; }
 	.mb-founder-hero__name::before { display: none; }
