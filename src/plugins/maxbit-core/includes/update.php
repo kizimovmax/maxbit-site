@@ -498,3 +498,56 @@ function maxbit_update_migrate( WP_REST_Request $r ) {
 	$report['note']         = $dry ? 'Сухой прогон: ничего не записано. Для записи передайте confirm=migrate (после резервной копии базы).' : 'Записано. Проверьте страницы, canonical и sitemap; при WP_HOME/WP_SITEURL в wp-config они имеют приоритет.';
 	return new WP_REST_Response( $report, 200 );
 }
+
+/**
+ * Перенос на боевой домен (03.11.2026): копия всех таблиц текущей базы в пустую базу на том же сервере MySQL
+ * (CREATE TABLE … LIKE + INSERT … SELECT). Текущая база только читается. Целевая база должна быть пустой —
+ * перезапись запрещена. Только администратор, только с confirm:"clone". Пароли не передаются и не выводятся.
+ */
+function maxbit_clone_db( string $target, bool $dry = false ): array {
+	global $wpdb;
+	if ( ! preg_match( '/^[A-Za-z0-9_]{1,64}$/', $target ) || DB_NAME === $target ) {
+		return array( 'ok' => false, 'error' => 'Недопустимое имя целевой базы.' );
+	}
+	$exists = $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM information_schema.SCHEMATA WHERE SCHEMA_NAME = %s', $target ) );
+	if ( ! $exists ) {
+		return array( 'ok' => false, 'error' => 'Целевая база не найдена или нет доступа.' );
+	}
+	$busy = (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA = %s', $target ) );
+	if ( $busy ) {
+		return array( 'ok' => false, 'error' => 'В целевой базе уже есть таблицы (' . $busy . ') — перезапись запрещена.' );
+	}
+	$tables = $wpdb->get_col( $wpdb->prepare( "SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA = %s AND TABLE_TYPE = 'BASE TABLE'", DB_NAME ) );
+	$log    = array();
+	foreach ( $tables as $t ) {
+		$n = (int) $wpdb->get_var( "SELECT COUNT(*) FROM `{$t}`" ); // phpcs:ignore
+		$log[ $t ] = $n;
+	}
+	if ( $dry ) {
+		return array( 'ok' => true, 'dry_run' => true, 'source' => DB_NAME, 'target' => $target, 'tables' => $log );
+	}
+	$res = array();
+	foreach ( $tables as $t ) {
+		$src = '`' . DB_NAME . '`.`' . $t . '`';
+		$dst = '`' . $target . '`.`' . $t . '`';
+		if ( false === $wpdb->query( "CREATE TABLE {$dst} LIKE {$src}" ) || false === $wpdb->query( "INSERT INTO {$dst} SELECT * FROM {$src}" ) ) { // phpcs:ignore
+			return array( 'ok' => false, 'error' => 'Ошибка на таблице ' . $t . ': ' . $wpdb->last_error, 'done' => $res );
+		}
+		$res[ $t ] = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$dst}" ); // phpcs:ignore
+	}
+	$diff = array_keys( array_diff_assoc( $log, $res ) );
+	return array( 'ok' => ! $diff, 'source' => DB_NAME, 'target' => $target, 'tables' => count( $res ), 'rows' => array_sum( $res ), 'mismatch' => $diff );
+}
+
+add_action( 'rest_api_init', function () {
+	register_rest_route( 'maxbit/v1', '/update/clone-db', array(
+		'methods' => 'POST', 'permission_callback' => fn() => current_user_can( 'manage_options' ),
+		'callback' => function ( WP_REST_Request $r ) {
+			$dry = (bool) $r->get_param( 'dry_run' );
+			if ( ! $dry && 'clone' !== $r->get_param( 'confirm' ) ) {
+				return new WP_Error( 'confirm', 'Нужно confirm: "clone"', array( 'status' => 400 ) );
+			}
+			return rest_ensure_response( maxbit_clone_db( (string) $r->get_param( 'target' ), $dry ) );
+		},
+	) );
+} );
