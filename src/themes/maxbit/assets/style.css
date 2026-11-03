@@ -1305,3 +1305,46 @@ html.js .mb-quiz.is-collapsed .mb-quiz__head { margin-bottom: 0; }
 	.mb-founder-hero__name::before { display: none; }
 	.mb-founder-hero__name { font-size: 2.6rem; margin-bottom: 20px; }
 }
+
+/* ---------- «Сервисы для задач компании» (03.11): задачи → примеры сочетаний → карта → каталог ---------- */
+.mb-catalog__group > h3.mb-svc-group__h { display: flex; align-items: flex-end; gap: 14px; font-size: 1.35rem; margin: 0 0 16px; }
+.mb-catalog__group > h3.mb-svc-group__h span { font-size: 2rem; font-weight: 900; letter-spacing: -.06em; line-height: .85; color: var(--accent); }
+.mb-svc-card h4 { margin: 0; font-size: 1.45rem; letter-spacing: -.02em; }
+.mb-svc-catalog-h { margin-top: 64px; }
+.mb-svc-tasks { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 8px 0 56px; }
+.mb-svc-tasks a { display: flex; flex-direction: column; gap: 10px; padding: 18px 20px; background: var(--surface); color: var(--ink); text-decoration: none; font-weight: 700; line-height: 1.35; border-top: 3px solid var(--accent); transition: background .15s; }
+.mb-svc-tasks a span { color: var(--accent); font-size: .78rem; font-weight: 800; letter-spacing: .14em; }
+.mb-svc-tasks a:hover { background: #E3EBF7; }
+.mb-svc-tasks a.mb-svc-tasks__other { background: #fff; border: 1px solid var(--line); border-top: 3px solid var(--ink); }
+.mb-svc-combos { margin: 0 0 64px; }
+.mb-svc-combos__head { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 460px); gap: 12px 48px; align-items: end; margin-bottom: 24px; }
+.mb-svc-combos__head .mb-svc__h2 { margin: 0; }
+.mb-svc-combos__head p { margin: 0; color: var(--ink-2); font-size: .92rem; line-height: 1.55; }
+.mb-svc-combo { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); border: 1px solid var(--line); background: #fff; margin-bottom: 16px; scroll-margin-top: 110px; }
+.mb-svc-combo__main { padding: 28px 32px; }
+.mb-svc-combo__side { padding: 28px 32px; background: var(--surface-2); border-left: 1px solid var(--line); }
+.mb-svc-combo h3 { margin: 0 0 10px; font-size: 1.45rem; letter-spacing: -.02em; }
+.mb-svc-combo p { margin: 0 0 14px; line-height: 1.6; }
+.mb-svc-combo .mb-ccard__label { margin: 0 0 8px; }
+.mb-svc-combo__side .mb-ccard__label:not(:first-child) { margin-top: 18px; }
+.mb-svc-combo__parts { display: flex; flex-wrap: wrap; gap: 8px; }
+.mb-svc-combo__parts a { padding: 5px 10px; background: var(--surface); color: var(--accent-dark); font-size: .78rem; font-weight: 800; letter-spacing: .04em; text-decoration: none; }
+.mb-svc-combo__parts a:hover { background: var(--accent); color: #fff; }
+.mb-svc-combo__flow { list-style: none; margin: 18px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px 0; counter-reset: fl; }
+.mb-svc-combo__flow li { position: relative; padding: 10px 26px 10px 14px; background: var(--graphite); color: #fff; font-size: .84rem; line-height: 1.35; margin-right: 18px; clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%); }
+.mb-svc-combo__flow li:last-child { background: var(--accent); }
+.mb-svc-combo__limits { color: var(--ink-2); font-size: .9rem; }
+.mb-svc-combo__links { display: flex; flex-wrap: wrap; gap: 8px 20px; margin: 18px 0 0 !important; }
+@media (max-width: 1100px) { .mb-svc-tasks { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 900px) {
+	.mb-svc-combos__head, .mb-svc-combo { grid-template-columns: 1fr; }
+	.mb-svc-combo__side { border-left: 0; border-top: 1px solid var(--line); }
+	.mb-svc-combo__main, .mb-svc-combo__side { padding: 22px; }
+}
+@media (max-width: 560px) {
+	.mb-svc-tasks { grid-template-columns: 1fr; }
+	.mb-svc-combo__flow { flex-direction: column; }
+	.mb-svc-combo__flow li { margin-right: 0; clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%); padding-right: 14px; }
+}
+/* Ситуации на главной: восемь входов (03.11) — четыре колонки на широком экране. */
+@media (min-width: 1101px) { .mb-situations.wp-block-columns:has(> .wp-block-column:nth-child(7)) { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px !important; } .mb-situations:has(> .wp-block-column:nth-child(7)) > .wp-block-column { padding: 24px 22px; } .mb-situations:has(> .wp-block-column:nth-child(7)) > .wp-block-column h3 { font-size: 1.02rem; } }

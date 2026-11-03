@@ -34,7 +34,7 @@ c=$(curl -s -o /tmp/mb_body -w '%{http_code}' "$BASE/")
 [ "$c" = 200 ] && grep -q "proekty/gk-vpk" /tmp/mb_body && ! grep -qi 'fatal\|critical error' /tmp/mb_body && ok "при другой теме главная 200, блок проектов отрисован нейтральной карточкой модуля, без fatal" || fail "при другой теме: HTTP $c, fatal=$(grep -c -i 'critical error' /tmp/mb_body)"
 c=$(curl -s -o /tmp/mb_body -w '%{http_code}' "$BASE/resheniya/zakaz-pod-kontrolem/")
 [ "$c" = 200 ] && grep -q 'value="order_control"' /tmp/mb_body && ok "при другой теме решение и форма (тема order_control) работают" || fail "решение при другой теме: $c"
-c=$(curl -s -o /tmp/mb_body -w '%{http_code}' "$BASE/resheniya/ii-praktikum/"); [ "$c" = 404 ] && ok "при другой теме закрытое остаётся закрытым (404)" || fail "закрытое при другой теме: $c"
+c=$(curl -s -o /tmp/mb_body -w '%{http_code}' "$BASE/resheniya/syn-sol-pub-nook/"); [ "$c" = 404 ] && ok "при другой теме закрытое остаётся закрытым (404)" || fail "закрытое при другой теме: $c"
 N=$($WP post list --post_type=mb_solution,mb_project --post_status=publish,draft,private --format=count); REL=$($WP post meta get "$ID" _mb_related_article)
 [ "$N" -ge 8 ] && [ -n "$REL" ] && ok "типы, записи ($N) и связи на месте" || fail "данные при другой теме"
 $WP theme activate maxbit >/dev/null 2>&1; [ "$($WP theme list --status=active --field=name)" = maxbit ] && ok "тема MAXBIT возвращена" || fail "возврат темы"

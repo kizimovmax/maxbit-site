@@ -134,13 +134,13 @@ c=$(curl -s -b /tmp/mb_c_sub -o /tmp/mb_body -w '%{http_code}' "$BASE/wp-json/wp
 login mb_editor "Editor-Pass-Local-1" /tmp/mb_c_ed
 c=$(curl -s -b /tmp/mb_c_ed -o /tmp/mb_body -w '%{http_code}' "$BASE/resheniya/$(slug $S_PUB_NOOK)/"); check "редактор: publish+ok=0 → 200 с плашкой «Закрытый просмотр»" "[ $c = 200 ] && grep -q 'Закрытый просмотр' /tmp/mb_body"
 AI_ID=$($WP post list --post_type=mb_solution --post_name__in=ii-praktikum --post_status=draft,publish,private,pending --field=ID | head -1)
-c=$(curl -s -b /tmp/mb_c_ed -o /tmp/mb_body -w '%{http_code}' "$BASE/?post_type=mb_solution&p=$AI_ID&preview=true"); check "редактор: предпросмотр черновика ИИ-Практикума → 200" "[ $c = 200 ] && grep -q 'ИИ-проводник' /tmp/mb_body"
+c=$(curl -s -o /tmp/mb_body -w '%{http_code}' "$BASE/resheniya/ii-praktikum/"); check "ИИ-страница опубликована (03.11): посетитель → 200" "[ $c = 200 ] && grep -q 'ИИ-проводник' /tmp/mb_body"
 c=$(curl -s -b /tmp/mb_c_ed -o /tmp/mb_body -w '%{http_code}' "$BASE/wp-admin/post.php?post=$AI_ID&action=edit"); check "редактор: открывает редактор ИИ-страницы (A06)" "[ $c = 200 ] && grep -q 'block-editor' /tmp/mb_body"
-check "редактор: флажок допуска отсутствует в его редакторе (управляет только администратор)" "! grep -q 'name=\"mb_public_ok\"' /tmp/mb_body && grep -q 'Не допущено к публичному показу' /tmp/mb_body"
+check "редактор: флажок допуска отсутствует в его редакторе (управляет только администратор)" "! grep -q 'name=\"mb_public_ok\"' /tmp/mb_body"
 c=$(curl -s -b /tmp/mb_c_ed -o /tmp/mb_body -w '%{http_code}' "$BASE/wp-admin/edit.php?post_type=mb_lead"); check "редактор: список обращений недоступен" "[ $c != 200 ] || ! grep -q 'MB-' /tmp/mb_body"
 login maxbit_admin "$ADMIN_PW" /tmp/mb_c_adm
 c=$(curl -s -b /tmp/mb_c_adm -o /tmp/mb_body -w '%{http_code}' "$BASE/wp-admin/edit.php?post_type=mb_lead"); check "администратор: список обращений доступен" "[ $c = 200 ] && grep -q 'Обращения' /tmp/mb_body && ! grep -q 'Извините, вам не разрешено\|not allowed' /tmp/mb_body"
-c=$(curl -s -b /tmp/mb_c_adm -o /tmp/mb_body -w '%{http_code}' "$BASE/"); check "администратор: главная 200, ИИ-блока на главной нет" "[ $c = 200 ] && ! grep -q 'ii-praktikum' /tmp/mb_body"
+c=$(curl -s -b /tmp/mb_c_adm -o /tmp/mb_body -w '%{http_code}' "$BASE/"); check "администратор: главная 200, ситуация ведёт на ИИ-страницу (03.11)" "[ $c = 200 ] && grep -q 'resheniya/ii-praktikum/' /tmp/mb_body"
 code / >/dev/null; check "v0.3: аноним не видит служебных заметок и пустых разделов" "! grep -q 'mb-editor-note\|Служебная заметка' /tmp/mb_body"
 code /o-kompanii/ >/dev/null; check "v0.3: «О компании» анонимно без пустых заголовков «Компетенции»/«Проекты»" "! grep -q 'Компетенции и подтверждения' /tmp/mb_body && grep -q 'Команда и руководство' /tmp/mb_body"
 for u in /resheniya/integraciya-bitrix24-i-1c/ /osnovatel/ /baza-znaniy/chek-list-peredacha-zakaza-v-proizvodstvo/; do c=$(code "$u"); check "v0.3: $u → 200 и один H1" "[ $c = 200 ] && [ \$(grep -o '<h1' /tmp/mb_body | wc -l) = 1 ]"; done
@@ -150,8 +150,8 @@ check "v4: главная — цифровое развитие; удалённ�
 c=$(curl -s -b /tmp/mb_c_adm -o /tmp/mb_body -w '%{http_code}' "$BASE/proekty/obrazets-struktury-keysa/"); check "администратор: учебный образец → 200 и помечен" "[ $c = 200 ] && grep -q 'Учебный образец' /tmp/mb_body"
 
 echo "== A21/A23/A25 ИИ-страница (редактор) =="
-curl -s -b /tmp/mb_c_ed -o /tmp/mb_body "$BASE/?post_type=mb_solution&p=$AI_ID&preview=true"
-check "ИИ-страница: H1, проводник, примеры, FAQ, CTA, форма с темой ai_practicum" "grep -q 'ИИ-Практикум для производственных компаний' /tmp/mb_body && grep -q 'Примеры задач' /tmp/mb_body && grep -q 'Ответы на вопросы' /tmp/mb_body && grep -q 'Обсудить применение ИИ' /tmp/mb_body && grep -q 'value=\"ai_practicum\"' /tmp/mb_body"
+curl -s -o /tmp/mb_body "$BASE/resheniya/ii-praktikum/"
+check "ИИ-страница: H1, проводник, примеры, FAQ, CTA, форма с темой ai_practicum" "grep -q 'Обучение сотрудников работе с ИИ' /tmp/mb_body && grep -q 'Примеры задач' /tmp/mb_body && grep -q 'Ответы на вопросы' /tmp/mb_body && grep -q 'Обсудить применение ИИ' /tmp/mb_body && grep -q 'value=\"ai_practicum\"' /tmp/mb_body"
 check "ИИ-страница: нет цен/гарантий/сертификатов/набора" "! grep -q 'тыс. ₽\|сертифик\|без утечек\|240 ч\|набор открыт\|места ограничены' /tmp/mb_body"
 check "MB-14: кнопка шапки на ИИ-странице ведёт к форме этой страницы (#contact), не на главную" "grep -q 'mb-nav__cta\" href=\"#contact\"' /tmp/mb_body"
 rm -f /tmp/mb_c_sub /tmp/mb_c_ed /tmp/mb_c_adm

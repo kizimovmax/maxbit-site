@@ -504,6 +504,10 @@ add_action( 'init', function () {
 	if ( $tech && 'publish' === $tech->post_status ) {
 		$out .= '- [' . $tech->post_title . '](' . get_permalink( $tech ) . '): ' . ( get_post_meta( $tech->ID, '_mb_seo_description', true ) ?: '' ) . "\n";
 	}
+	$svc = get_page_by_path( 'tekhnologii' );
+	if ( $svc && 'publish' === $svc->post_status ) {
+		$out .= '- [Сервисы для задач компании](' . get_permalink( $svc ) . '): примеры сочетаний сервисов (обращения и продажи, продажи и учёт, документы и подписание), карта связей и каталог: Битрикс24, Wazzup, UIS, 1С, Контур.Эльба, Saby, Контур.Диадок.' . "\n";
+	}
 	$b24 = get_page_by_path( 'bitrix24' );
 	if ( $b24 && 'publish' === $b24->post_status ) {
 		$out .= '- [' . $b24->post_title . '](' . get_permalink( $b24 ) . '): ' . ( get_post_meta( $b24->ID, '_mb_seo_description', true ) ?: '' ) . "\n";
