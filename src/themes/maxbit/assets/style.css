@@ -379,7 +379,8 @@ strong { font-weight: 700; }
 /* ---------- Как проходит работа: графитовая секция с синей диагональной полосой ---------- */
 .mb-home .mb-section:has(.mb-how) { background: var(--graphite); color: #fff; position: relative; overflow: hidden; isolation: isolate; }
 .mb-home .mb-section:has(.mb-how)::before { content: ""; position: absolute; left: 0; top: 0; height: 100%; width: 120px; z-index: -1; background: var(--accent); clip-path: polygon(0 0, 100% 0, calc(100% - 60px) 100%, 0 100%); pointer-events: none; }
-.mb-home .mb-section:has(.mb-how) > * { padding-left: 100px; }
+.mb-home .mb-section:has(.mb-how) > * { padding-left: 0; } /* 03.11: содержимое по общей сетке, как у остальных блоков */
+.mb-home .mb-section:has(.mb-how)::before { width: max(12px, calc(var(--pad) + max(0px, (100% - 2 * var(--pad) - var(--max)) / 2) - 16px)); clip-path: polygon(0 0, 100% 0, 50% 100%, 0 100%); } /* синяя грань — только в поле слева от сетки */
 .mb-home .mb-section:has(.mb-how) .mb-section__head h2 { color: #fff; }
 .mb-home .mb-section:has(.mb-how) .mb-section__head h2::before { color: #fff; }
 .mb-home .mb-section:has(.mb-how) .mb-section__head p { color: var(--text-dark); }
@@ -398,7 +399,7 @@ strong { font-weight: 700; }
 .mb-how__example::before { content: "Условный пример"; display: block; font-size: .66rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--sky); margin-bottom: 6px; }
 .mb-how__caption { grid-column: 1 / -1; margin: 0; padding: 20px 0 0; display: flex; align-items: center; gap: 12px; color: var(--sky); font-size: .8rem; font-weight: 600; }
 .mb-how__caption::before { content: "››"; font-weight: 900; color: var(--accent); }
-@media (max-width: 1100px) { .mb-how { grid-template-columns: repeat(2, minmax(0, 1fr)); } .mb-home .mb-section:has(.mb-how) > * { padding-left: 80px; } .mb-home .mb-section:has(.mb-how)::before { width: 90px; clip-path: polygon(0 0, 100% 0, calc(100% - 44px) 100%, 0 100%); } }
+@media (max-width: 1100px) { .mb-how { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 620px) { .mb-how { grid-template-columns: 1fr; margin-top: 28px; gap: 20px; } .mb-home .mb-section:has(.mb-how) > * { padding-left: 0; } .mb-home .mb-section:has(.mb-how)::before { width: 100%; height: 8px; clip-path: polygon(0 0, 46% 0, 40% 100%, 0 100%); } .mb-how__step { font-size: 1.1rem; } }
 
 /* ---------- Что вы получите — три пункта с крупными номерами ---------- */
