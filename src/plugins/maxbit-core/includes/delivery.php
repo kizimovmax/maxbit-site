@@ -108,7 +108,7 @@ function maxbit_b24_fields( int $post_id, string $request_id ): array {
 		'TITLE'       => 'Сайт: ' . ( $topics[ $topic ] ?? 'обращение' ) . ' — ' . $name,
 		'NAME'        => $name,
 		'SOURCE_ID'   => 'WEB',
-		'SOURCE_DESCRIPTION' => 'maxbitpro.ru / ' . $topic,
+		'SOURCE_DESCRIPTION' => wp_parse_url( home_url(), PHP_URL_HOST ) . ' / ' . $topic,
 		'ORIGIN_ID'   => $request_id,
 		'ORIGINATOR_ID' => 'maxbit-site',
 		'COMMENTS'    => implode( "\n", $lines ),

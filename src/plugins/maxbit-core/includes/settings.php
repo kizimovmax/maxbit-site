@@ -328,6 +328,7 @@ function maxbit_settings_page(): void {
 			</table>
 			<?php submit_button( 'Сохранить' ); ?>
 		</form>
+		<?php do_action( 'maxbit_settings_after' ); ?>
 	</div>
 	<?php
 }
