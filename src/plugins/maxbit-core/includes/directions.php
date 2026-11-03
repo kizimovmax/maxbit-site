@@ -31,6 +31,59 @@ function maxbit_dir_blocks(): array {
 	return compact( 'e', 'p', 'h', 'ul', 'ol', 'sc', 'qa', 'b', 'links' );
 }
 
+/**
+ * [maxbit_next_steps items="sol:slug,page:slug,services"] — «Что ещё посмотреть»: карточки связанных решений и разделов
+ * (правка владельца 03.11: вместо строки ссылок и отдельной плашки сервисов). Неопубликованные пропускаются.
+ */
+add_shortcode( 'maxbit_next_steps', function ( $atts ) {
+	$a     = shortcode_atts( array( 'items' => '', 'heading' => 'Что ещё посмотреть' ), $atts );
+	$cards = array();
+	foreach ( array_filter( array_map( 'trim', explode( ',', $a['items'] ) ) ) as $ref ) {
+		[ $type, $slug ] = array_pad( explode( ':', $ref, 2 ), 2, '' );
+		if ( 'services' === $type ) {
+			$svc = get_page_by_path( 'tekhnologii' );
+			if ( $svc && 'publish' === $svc->post_status ) {
+				$cards[] = array( 'Сервисы', 'Сервисы для задач компании', 'CRM, 1С, ЭДО, телефония и мессенджеры: какие сервисы подходят под задачу и как их связать.', get_permalink( $svc ) );
+			}
+			continue;
+		}
+		$p = 'sol' === $type ? maxbit_dir_find( $slug ) : ( 'page' === $type ? get_page_by_path( $slug ) : null );
+		if ( ! $p || 'publish' !== $p->post_status || ( 'sol' === $type && ! maxbit_is_publicly_visible( $p->ID ) ) ) {
+			continue;
+		}
+		$title = (string) ( get_post_meta( $p->ID, '_mb_catalog_title', true ) ?: get_the_title( $p ) );
+		$text  = has_excerpt( $p ) ? get_the_excerpt( $p ) : (string) get_post_meta( $p->ID, '_mb_seo_description', true );
+		$text  = wp_trim_words( wp_strip_all_tags( $text ), 18, '…' );
+		$cards[] = array( 'sol' === $type ? 'Решение' : 'MAXBIT', $title, $text, get_permalink( $p ) );
+	}
+	if ( ! $cards ) {
+		return '';
+	}
+	$out = '<section class="mb-next" aria-label="' . esc_attr( $a['heading'] ) . '"><h2 class="mb-h2--plain mb-next__h">' . esc_html( $a['heading'] ) . '</h2><div class="mb-next__grid">';
+	foreach ( $cards as $c ) {
+		$out .= '<a class="mb-next__card" href="' . esc_url( $c[3] ) . '"><span class="mb-next__label">' . esc_html( $c[0] ) . '</span><span class="mb-next__title">' . esc_html( $c[1] ) . '</span>' . ( $c[2] ? '<span class="mb-next__text">' . esc_html( $c[2] ) . '</span>' : '' ) . '</a>';
+	}
+	return $out . '</div></section>';
+} );
+
+/** Правка 03.11: «Связанные задачи» (строка ссылок) → карточки [maxbit_next_steps]; у цифровой среды — ссылки из середины в конец. */
+function maxbit_dir_next_fix( string $slug, string $c ): string {
+	$sc_coord = "<!-- wp:shortcode -->\n[maxbit_next_steps items=\"sol:cifrovaya-sreda-kompanii,sol:porucheniya-i-otchety,page:kak-rabotaem,services\"]\n<!-- /wp:shortcode -->\n";
+	$sc_env   = "<!-- wp:shortcode -->\n[maxbit_next_steps items=\"sol:integraciya-bitrix24-i-1c,page:tekhnologii/bitrix24-dlya-proizvodstva,sol:koordinaciya-podryadchikov,services\"]\n<!-- /wp:shortcode -->\n";
+	if ( false !== strpos( $c, '[maxbit_next_steps' ) ) {
+		return $c;
+	}
+	$links = '<!-- wp:paragraph \{"className":"mb-links"\} -->\s*<p class="mb-links">.*?</p>\s*<!-- /wp:paragraph -->\s*';
+	if ( 'koordinaciya-podryadchikov' === $slug ) {
+		return (string) preg_replace( '~<!-- wp:heading -->\s*<h2 class="wp-block-heading">Связанные задачи</h2>\s*<!-- /wp:heading -->\s*' . $links . '~su', $sc_coord, $c, 1 );
+	}
+	if ( 'cifrovaya-sreda-kompanii' === $slug ) {
+		$c = (string) preg_replace( '~' . $links . '~su', '', $c, 1 );
+		return rtrim( $c ) . "\n" . $sc_env;
+	}
+	return $c;
+}
+
 function maxbit_dir_data(): array {
 	extract( maxbit_dir_blocks() ); // phpcs:ignore WordPress.PHP.DontExtract
 
@@ -60,8 +113,7 @@ function maxbit_dir_data(): array {
 		. $qa( 'Вы заменяете наших подрядчиков?', 'Нет. Подрядчики продолжают выполнять свои работы. Мы координируем согласованный участок: задачи, сроки, зависимости и проверку результата.' )
 		. $qa( 'Кто принимает работы и решает по бюджету?', 'Вы. Приёмка, бюджеты и выбор исполнителей остаются за заказчиком, если другие полномочия не согласованы отдельно.' )
 		. $qa( 'Можно ли начать с одного направления, например сайта и рекламы?', 'Да. Обычно начинаем с участка, где больше всего несогласованности, и расширяем координацию, если это полезно.' )
-		. $h( 'Связанные задачи' )
-		. $links( array( array( '/resheniya/cifrovaya-sreda-kompanii/', 'Связываем программы и работу сотрудников' ), array( '/resheniya/porucheniya-i-otchety/', 'Поручения и отчёты руководителю' ), array( '/kak-rabotaem/', 'Как работаем' ) ) );
+		. $sc( '[maxbit_next_steps items="sol:cifrovaya-sreda-kompanii,sol:porucheniya-i-otchety,page:kak-rabotaem,services"]' );
 
 	$env = $h( 'Связываем программы и работу сотрудников', 1 )
 		. $p( 'Когда в компании 1С, CRM, ЭДО, почта, таблицы и хранилища используются отдельно, одни и те же данные вводят несколько раз, а правильную версию документа приходится искать. Разбираемся, как устроена работа сейчас, и составляем план: какая программа за что отвечает, кто отвечает за данные и что менять в первую очередь.', 'mb-lead' )
@@ -77,11 +129,11 @@ function maxbit_dir_data(): array {
 		. $ul( array( esc_html( 'Карту текущих программ и связей между ними.' ), esc_html( 'Распределение функций: какая система за что отвечает и кто ответственный.' ), esc_html( 'План изменений по приоритетам с понятным первым шагом.' ) ) )
 		. $h( 'Чем это отличается от интеграции' )
 		. $p( esc_html( 'Разбор среды — отдельная работа: сначала выясняем, что и зачем связывать. Настройка обмена Битрикс24 и 1С и построение системы на Битрикс24 — отдельные решения; разработка и настройка обмена входят в работу только по согласованному объёму.' ) )
-		. $links( array( array( '/resheniya/integraciya-bitrix24-i-1c/', 'Интеграция Битрикс24 и 1С' ), array( '/tekhnologii/bitrix24-dlya-proizvodstva/', 'Единая система в Битрикс24' ), array( '/tekhnologii/', 'Сервисы для задач компании' ) ) )
 		. $h( 'Ответы на вопросы' )
 		. $qa( 'Обязательно ли переходить на Битрикс24?', 'Нет. Сначала смотрим, что уже есть в компании. Битрикс24 предлагаем, только если текущие программы задачу не решают, и объясняем почему.' )
 		. $qa( 'Вы сразу начнёте что-то настраивать?', 'Нет. Сначала разбор и план. Настройки, обмен данными и доработки — отдельным согласованным этапом.' )
-		. $qa( 'С какого процесса лучше начать?', 'С того, где повторный ввод данных или поиск документов отнимают больше всего времени. Обычно это путь заказа или подготовка документов.' );
+		. $qa( 'С какого процесса лучше начать?', 'С того, где повторный ввод данных или поиск документов отнимают больше всего времени. Обычно это путь заказа или подготовка документов.' )
+		. $sc( '[maxbit_next_steps items="sol:integraciya-bitrix24-i-1c,page:tekhnologii/bitrix24-dlya-proizvodstva,sol:koordinaciya-podryadchikov,services"]' );
 
 	return array(
 		'ii' => array(
@@ -225,7 +277,9 @@ function maxbit_directions_migrate( bool $dry = false ): array {
 
 	// 1. ИИ-практикум: существующая запись, без дубля.
 	$ii = maxbit_dir_find( $d['ii']['slug'] );
-	if ( $ii ) {
+	if ( $ii && 'publish' === $ii->post_status && $ii->post_title === $d['ii']['title'] ) {
+		$log[] = 'ИИ-практикум #' . $ii->ID . ': уже опубликован — не трогаем';
+	} elseif ( $ii ) {
 		$p = $ii;
 		$c = strtr( $p->post_content, $d['ii']['replace'] );
 		$log[] = sprintf( 'ИИ-практикум #%d (%s): опубликовать как «%s», раздел «Внутренние процессы»%s', $p->ID, $p->post_status, $d['ii']['title'], $c !== $p->post_content ? ', заголовок и вводный абзац обновлены' : ', текст без изменений' );
@@ -243,6 +297,17 @@ function maxbit_directions_migrate( bool $dry = false ): array {
 		$log[]    = 'создать: /resheniya/' . $n['slug'] . '/ — ' . $n['title'];
 		$writes[] = array( 'create', null, array( 'post_type' => 'mb_solution', 'post_status' => 'publish', 'post_title' => $n['title'], 'post_name' => $n['slug'], 'post_excerpt' => $n['excerpt'], 'menu_order' => $n['order'], 'post_content' => $n['content'] ),
 			array( '_mb_stage' => $n['stage'], '_mb_problems' => $n['problems'], '_mb_public_ok' => '1', '_mb_seo_title' => $n['seo_t'], '_mb_seo_description' => $n['seo_d'], '_mb_catalog' => '2026-11-03' ) );
+	}
+	// 2а. Правка 03.11: блок «Связанные задачи» у уже созданных страниц.
+	foreach ( $d['new'] as $n ) {
+		$ex = maxbit_dir_find( $n['slug'] );
+		if ( $ex ) {
+			$nc = maxbit_dir_next_fix( $n['slug'], $ex->post_content );
+			if ( $nc !== $ex->post_content ) {
+				$log[]    = '/resheniya/' . $n['slug'] . '/: «Связанные задачи» → карточки «Что ещё посмотреть»';
+				$writes[] = array( 'update', $ex, array( 'post_content' => $nc ), array() );
+			}
+		}
 	}
 	// 3. Главная.
 	$front = (int) get_option( 'page_on_front' );

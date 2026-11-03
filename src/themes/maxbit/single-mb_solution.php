@@ -4,7 +4,7 @@
 	<?php maxbit_preview_banner( get_the_ID() ); ?>
 	<article class="mb-article mb-article--solution">
 		<div class="mb-content"><?php the_content(); ?></div>
-		<?php maxbit_theme_services_link(); ?>
+		<?php if ( ! has_shortcode( (string) get_post()->post_content, 'maxbit_next_steps' ) ) { maxbit_theme_services_link(); } // карточки «Что ещё посмотреть» уже ведут на сервисы ?>
 		<?php maxbit_theme_updated(); ?>
 	</article>
 	<?php maxbit_theme_aside(); ?>

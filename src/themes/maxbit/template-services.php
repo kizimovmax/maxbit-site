@@ -41,7 +41,6 @@ $cases  = function ( array $keys ): array {
 	<section class="mb-svc-combos" aria-labelledby="mb-svc-combos-h">
 		<div class="mb-svc-combos__head">
 			<h2 id="mb-svc-combos-h" class="mb-svc__h2">Примеры сочетаний сервисов</h2>
-			<p>Это примеры, а не готовые пакеты. Состав и обмен данными проверяем по версиям, конфигурациям, доступам и лицензиям конкретной компании.</p>
 		</div>
 		<?php foreach ( maxbit_theme_service_combos() as $c ) : ?>
 		<article class="mb-svc-combo" id="<?php echo esc_attr( $c['id'] ); ?>">
@@ -58,7 +57,7 @@ $cases  = function ( array $keys ): array {
 				<p class="mb-ccard__label">Ограничения</p>
 				<p class="mb-svc-combo__limits"><?php echo esc_html( $c['limits'] ); ?></p>
 				<p class="mb-svc-combo__links">
-					<?php foreach ( $c['links'] as $l ) : $u = maxbit_theme_combo_url( $l[0] ); if ( $u ) : ?><a class="mb-btn mb-btn--link" href="<?php echo esc_url( $u ); ?>"><?php echo esc_html( $l[1] ); ?></a> <?php endif; endforeach; ?>
+					<?php foreach ( $c['links'] as $l ) : $u = maxbit_theme_combo_url( $l[0] ); if ( $u ) : ?><a class="mb-btn mb-btn--link" href="<?php echo esc_url( $u ); ?>"><?php echo esc_html( maxbit_theme_combo_label( $l ) ); ?></a> <?php endif; endforeach; ?>
 				</p>
 			</div>
 		</article>
