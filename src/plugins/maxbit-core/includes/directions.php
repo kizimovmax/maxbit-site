@@ -320,6 +320,15 @@ function maxbit_directions_migrate( bool $dry = false ): array {
 			$log[] = 'главная: изменений нет (уже применено или блоки не найдены)';
 		}
 	}
+	// 4. Схема ссылок блока ситуаций (03.11): боль из кнопки — первой строкой «Когда это нужно» у заказов.
+	$zk = maxbit_dir_find( 'zakaz-pod-kontrolem' );
+	if ( $zk ) {
+		$nc = maxbit_dir_zakaz_echo( $zk->post_content );
+		if ( $nc !== $zk->post_content ) {
+			$log[]    = '/resheniya/zakaz-pod-kontrolem/: в «Когда это нужно» — боли из блока ситуаций';
+			$writes[] = array( 'update', $zk, array( 'post_content' => $nc ), array() );
+		}
+	}
 	if ( $dry || ! $writes ) {
 		return array( 'ok' => true, 'dry_run' => $dry, 'log' => $log );
 	}
@@ -406,7 +415,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 
 /* ---------------------------------------------------------------- блок «Узнаёте свою ситуацию?» (03.11) */
 
-/** Три крупные ситуации и ряд коротких (утверждено владельцем 03.11). Ссылка: 'sol:<slug>' | 'page:<path>' | '/путь/'. */
+/** Три крупные ситуации и ряд коротких (утверждено владельцем 03.11; схема ссылок — 03.11, вечер). Ссылка: 'sol:<slug>' | 'page:<path>' | '/путь/'. */
 function maxbit_situations_data(): array {
 	return (array) apply_filters( 'maxbit_situations', array(
 		'big'   => array(
@@ -415,9 +424,9 @@ function maxbit_situations_data(): array {
 			array( 'Отчёты для руководителя собираем вручную', 'Продажи, заказы и оплаты видны в одном отчёте, без Excel.', 'sol:porucheniya-i-otchety', 'reports' ),
 		),
 		'small' => array(
-			array( 'Договорённости теряются между отделами', 'sol:zakaz-pod-kontrolem' ),
-			array( 'Много ручной работы', 'sol:integraciya-bitrix24-i-1c' ),
-			array( 'Всё замыкается на руководителе', 'page:tekhnologii/bitrix24-dlya-proizvodstva' ),
+			array( 'Изменения по заказу не доходят до производства', 'sol:zakaz-pod-kontrolem' ),
+			array( 'Договоры и счета делаем вручную', 'sol:dokumenty-i-soglasovaniya' ),
+			array( 'Всё замыкается на руководителе', 'sol:porucheniya-i-otchety' ),
 			array( 'Подрядчики не стыкуются', 'sol:koordinaciya-podryadchikov' ),
 			array( 'Хотим ИИ, но с чего начать?', 'sol:ii-praktikum' ),
 		),
@@ -514,4 +523,18 @@ function maxbit_dir_home_situations( string $c, array &$log ): string {
 	}
 	unset( $sec );
 	return $done ? serialize_blocks( $blocks ) : $c;
+}
+
+/** Первые строки «Когда это нужно» у решения «Заказ под контролем» повторяют кнопки блока ситуаций. Идемпотентно. */
+function maxbit_dir_zakaz_echo( string $c ): string {
+	if ( str_contains( $c, 'Непонятно, на каком этапе заказ' ) ) {
+		return $c;
+	}
+	$from = '<li>Цех работает по устаревшей спецификации, а об изменениях узнаёт на отгрузке.</li>';
+	if ( ! str_contains( $c, $from ) ) {
+		return $c;
+	}
+	$to = '<li>Непонятно, на каком этапе заказ и кто за него отвечает.</li>' . "\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n"
+		. '<li>Изменения по заказу не доходят до производства: цех работает по устаревшей спецификации и узнаёт о них на отгрузке.</li>';
+	return str_replace( $from, $to, $c );
 }
