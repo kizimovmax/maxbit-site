@@ -4,7 +4,7 @@
  */
 defined( 'ABSPATH' ) || exit;
 
-define( 'MAXBIT_THEME_VERSION', '0.10.4' );
+define( 'MAXBIT_THEME_VERSION', '0.10.5' );
 
 /**
  * Тема работает и без модуля maxbit-core (без формы, типов и допуска). Обёртки с префиксом maxbit_theme_
@@ -474,7 +474,7 @@ function maxbit_theme_founder_hero(): void {
 	$name  = function_exists( 'maxbit_get_settings' ) ? ( maxbit_get_settings()['founder'] ?: 'Максим Кизимов' ) : 'Максим Кизимов';
 	$parts = preg_split( '/\s+/u', trim( $name ), 2 );
 	$lead  = 'Участвует в определении задач, выборе подхода и контроле результата в работе с производственными компаниями.';
-	if ( preg_match( '~<p class="mb-lead">(.*?)</p>~su', get_the_content(), $m ) ) { // вводный абзац страницы, без повтора «Основатель MAXBIT.»
+	if ( preg_match( '~<p class="mb-lead[^"]*">(.*?)</p>~su', get_the_content(), $m ) ) { // вводный абзац страницы, без повтора «Основатель MAXBIT.»
 		$lead = trim( preg_replace( '/^Основатель MAXBIT\.\s*/u', '', wp_strip_all_tags( $m[1] ) ) ) ?: $lead;
 	}
 	$links = array();
@@ -510,7 +510,7 @@ add_filter( 'the_content', function ( $c ) {
 	if ( ! maxbit_theme_is_founder_page() || get_the_ID() !== get_queried_object_id() ) {
 		return $c;
 	}
-	$c = preg_replace( '~<p class="mb-lead">.*?</p>~su', '', $c, 1 );
+	$c = preg_replace( '~<p class="mb-lead[^"]*">.*?</p>~su', '', $c, 1 ); // WP 7 добавляет класс wp-block-paragraph
 	foreach ( maxbit_theme_founder_anchors() as $t => $id ) {
 		$c = str_replace( '<h2 class="wp-block-heading">' . $t . '</h2>', '<h2 class="wp-block-heading" id="' . $id . '">' . $t . '</h2>', $c );
 	}
