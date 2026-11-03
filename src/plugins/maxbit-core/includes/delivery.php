@@ -89,11 +89,16 @@ function maxbit_b24_fields( int $post_id, string $request_id ): array {
 	$source  = (string) get_post_meta( $post_id, '_mb_source', true );
 	$page    = (string) get_post_meta( $post_id, '_mb_page', true );
 	$c       = maxbit_split_contact( $contact );
+	$phone   = (string) get_post_meta( $post_id, '_mb_phone', true );
+	if ( $phone ) { // телефон из отдельного поля (с 0.7.1) главнее разбора свободного контакта
+		$c['phone'] = $phone;
+	}
 	$lines   = array_filter( array(
 		'Заявка с сайта ' . wp_parse_url( home_url(), PHP_URL_HOST ) . ', номер ' . $request_id,
 		'Цель: ' . ( maxbit_lead_purposes()[ (string) get_post_meta( $post_id, '_mb_purpose', true ) ] ?? 'Обсудить задачу' ),
 		'Тема: ' . ( $topics[ $topic ] ?? $topic ),
-		'Контакт (как ввёл посетитель): ' . $contact,
+		$phone ? 'Телефон: ' . $phone : '',
+		$contact ? 'Почта или мессенджер (как ввёл посетитель): ' . $contact : '',
 		$msg ? "Задача:\n" . $msg : '',
 		'Страница: ' . ( $page ?: $source ),
 		$source && $page ? 'Источник: ' . $source : '',
@@ -263,6 +268,7 @@ function maxbit_deliver_lead( int $post_id ): bool {
 			'request_id' => $request_id,
 			'topic'      => get_post_meta( $post_id, '_mb_topic', true ),
 			'name'       => get_post_meta( $post_id, '_mb_name', true ),
+			'phone'      => get_post_meta( $post_id, '_mb_phone', true ),
 			'contact'    => get_post_meta( $post_id, '_mb_contact', true ),
 			'message'    => get_post_meta( $post_id, '_mb_message', true ),
 			'source'     => get_post_meta( $post_id, '_mb_source', true ),

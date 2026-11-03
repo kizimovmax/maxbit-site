@@ -40,16 +40,28 @@
     div.focus({ preventScroll: false });
   }
 
+  // Российский номер: +7 / 7 / 8 и 10 цифр; код начинается с 3, 4, 8 или 9 (как на сервере).
+  function ruPhone(v) {
+    v = (v || '').trim();
+    if (!v || /[^\d\s()+\-]/.test(v)) { return false; }
+    var d = v.replace(/\D/g, '');
+    if (d.length === 11 && (d[0] === '7' || d[0] === '8')) { d = d.slice(1); }
+    return d.length === 10 && '3489'.indexOf(d[0]) !== -1;
+  }
+
   function validate(form) {
     var ok = true;
     var name = form.querySelector('[name="name"]');
+    var phone = form.querySelector('[name="phone"]');
     var contact = form.querySelector('[name="contact"]');
     var consent = form.querySelector('[name="consent"]');
     var transfer = form.querySelector('[name="consent_transfer"]');
-    setError(form, 'name', ''); setError(form, 'contact', ''); setError(form, 'consent', ''); if (transfer) { setError(form, 'consent_transfer', ''); }
+    setError(form, 'name', ''); if (phone) { setError(form, 'phone', ''); } setError(form, 'contact', ''); setError(form, 'consent', ''); if (transfer) { setError(form, 'consent_transfer', ''); }
     var first = null;
-    if (!name.value || name.value.trim().length < 2) { setError(form, 'name', 'Укажите, как к вам обращаться.'); ok = false; first = first || name; }
-    if (!contact.value || contact.value.trim().length < 3) { setError(form, 'contact', 'Укажите email или имя пользователя в Telegram/MAX.'); ok = false; first = first || contact; }
+    if (!name.value || name.value.trim().length < 2) { setError(form, 'name', 'Укажите имя.'); ok = false; first = first || name; }
+    if (phone && !ruPhone(phone.value)) { setError(form, 'phone', 'Укажите российский номер телефона: +7 и 10 цифр.'); ok = false; first = first || phone; }
+    var cv = contact ? contact.value.trim() : '';
+    if (cv && cv.length < 3) { setError(form, 'contact', 'Укажите email или имя пользователя в Telegram/MAX — или оставьте поле пустым.'); ok = false; first = first || contact; }
     if (consent && !consent.checked) { setError(form, 'consent', 'Нужно согласие на обработку персональных данных.'); ok = false; first = first || consent; }
     if (transfer && !transfer.checked) { setError(form, 'consent_transfer', 'Нужно согласие на передачу данных.'); ok = false; first = first || transfer; }
     if (!ok && first) { first.focus(); }

@@ -82,14 +82,19 @@ function maxbit_render_form( array $args = array() ): string {
 			</fieldset>
 			<?php endif; ?>
 			<div class="mb-form__row">
-				<label for="<?php echo $uid; ?>-name">Как к вам обращаться <span aria-hidden="true">*</span></label>
+				<label for="<?php echo $uid; ?>-name">Имя <span aria-hidden="true">*</span></label>
 				<input id="<?php echo $uid; ?>-name" name="name" type="text" required maxlength="100" autocomplete="name" aria-required="true" aria-describedby="<?php echo $uid; ?>-name-err" value="<?php echo esc_attr( $state['values']['name'] ?? '' ); ?>">
 				<p class="mb-form__error" id="<?php echo $uid; ?>-name-err"><?php echo esc_html( $state['fields']['name'] ?? '' ); ?></p>
 			</div>
 			<div class="mb-form__row">
-				<label for="<?php echo $uid; ?>-contact">Удобный контакт <span aria-hidden="true">*</span></label>
-				<input id="<?php echo $uid; ?>-contact" name="contact" type="text" required maxlength="200" autocomplete="email" aria-required="true" aria-describedby="<?php echo $uid; ?>-contact-hint <?php echo $uid; ?>-contact-err" value="<?php echo esc_attr( $state['values']['contact'] ?? '' ); ?>">
-				<p class="mb-form__hint" id="<?php echo $uid; ?>-contact-hint">Email или имя пользователя в Telegram/MAX</p>
+				<label for="<?php echo $uid; ?>-phone">Телефон <span aria-hidden="true">*</span></label>
+				<input id="<?php echo $uid; ?>-phone" name="phone" type="tel" required maxlength="20" autocomplete="tel" inputmode="tel" placeholder="+7 900 000-00-00" aria-required="true" aria-describedby="<?php echo $uid; ?>-phone-err" value="<?php echo esc_attr( $state['values']['phone'] ?? '' ); ?>">
+				<p class="mb-form__error" id="<?php echo $uid; ?>-phone-err"><?php echo esc_html( $state['fields']['phone'] ?? '' ); ?></p>
+			</div>
+			<div class="mb-form__row">
+				<label for="<?php echo $uid; ?>-contact">Почта или мессенджер</label>
+				<input id="<?php echo $uid; ?>-contact" name="contact" type="text" maxlength="200" autocomplete="email" aria-describedby="<?php echo $uid; ?>-contact-hint <?php echo $uid; ?>-contact-err" value="<?php echo esc_attr( $state['values']['contact'] ?? '' ); ?>">
+				<p class="mb-form__hint" id="<?php echo $uid; ?>-contact-hint">Необязательно: email или имя пользователя в Telegram/MAX</p>
 				<p class="mb-form__error" id="<?php echo $uid; ?>-contact-err"><?php echo esc_html( $state['fields']['contact'] ?? '' ); ?></p>
 			</div>
 			<?php if ( $pilot ) { echo maxbit_pilot_fields( $uid, $state ); } // phpcs:ignore ?>
@@ -209,6 +214,7 @@ function maxbit_lead_admin_post(): void {
 	if ( ! $result['ok'] && ! in_array( $result['code'], array( 'spam' ), true ) ) {
 		$flash['values'] = array(
 			'name'    => mb_substr( sanitize_text_field( $in['name'] ?? '' ), 0, 100 ),
+			'phone'   => mb_substr( sanitize_text_field( $in['phone'] ?? '' ), 0, 20 ),
 			'contact' => mb_substr( sanitize_text_field( $in['contact'] ?? '' ), 0, 200 ),
 			'message' => mb_substr( sanitize_textarea_field( $in['message'] ?? '' ), 0, 2000 ),
 			'topic'   => sanitize_key( $in['topic'] ?? '' ),

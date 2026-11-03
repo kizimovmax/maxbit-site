@@ -37,7 +37,7 @@
 				'fallback_cb'    => false,
 			) );
 			?>
-			<a class="mb-btn mb-btn--primary mb-nav__cta" href="<?php echo esc_url( maxbit_cta_url() ); ?>">Обсудить задачу за 30 минут</a>
+			<a class="mb-btn mb-btn--primary mb-nav__cta" href="<?php echo esc_url( maxbit_cta_url() ); ?>">Обсудить задачу за 45 минут</a>
 			<?php
 			$nav_contacts = array();
 			foreach ( maxbit_theme_links( 'bots' ) as $l ) {

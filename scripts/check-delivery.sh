@@ -19,7 +19,7 @@ RUN=$(date +%s)
 mklead() { # $1 mode → echo post_id
   MAXBIT_DELIVERY_TEST_URL="http://127.0.0.1:8099/?mode=$1" $WP eval "
     global \$wpdb; \$wpdb->query(\"DELETE FROM {\$wpdb->options} WHERE option_name LIKE 'mb_ctr_rl_%'\"); // тест: сброс лимита CLI-адреса
-    \$r = maxbit_lead_process(array('name'=>'Доставка $1','contact'=>'d$1-$RUN-'.mt_rand().'@example.test','message'=>'m$1 $RUN '.mt_rand(),'topic'=>'general','consent'=>'1','token'=>maxbit_lead_token_check_bypass(),'client_key'=>'k-deliv-$1-$RUN-'.mt_rand()));
+    \$r = maxbit_lead_process(array('name'=>'Доставка $1','phone'=>'+7 900 000-00-00','contact'=>'d$1-$RUN-'.mt_rand().'@example.test','message'=>'m$1 $RUN '.mt_rand(),'topic'=>'general','consent'=>'1','token'=>maxbit_lead_token_check_bypass(),'client_key'=>'k-deliv-$1-$RUN-'.mt_rand()));
     if (empty(\$r['ok'])) { echo 'ERR:'.\$r['code']; exit; }
     \$ids = get_posts(array('post_type'=>'mb_lead','post_status'=>'private','numberposts'=>1,'fields'=>'ids','meta_key'=>'_mb_request_id','meta_value'=>\$r['request_id']));
     echo \$ids[0];" 2>/dev/null

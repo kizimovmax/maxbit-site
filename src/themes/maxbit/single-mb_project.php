@@ -54,7 +54,7 @@ $sample    = '1' === get_post_meta( $id, '_mb_is_sample', true );
 		</div>
 		<?php endif; ?>
 		<?php $bots = maxbit_theme_msg( 'bots', false ); if ( $bots ) : ?>
-		<div class="mb-aside__card"><p class="mb-aside__title">Похожая задача?</p><p>Первый разговор — бесплатно, примерно 30 минут.</p><?php echo $bots; // phpcs:ignore ?></div>
+		<div class="mb-aside__card"><p class="mb-aside__title">Похожая задача?</p><p>Первый разговор — бесплатно, примерно 45 минут.</p><?php echo $bots; // phpcs:ignore ?></div>
 		<?php endif; ?>
 	</div></aside>
 	<?php
@@ -66,6 +66,6 @@ $sample    = '1' === get_post_meta( $id, '_mb_is_sample', true );
 		<div class="mb-projects mb-grid mb-grid--3"><?php foreach ( $others as $p ) { echo maxbit_project_card_html( $p ); } // phpcs:ignore ?></div>
 	</section>
 	<?php endif; ?>
-	<?php echo maxbit_theme_form( array( 'topic' => 'project', 'heading' => 'Обсудить похожую задачу', 'text' => 'Расскажите, что хотите изменить. На бесплатной встрече примерно на 30 минут обсудим ситуацию и возможный следующий шаг.' ) ); // phpcs:ignore ?>
+	<?php echo maxbit_theme_form( array( 'topic' => 'project', 'heading' => 'Обсудить похожую задачу', 'text' => 'Расскажите, что хотите изменить. На бесплатной встрече примерно на 45 минут обсудим ситуацию и возможный следующий шаг.' ) ); // phpcs:ignore ?>
 </div>
 <?php get_footer(); ?>

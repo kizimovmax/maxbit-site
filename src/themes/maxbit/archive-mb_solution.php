@@ -69,13 +69,13 @@ $n       = 0;
 	<section class="mb-pilot-cta" aria-labelledby="mb-pilot-cta-h">
 		<div>
 			<p class="mb-pilot-cta__label">Пилотный проект</p>
-			<h2 id="mb-pilot-cta-h">Одну задачу — за наш счёт</h2>
+			<h2 id="mb-pilot-cta-h">Выполним одну задачу за наш счёт</h2>
 			<p>Чтобы вы оценили работу на деле, небольшую задачу можем выполнить в рамках пилота. Решение об участии принимаем после разбора задачи.</p>
 		</div>
 		<a class="mb-btn mb-btn--primary" href="<?php echo esc_url( get_permalink( $pilot ) ); ?>">Условия и анкета</a>
 	</section>
 	<?php endif; ?>
 
-	<?php echo maxbit_theme_form( array( 'topic' => 'general', 'purposes' => '1', 'heading' => 'Не нашли свою ситуацию?', 'text' => 'Опишите задачу своими словами. На бесплатной встрече примерно на 30 минут разберём её и предложим первый шаг.' ) ); // phpcs:ignore ?>
+	<?php echo maxbit_theme_form( array( 'topic' => 'general', 'purposes' => '1', 'heading' => 'Не нашли свою ситуацию?', 'text' => 'Опишите задачу своими словами. На бесплатной встрече примерно на 45 минут разберём её и предложим первый шаг.' ) ); // phpcs:ignore ?>
 </div>
 <?php get_footer(); ?>

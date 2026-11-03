@@ -4,7 +4,7 @@
  */
 defined( 'ABSPATH' ) || exit;
 
-define( 'MAXBIT_THEME_VERSION', '0.10.0' );
+define( 'MAXBIT_THEME_VERSION', '0.10.1' );
 
 /**
  * Тема работает и без модуля maxbit-core (без формы, типов и допуска). Обёртки с префиксом maxbit_theme_
@@ -322,7 +322,7 @@ function maxbit_theme_aside(): void {
 		<?php $bots = maxbit_theme_msg( 'bots', false ); if ( $bots ) : ?>
 		<div class="mb-aside__card">
 			<p class="mb-aside__title">Написать нам</p>
-			<p>Первый разговор — бесплатно, примерно 30 минут. Форма заявки — внизу страницы.</p>
+			<p>Первый разговор — бесплатно, примерно 45 минут. Форма заявки — внизу страницы.</p>
 			<?php echo $bots; // phpcs:ignore WordPress.Security.EscapeOutput ?>
 		</div>
 		<?php endif; ?>
@@ -375,7 +375,7 @@ function maxbit_theme_hero_art_html(): string {
 	$teaser = '';
 	$pilot  = get_page_by_path( 'pilotnyj-proekt' );
 	if ( $pilot && 'publish' === $pilot->post_status ) {
-		$teaser = '<div class="mb-hero__teaser"><p class="mb-hero__teaser-label">Пилотный проект</p><p class="mb-hero__teaser-title">Одну задачу — за наш счёт</p><p class="mb-hero__teaser-text">Чтобы вы оценили нашу работу на деле. Участие — после разбора задачи.</p><a class="mb-btn mb-btn--primary" href="' . esc_url( get_permalink( $pilot ) ) . '" data-event="pilot_open_hero">Условия и анкета</a></div>';
+		$teaser = '<div class="mb-hero__teaser"><p class="mb-hero__teaser-label">Пилотный проект</p><p class="mb-hero__teaser-title">Выполним одну задачу за&nbsp;наш&nbsp;счёт</p><p class="mb-hero__teaser-text">Чтобы вы оценили нашу работу на деле.</p><a class="mb-btn mb-btn--primary" href="' . esc_url( get_permalink( $pilot ) ) . '" data-event="pilot_open_hero">Условия и анкета</a></div>';
 	} elseif ( shortcode_exists( 'maxbit_quiz' ) ) {
 		$teaser = '<div class="mb-hero__teaser"><p class="mb-hero__teaser-label">Самодиагностика · 3 минуты</p><p class="mb-hero__teaser-title">Где теряются информация и задачи в вашей компании?</p><a class="mb-btn mb-btn--primary" href="#diagnostic" data-mb-open="diagnostic" data-event="quiz_open_hero">Пройти самодиагностику</a></div>';
 	}

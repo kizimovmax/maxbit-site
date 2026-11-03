@@ -24,7 +24,7 @@ function maxbit_lead_secret(): string {
 
 /** Версия текста согласия на обработку ПДн: меняется при изменении текста страницы «Согласие». */
 if ( ! defined( 'MAXBIT_CONSENT_VERSION' ) ) {
-	define( 'MAXBIT_CONSENT_VERSION', '2026-10-16' );
+	define( 'MAXBIT_CONSENT_VERSION', '2026-11-03' ); // 03.11: в форме отдельное поле «Телефон»
 }
 
 /** Токен формы: issued_at.hmac. Без персональных данных. $age — сдвиг времени выдачи назад (для перевыдачи). */
@@ -163,6 +163,7 @@ function maxbit_lead_process( array $in ): array {
 	}
 
 	$name    = trim( mb_substr( sanitize_text_field( $in['name'] ?? '' ), 0, 100 ) );
+	$phone   = maxbit_phone_normalize( (string) ( $in['phone'] ?? '' ) );
 	$contact = trim( mb_substr( sanitize_text_field( $in['contact'] ?? '' ), 0, 200 ) );
 	$message = trim( mb_substr( sanitize_textarea_field( $in['message'] ?? '' ), 0, 2000 ) );
 	$topic   = sanitize_key( $in['topic'] ?? 'general' );
@@ -178,10 +179,13 @@ function maxbit_lead_process( array $in ): array {
 
 	$errors = array();
 	if ( mb_strlen( $name ) < 2 ) {
-		$errors['name'] = 'Укажите, как к вам обращаться (не короче 2 символов).';
+		$errors['name'] = 'Укажите имя (не короче 2 символов).';
 	}
-	if ( ! maxbit_contact_valid( $contact ) ) {
-		$errors['contact'] = 'Укажите email или имя пользователя в Telegram/MAX.';
+	if ( '' === $phone ) {
+		$errors['phone'] = 'Укажите российский номер телефона: +7 и 10 цифр.';
+	}
+	if ( '' !== $contact && ! maxbit_contact_valid( $contact ) ) {
+		$errors['contact'] = 'Укажите email или имя пользователя в Telegram/MAX — или оставьте поле пустым.';
 	}
 	if ( ! array_key_exists( $topic, maxbit_lead_topics() ) ) {
 		$errors['topic'] = 'Недопустимая тема обращения.';
@@ -204,7 +208,7 @@ function maxbit_lead_process( array $in ): array {
 		return $fail( 'validation', 'Проверьте заполнение полей.', $errors );
 	}
 
-	$fingerprint = hash( 'sha256', mb_strtolower( $name . '|' . $contact . '|' . $message . '|' . $topic . '|' . $purpose ) );
+	$fingerprint = hash( 'sha256', mb_strtolower( $name . '|' . $phone . '|' . $contact . '|' . $message . '|' . $topic . '|' . $purpose ) );
 	$lock_name   = $client_key ? 'key_' . substr( hash( 'sha256', $client_key ), 0, 40 ) : 'fp_' . substr( $fingerprint, 0, 40 );
 
 	// Атомарная блокировка на ключ/отпечаток: параллельные повторы ждут и получают тот же результат.
@@ -233,7 +237,7 @@ function maxbit_lead_process( array $in ): array {
 		if ( maxbit_lead_rate_limited() ) {
 			return $fail( 'rate_limited', 'Слишком много попыток. Подождите несколько минут и повторите.' );
 		}
-		return maxbit_lead_store( compact( 'name', 'contact', 'message', 'topic', 'source', 'client_key', 'fingerprint', 'quiz', 'variant', 'purpose' ) + array( 'page' => mb_substr( maxbit_mask_private_path( sanitize_text_field( $in['page'] ?? '' ) ), 0, 300 ), 'consent_transfer' => $consent_transfer ? '1' : '0' ) );
+		return maxbit_lead_store( compact( 'name', 'phone', 'contact', 'message', 'topic', 'source', 'client_key', 'fingerprint', 'quiz', 'variant', 'purpose' ) + array( 'page' => mb_substr( maxbit_mask_private_path( sanitize_text_field( $in['page'] ?? '' ) ), 0, 300 ), 'consent_transfer' => $consent_transfer ? '1' : '0' ) );
 	} finally {
 		maxbit_lock_release( $lock_name );
 	}
@@ -259,7 +263,7 @@ function maxbit_lead_store( array $d ): array {
 	$required = array(
 		'_mb_request_id'  => $request_id,
 		'_mb_name'        => $d['name'],
-		'_mb_contact'     => $d['contact'],
+		'_mb_phone'       => $d['phone'],
 		'_mb_topic'       => $d['topic'],
 		'_mb_fingerprint' => $d['fingerprint'],
 		'_mb_consent'     => '1',
@@ -267,6 +271,7 @@ function maxbit_lead_store( array $d ): array {
 		'_mb_consent_at'  => gmdate( 'c' ),
 	);
 	$optional = array(
+		'_mb_contact'     => $d['contact'],
 		'_mb_message'     => $d['message'],
 		'_mb_page'        => $d['page'] ?? '',
 		'_mb_source'      => $d['source'],
@@ -333,9 +338,28 @@ function maxbit_lead_success( int $post_id, bool $duplicate ): array {
 }
 
 /**
- * «Удобный контакт» (ТЗ v4 §17.3): email, @имя или ссылка t.me / max.ru, либо имя пользователя мессенджера.
+ * Необязательное поле «Почта или мессенджер» (с 0.7.1; ранее «Удобный контакт», ТЗ v4 §17.3): email, @имя или ссылка t.me / max.ru, либо имя пользователя мессенджера.
  * Телефон не требуется; если посетитель всё же указал номер — заявку принимаем.
  */
+/**
+ * Российский номер: +7 / 7 / 8 и 10 цифр (решение владельца 28.10, вариант «б»).
+ * Возвращает «+7XXXXXXXXXX» или пустую строку, если номер не подходит.
+ */
+function maxbit_phone_normalize( string $p ): string {
+	$p = trim( $p );
+	if ( '' === $p || mb_strlen( $p ) > 25 || preg_match( '/[^\d\s()+\-]/', $p ) ) {
+		return '';
+	}
+	$d = preg_replace( '/\D/', '', $p );
+	if ( 11 === strlen( $d ) && in_array( $d[0], array( '7', '8' ), true ) ) {
+		$d = substr( $d, 1 );
+	}
+	if ( 10 !== strlen( $d ) || ! in_array( $d[0], array( '3', '4', '8', '9' ), true ) ) {
+		return '';
+	}
+	return '+7' . $d;
+}
+
 function maxbit_contact_valid( string $c ): bool {
 	$c = trim( $c );
 	if ( mb_strlen( $c ) < 3 ) {
@@ -410,7 +434,8 @@ add_action( 'add_meta_boxes_mb_lead', function () {
 			'Цель'          => maxbit_lead_purposes()[ (string) get_post_meta( $post->ID, '_mb_purpose', true ) ] ?? 'Обсудить задачу',
 			'Тема'          => maxbit_lead_topics()[ get_post_meta( $post->ID, '_mb_topic', true ) ] ?? '',
 			'Имя'           => get_post_meta( $post->ID, '_mb_name', true ),
-			'Контакт'       => get_post_meta( $post->ID, '_mb_contact', true ),
+			'Телефон'       => get_post_meta( $post->ID, '_mb_phone', true ) ?: '—',
+			'Почта / мессенджер' => get_post_meta( $post->ID, '_mb_contact', true ) ?: '—',
 			'Задача'        => get_post_meta( $post->ID, '_mb_message', true ),
 			'Страница'      => get_post_meta( $post->ID, '_mb_page', true ),
 			'Источник'      => get_post_meta( $post->ID, '_mb_source', true ),
