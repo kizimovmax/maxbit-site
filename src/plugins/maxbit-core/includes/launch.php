@@ -55,7 +55,7 @@ function maxbit_launch( array $o ): array {
 	$host = (string) wp_parse_url( home_url(), PHP_URL_HOST );
 
 	/* 1. Проверка */
-	$log[] = 'Сайт: ' . $host . ', среда ' . MAXBIT_ENV . ', режим формы ' . MAXBIT_FORM_MODE . ', модуль ' . MAXBIT_CORE_VERSION . ', тема ' . wp_get_theme()->get( 'Version' ) . ', база ' . DB_NAME;
+	$log[] = 'Сайт: ' . $host . ', среда ' . MAXBIT_ENV . ', режим формы ' . MAXBIT_FORM_MODE . ', модуль ' . MAXBIT_CORE_VERSION . ', тема ' . wp_get_theme()->get( 'Version' ) . ', база ' . DB_NAME . ', загрузки ' . wp_get_upload_dir()['basedir'];
 	if ( ! $rehearse ) {
 		if ( 'production' !== MAXBIT_ENV || 'maxbitpro.ru' !== $host ) {
 			return $fail( 'Запуск выполняется только на боевом сайте (production, maxbitpro.ru). Для проверки на dev — rehearse:true.' );
@@ -262,7 +262,7 @@ function maxbit_launch_indexing( bool $open ): array {
 
 /** Проверка по живым адресам с самого сервера: коды, переадресации, следы dev, noindex, Метрика. */
 function maxbit_launch_smoke(): array {
-	$paths = array( '/', '/resheniya/', '/resheniya/zakaz-pod-kontrolem/', '/tekhnologii/', '/proekty/', '/baza-znaniy/', '/o-kompanii/', '/politika-obrabotki-personalnyh-dannyh/', '/robots.txt', '/sitemap.xml', '/llms.txt', '/net-takoj-stranicy-404/' );
+	$paths = array( '/', '/resheniya/', '/resheniya/zakaz-pod-kontrolem/', '/tekhnologii/', '/proekty/', '/baza-znaniy/', '/o-kompanii/', '/politika-obrabotki-personalnyh-dannyh/', '/robots.txt', '/wp-sitemap.xml', '/llms.txt', '/net-takoj-stranicy-404/' );
 	$s     = maxbit_get_settings();
 	$out   = array();
 	foreach ( $paths as $p ) {
