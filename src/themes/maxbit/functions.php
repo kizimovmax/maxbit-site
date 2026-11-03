@@ -4,7 +4,7 @@
  */
 defined( 'ABSPATH' ) || exit;
 
-define( 'MAXBIT_THEME_VERSION', '0.10.3' );
+define( 'MAXBIT_THEME_VERSION', '0.10.4' );
 
 /**
  * Тема работает и без модуля maxbit-core (без формы, типов и допуска). Обёртки с префиксом maxbit_theme_
@@ -447,9 +447,22 @@ function maxbit_theme_services_link(): void {
 
 /* ---------- Страница основателя (/osnovatel/): первый экран с портретом (материалы владельца 03.11) ---------- */
 
-/** Страница основателя с загруженным портретом (изображение записи). Без фото — обычная страница. */
+/** Портрет: изображение записи, если задано в админке; иначе фото из темы (прислано владельцем 03.11). */
+function maxbit_theme_founder_photo(): string {
+	$alt = 'Максим Кизимов, основатель MAXBIT';
+	if ( has_post_thumbnail() ) {
+		return get_the_post_thumbnail( null, 'full', array( 'alt' => $alt, 'loading' => 'eager', 'fetchpriority' => 'high', 'sizes' => '(max-width: 760px) 100vw, 50vw' ) );
+	}
+	$f = get_template_directory() . '/assets/img/founder-maksim-kizimov.webp';
+	if ( ! is_file( $f ) ) {
+		return '';
+	}
+	return '<img src="' . esc_url( get_template_directory_uri() . '/assets/img/founder-maksim-kizimov.webp?ver=' . filemtime( $f ) ) . '" width="1122" height="1402" alt="' . esc_attr( $alt ) . '" fetchpriority="high">';
+}
+
+/** Страница основателя с портретом. Без портрета — обычная страница. */
 function maxbit_theme_is_founder_page(): bool {
-	return is_page( 'osnovatel' ) && has_post_thumbnail();
+	return is_page( 'osnovatel' ) && '' !== maxbit_theme_founder_photo();
 }
 
 /** Якоря разделов страницы основателя: заголовок h2 → id. */
@@ -473,7 +486,7 @@ function maxbit_theme_founder_hero(): void {
 	?>
 	<section class="mb-founder-hero" aria-labelledby="mb-founder-name">
 		<div class="mb-founder-hero__photo">
-			<?php the_post_thumbnail( 'full', array( 'alt' => esc_attr( $name . ', основатель MAXBIT' ), 'loading' => 'eager', 'fetchpriority' => 'high', 'sizes' => '(max-width: 760px) 100vw, 50vw' ) ); ?>
+			<?php echo maxbit_theme_founder_photo(); // phpcs:ignore ?>
 		</div>
 		<div class="mb-founder-hero__body">
 			<?php maxbit_the_breadcrumbs(); ?>
