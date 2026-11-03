@@ -1360,3 +1360,7 @@ html.js .mb-quiz.is-collapsed .mb-quiz__head { margin-bottom: 0; }
 .mb-next__title::after { content: " ››"; color: var(--accent); }
 .mb-next__text { color: var(--ink-2); font-size: .88rem; line-height: 1.5; text-align: left; }
 @media (max-width: 620px) { .mb-next__grid { grid-template-columns: 1fr; } }
+/* Логотипы сервисов в каталоге (03.11): официальный файл, без перекраски, одна высота. */
+.mb-visually-hidden { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
+.mb-svc-card__logo { margin: 0 0 16px; height: 34px; display: flex; align-items: center; }
+.mb-svc-card__logo img { height: 30px; width: auto; max-width: 220px; display: block; }

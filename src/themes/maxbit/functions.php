@@ -4,7 +4,7 @@
  */
 defined( 'ABSPATH' ) || exit;
 
-define( 'MAXBIT_THEME_VERSION', '0.11.1' );
+define( 'MAXBIT_THEME_VERSION', '0.11.2' );
 
 /**
  * Тема работает и без модуля maxbit-core (без формы, типов и допуска). Обёртки с префиксом maxbit_theme_
@@ -419,6 +419,18 @@ function maxbit_theme_services(): array {
 			array( 'id' => 'kontur-diadok', 'name' => 'Контур.Диадок', 'kind' => 'ЭДО', 'about' => 'Сервис электронного документооборота с контрагентами.', 'do' => 'связываем отправку и статусы документов с карточками сделок в CRM.', 'case_keys' => array( 'Диадок' ) ),
 		) ),
 	);
+	// Логотипы — только официальные файлы правообладателей (брендбук), без перекраски. 1С не выводится:
+	// по правилам фирмы «1С» логотип вправе использовать только компании сети «1С:Франчайзинг» (решение владельца 03.11).
+	$logos = array( 'bitrix24' => 'bitrix24.svg' );
+	foreach ( $g as &$grp ) {
+		foreach ( $grp['items'] as &$it ) {
+			if ( isset( $logos[ $it['id'] ] ) && is_file( get_template_directory() . '/assets/img/logos/' . $logos[ $it['id'] ] ) ) {
+				$it['logo'] = get_template_directory_uri() . '/assets/img/logos/' . $logos[ $it['id'] ];
+			}
+		}
+		unset( $it );
+	}
+	unset( $grp );
 	// Статусы партнёра — из модуля (только действующие документы), со ссылкой на раздел «Статусы и сертификаты».
 	if ( function_exists( 'maxbit_cert_status_line' ) ) {
 		foreach ( $g as &$grp ) {

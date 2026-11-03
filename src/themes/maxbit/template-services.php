@@ -94,8 +94,9 @@ $cases  = function ( array $keys ): array {
 		<div class="mb-grid mb-grid--2">
 			<?php foreach ( $g['items'] as $s ) : $pr = $cases( $s['case_keys'] ?? array() ); ?>
 			<article class="mb-ccard mb-svc-card" id="<?php echo esc_attr( $s['id'] ); ?>">
+				<?php if ( ! empty( $s['logo'] ) ) : ?><p class="mb-svc-card__logo"><img src="<?php echo esc_url( $s['logo'] ); ?>" alt="<?php echo esc_attr( $s['name'] ); ?>" width="252" height="46" loading="lazy" decoding="async"></p><?php endif; ?>
 				<p class="mb-ccard__label"><?php echo esc_html( $s['kind'] ); ?></p>
-				<h4><?php echo esc_html( $s['name'] ); ?></h4>
+				<h4<?php echo ! empty( $s['logo'] ) ? ' class="mb-visually-hidden"' : ''; ?>><?php echo esc_html( $s['name'] ); ?></h4>
 				<p><?php echo esc_html( $s['about'] ); ?></p>
 				<p class="mb-svc-card__do"><strong>Что делаем:</strong> <?php echo esc_html( $s['do'] ); ?></p>
 				<?php if ( ! empty( $s['partner'] ) ) : ?><p class="mb-svc-card__partner"><?php echo esc_html( $s['partner'] ); ?><?php if ( ! empty( $s['certificate'] ) ) : ?> · <a href="<?php echo esc_url( $s['certificate'] ); ?>">Документы</a><?php endif; ?></p><?php endif; ?>
