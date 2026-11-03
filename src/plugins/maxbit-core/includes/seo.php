@@ -22,7 +22,7 @@ function maxbit_document_title(): string {
 			return 'MAXBIT — внешняя команда цифрового развития производственных компаний';
 		}
 		if ( function_exists( 'maxbit_tech_hub_active' ) && maxbit_tech_hub_active() && is_page( 'tekhnologii' ) ) {
-			return 'Сервисы и интеграции: Битрикс24, 1С, ЭДО, телефония | MAXBIT';
+			return 'Сервисы для задач компании: Битрикс24, 1С, ЭДО, телефония | MAXBIT';
 		}
 		return get_the_title( $id ) . ' — MAXBIT';
 	}

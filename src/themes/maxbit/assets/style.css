@@ -1384,3 +1384,14 @@ html.js .mb-quiz.is-collapsed .mb-quiz__head { margin-bottom: 0; }
 @media (max-width: 1100px) { .mb-sit2__row { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (max-width: 900px) { .mb-sit2__big { grid-template-columns: 1fr; } }
 @media (max-width: 620px) { .mb-sit2__card { padding: 22px; } .mb-sit2__row { grid-template-columns: repeat(2, minmax(0, 1fr)); } .mb-sit2__row a { font-size: .9rem; min-height: 58px; padding: 11px 12px; } }
+
+/* 03.11: зона нажатия на телефоне не меньше ~44px — без изменения вида */
+@media (pointer: coarse) {
+	.mb-btn--link, .mb-logo { position: relative; }
+	.mb-btn--link::before, .mb-logo::before { content: ""; position: absolute; inset: -11px -6px; }
+	.mb-footer__legal { gap: 0 18px; }
+	.mb-footer__legal a, .mb-footer__legal button { display: inline-block; padding: 12px 0; }
+}
+/* 03.11: стрелка «››» кнопки не разрывается при переносе текста на телефоне */
+.wp-block-buttons .wp-block-button__link::after, .mb-btn::after { white-space: nowrap; flex: none; }
+@media (max-width: 620px) { .mb-hero__actions .wp-block-button__link { font-size: .95rem; padding: 12px 18px; } }

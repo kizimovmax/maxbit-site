@@ -329,6 +329,12 @@ function maxbit_directions_migrate( bool $dry = false ): array {
 			$writes[] = array( 'update', $zk, array( 'post_content' => $nc ), array() );
 		}
 	}
+	// 5. Название страницы сервисов (крошки, меню) — как заголовок страницы (03.11).
+	$svc = get_page_by_path( 'tekhnologii' );
+	if ( $svc && 'Сервисы и интеграции' === $svc->post_title ) {
+		$log[]    = '/tekhnologii/: название «Сервисы и интеграции» → «Сервисы для задач компании»';
+		$writes[] = array( 'update', $svc, array( 'post_title' => 'Сервисы для задач компании' ), array() );
+	}
 	if ( $dry || ! $writes ) {
 		return array( 'ok' => true, 'dry_run' => $dry, 'log' => $log );
 	}
