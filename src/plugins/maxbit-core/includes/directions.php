@@ -313,6 +313,7 @@ function maxbit_directions_migrate( bool $dry = false ): array {
 	$front = (int) get_option( 'page_on_front' );
 	if ( $front && ( $fp = get_post( $front ) ) ) {
 		$nc = maxbit_dir_home( $fp->post_content, $d, $log );
+		$nc = maxbit_dir_home_situations( $nc, $log ); // 03.11: новый блок ситуаций
 		if ( $nc !== $fp->post_content ) {
 			$writes[] = array( 'update', $fp, array( 'post_content' => $nc ), array() );
 		} else {
@@ -401,4 +402,116 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 		}
 		$r['ok'] ? WP_CLI::success( $r['backup'] ?? 'проверка' ) : WP_CLI::error( $r['error'] );
 	} );
+}
+
+/* ---------------------------------------------------------------- блок «Узнаёте свою ситуацию?» (03.11) */
+
+/** Три крупные ситуации и ряд коротких (утверждено владельцем 03.11). Ссылка: 'sol:<slug>' | 'page:<path>' | '/путь/'. */
+function maxbit_situations_data(): array {
+	return (array) apply_filters( 'maxbit_situations', array(
+		'big'   => array(
+			array( 'Непонятно, на каком этапе заказ и кто за него отвечает', 'Статус, ответственный и срок видны в карточке заказа.', 'sol:zakaz-pod-kontrolem', 'order' ),
+			array( 'Одно и то же вбиваем в 1С, CRM и таблицу', 'Данные вводятся один раз и сами попадают туда, где нужны.', 'sol:cifrovaya-sreda-kompanii', 'systems' ),
+			array( 'Отчёты для руководителя собираем вручную', 'Продажи, заказы и оплаты видны в одном отчёте, без Excel.', 'sol:porucheniya-i-otchety', 'reports' ),
+		),
+		'small' => array(
+			array( 'Договорённости теряются между отделами', 'sol:zakaz-pod-kontrolem' ),
+			array( 'Много ручной работы', 'sol:integraciya-bitrix24-i-1c' ),
+			array( 'Всё замыкается на руководителе', 'page:tekhnologii/bitrix24-dlya-proizvodstva' ),
+			array( 'Подрядчики не стыкуются', 'sol:koordinaciya-podryadchikov' ),
+			array( 'Хотим ИИ, но с чего начать?', 'sol:ii-praktikum' ),
+		),
+	) );
+}
+
+function maxbit_situation_url( string $ref ): string {
+	[ $t, $v ] = array_pad( explode( ':', $ref, 2 ), 2, '' );
+	if ( 'sol' === $t ) {
+		$p = maxbit_dir_find( $v );
+		return ( $p && 'publish' === $p->post_status && maxbit_is_publicly_visible( $p->ID ) ) ? (string) get_permalink( $p ) : '';
+	}
+	if ( 'page' === $t ) {
+		$p = get_page_by_path( $v );
+		return ( $p && 'publish' === $p->post_status ) ? (string) get_permalink( $p ) : '';
+	}
+	return str_starts_with( $ref, '/' ) ? home_url( $ref ) : '';
+}
+
+/** [maxbit_situations] — блок ситуаций на главной. Ситуации без опубликованной страницы не выводятся. */
+add_shortcode( 'maxbit_situations', function () {
+	$d     = maxbit_situations_data();
+	$icons = array(
+		'order'   => '<path d="M4 6h16M4 12h10M4 18h6"/><circle cx="18" cy="16" r="3"/><path d="M20.2 18.2 22 20"/>',
+		'systems' => '<rect x="3" y="4" width="7" height="7"/><rect x="14" y="13" width="7" height="7"/><path d="M10 7.5h4.5v5.5"/>',
+		'reports' => '<path d="M4 20V11M10 20V5M16 20v-6M2 20h20"/>',
+	);
+	$big = '';
+	foreach ( $d['big'] as $b ) {
+		$u = maxbit_situation_url( $b[2] );
+		if ( ! $u ) {
+			continue;
+		}
+		$big .= '<a class="mb-sit2__card" href="' . esc_url( $u ) . '"><svg class="mb-sit2__icon" viewBox="0 0 24 24" aria-hidden="true">' . ( $icons[ $b[3] ] ?? '' ) . '</svg><h3>' . esc_html( $b[0] ) . '</h3><p>' . esc_html( $b[1] ) . '</p><span class="mb-sit2__more">Как решаем</span></a>';
+	}
+	$small = '';
+	foreach ( $d['small'] as $s ) {
+		$u = maxbit_situation_url( $s[1] );
+		if ( $u ) {
+			$small .= '<a href="' . esc_url( $u ) . '">' . esc_html( $s[0] ) . '</a>';
+		}
+	}
+	$cat    = get_post_type_archive_link( 'mb_solution' );
+	$small .= $cat ? '<a class="mb-sit2__all" href="' . esc_url( $cat ) . '">Все решения</a>' : '';
+	return '<div class="mb-sit2"><div class="mb-sit2__big">' . $big . '</div>' . ( $small ? '<p class="mb-sit2__label">Другие ситуации:</p><nav class="mb-sit2__row" aria-label="Другие ситуации">' . $small . '</nav>' : '' ) . '</div>';
+} );
+
+/** Миграция главной: вместо восьми карточек (columns mb-situations), подводки и строки ссылок — [maxbit_situations]. */
+function maxbit_dir_home_situations( string $c, array &$log ): string {
+	if ( false !== strpos( $c, '[maxbit_situations]' ) ) {
+		return $c;
+	}
+	$blocks = parse_blocks( $c );
+	$done   = false;
+	foreach ( $blocks as &$sec ) {
+		if ( $done || empty( $sec['innerBlocks'] ) ) {
+			continue;
+		}
+		$idx = null;
+		foreach ( $sec['innerBlocks'] as $i => $ib ) {
+			if ( 'core/columns' === $ib['blockName'] && false !== strpos( (string) ( $ib['attrs']['className'] ?? '' ), 'mb-situations' ) ) {
+				$idx = $i;
+			}
+		}
+		if ( null === $idx ) {
+			continue;
+		}
+		$new = array();
+		foreach ( $sec['innerBlocks'] as $i => $ib ) {
+			$cls = (string) ( $ib['attrs']['className'] ?? '' );
+			if ( $i === $idx ) {
+				$new[] = parse_blocks( "<!-- wp:shortcode -->\n[maxbit_situations]\n<!-- /wp:shortcode -->" )[0];
+				continue;
+			}
+			if ( 'core/paragraph' === $ib['blockName'] && false !== strpos( $cls, 'mb-section__after' ) ) {
+				$log[] = 'главная: строка «Все решения · Сервисы и интеграции» под ситуациями убрана';
+				continue;
+			}
+			if ( 'core/group' === $ib['blockName'] && false !== strpos( $cls, 'mb-section__head' ) ) {
+				$ib['innerBlocks']  = array_values( array_filter( $ib['innerBlocks'], fn( $x ) => 'core/paragraph' !== $x['blockName'] ) );
+				$open               = $ib['innerContent'][0];
+				$close              = end( $ib['innerContent'] );
+				$ib['innerContent'] = array_merge( array( $open ), array_fill( 0, count( $ib['innerBlocks'] ), null ), array( is_string( $close ) ? $close : '' ) );
+				$log[] = 'главная: подводка справа от «Узнаёте свою ситуацию?» убрана';
+			}
+			$new[] = $ib;
+		}
+		$sec['innerBlocks']  = $new;
+		$open                = $sec['innerContent'][0];
+		$close               = end( $sec['innerContent'] );
+		$sec['innerContent'] = array_merge( array( $open ), array_fill( 0, count( $new ), null ), array( is_string( $close ) ? $close : '' ) );
+		$log[]               = 'главная: восемь карточек ситуаций → блок [maxbit_situations] (3 крупные + 5 кнопок + «Все решения»)';
+		$done                = true;
+	}
+	unset( $sec );
+	return $done ? serialize_blocks( $blocks ) : $c;
 }
