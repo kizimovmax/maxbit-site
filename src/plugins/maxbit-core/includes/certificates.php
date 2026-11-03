@@ -11,7 +11,7 @@ defined( 'ABSPATH' ) || exit;
 
 function maxbit_certificates( string $service = '' ): array {
 	$all = array(
-		array( 'id' => 'b24-platinum-2026', 'service' => 'bitrix24', 'kind' => 'Статус партнёра', 'title' => 'Платиновый партнёр 1С-Битрикс', 'short' => 'Платиновый партнёр Битрикс24', 'issuer' => '1С-Битрикс', 'valid_to' => '2026-11-01', 'note' => 'Действует до 01.11.2026' ),
+		array( 'id' => 'b24-platinum-2027', 'service' => 'bitrix24', 'kind' => 'Статус партнёра', 'title' => 'Платиновый партнёр 1С-Битрикс', 'short' => 'Платиновый партнёр Битрикс24', 'issuer' => '1С-Битрикс', 'valid_to' => '2027-01-01', 'note' => 'Действует до 01.01.2027' ), // продлён: сертификат от 01.02.2026, действует по 01.01.2027 (прислан владельцем 03.11),
 		array( 'id' => 'b24-vibecode-2026', 'service' => 'bitrix24', 'kind' => 'Компетенция', 'title' => 'Компетенция «Вайбкод-разработка»', 'short' => 'компетенция «Вайбкод-разработка»', 'issuer' => '1С-Битрикс', 'valid_to' => '2027-09-17', 'note' => 'Действует до 17.09.2027' ),
 		array( 'id' => 'wazzup-top-partner', 'service' => 'wazzup', 'kind' => 'Статус партнёра', 'title' => 'ТОП-партнёр Wazzup', 'short' => 'ТОП-партнёр Wazzup', 'issuer' => 'Wazzup', 'valid_to' => '', 'note' => '' ),
 		array( 'id' => 'bitrix-awards-2022', 'service' => 'bitrix24', 'kind' => 'Награда', 'title' => 'Bitrix Awards 2022: 5 место «Лидер продаж»', 'short' => '', 'issuer' => '1С-Битрикс', 'valid_to' => '', 'note' => '«1С-Битрикс24» облачная версия, Сибирский федеральный округ' ),
