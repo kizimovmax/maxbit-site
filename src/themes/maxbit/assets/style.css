@@ -509,9 +509,9 @@ strong { font-weight: 700; }
 .mb-form__intro p { color: var(--ink-2); font-size: .95rem; line-height: 1.6; max-width: 480px; }
 .mb-form__row { margin-bottom: 14px; }
 .mb-form label { display: block; font-weight: 700; margin-bottom: 6px; color: var(--ink-2); font-size: .8rem; }
-.mb-form input[type=text], .mb-form input[type=email], .mb-form textarea { width: 100%; font: inherit; padding: 12px 14px; border: 2px solid var(--ink); background: #fff; color: var(--ink); transition: border-color .15s ease, box-shadow .15s ease; }
-.mb-form input[type=text]::placeholder, .mb-form textarea::placeholder { color: #8A97AD; }
-.mb-form input[type=text]:focus, .mb-form input[type=email]:focus, .mb-form textarea:focus { outline: 3px solid var(--sky); outline-offset: 0; border-color: var(--accent); }
+.mb-form input[type=text], .mb-form input[type=email], .mb-form input[type=tel], .mb-form textarea { width: 100%; font: inherit; padding: 12px 14px; border: 2px solid var(--ink); background: #fff; color: var(--ink); transition: border-color .15s ease, box-shadow .15s ease; }
+.mb-form input[type=text]::placeholder, .mb-form input[type=tel]::placeholder, .mb-form textarea::placeholder { color: #8A97AD; }
+.mb-form input[type=text]:focus, .mb-form input[type=email]:focus, .mb-form input[type=tel]:focus, .mb-form textarea:focus { outline: 3px solid var(--sky); outline-offset: 0; border-color: var(--accent); }
 .mb-form .is-invalid { border-color: var(--err); }
 .mb-form__error { color: var(--err); font-size: .85rem; font-weight: 600; margin: 6px 0 0; min-height: 1em; }
 .mb-form__hp { position: absolute; left: -9999px; }
@@ -1275,4 +1275,33 @@ html.js .mb-quiz.is-collapsed .mb-quiz__head { margin-bottom: 0; }
   .mb-updated { display: block; }
   .mb-download { display: none; }
   .mb-page::after { content: "MAXBIT · maxbitpro.ru"; display: block; margin-top: 24pt; padding-top: 8pt; border-top: 1px solid #999; font-size: 9pt; color: #52617A; }
+}
+
+/* ---------- Основатель: первый экран с портретом (03.11) ---------- */
+.mb-founder-hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); background: #F2F1EF; min-height: clamp(560px, 72vh, 680px); overflow: hidden; }
+.mb-founder-hero__photo { position: relative; margin-right: -96px; clip-path: polygon(0 0, 100% 0, calc(100% - 96px) 100%, 0 100%); background: #CFCFCB; }
+.mb-founder-hero__photo img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 28%; }
+.mb-founder-hero__body { position: relative; z-index: 1; padding: 56px max(var(--pad), calc((100vw - var(--max)) / 2)) 64px 120px; display: flex; flex-direction: column; justify-content: center; }
+.mb-founder-hero__body .mb-crumbs { margin: 0 0 40px; }
+.mb-founder-hero__label { margin: 0 0 14px; color: var(--accent); font-size: .78rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+.mb-founder-hero__name { position: relative; margin: 0 0 28px; font-size: clamp(2.6rem, 5vw, 4.2rem); line-height: .98; letter-spacing: -.035em; color: var(--ink); }
+.mb-founder-hero__name::before { content: ""; position: absolute; left: -34px; top: -58px; bottom: 4px; width: 3px; background: var(--accent); }
+.mb-founder-hero__name span { display: block; }
+.mb-founder-hero__lead { margin: 0; max-width: 34em; color: var(--ink); font-size: 1.05rem; line-height: 1.6; }
+.mb-founder-hero__role { margin-top: 28px; padding-top: 24px; border-top: 1px solid #D6D3CE; max-width: 34em; }
+.mb-founder-hero__role p:last-child { margin: 0; color: var(--ink); line-height: 1.6; }
+.mb-founder-nav { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 10px; padding: 28px 0 0; font-size: .95rem; color: var(--ink-2); }
+.mb-founder-nav span { flex-basis: 100%; font-size: .8rem; color: var(--ink-3); }
+.mb-founder-nav a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--line); }
+.mb-founder-nav a:hover { color: var(--accent); border-color: var(--accent); }
+.mb-page--founder { padding-top: 24px; }
+.mb-page--founder .mb-content h2[id] { scroll-margin-top: 110px; }
+@media (max-width: 1100px) { .mb-founder-hero__body { padding-left: 96px; } }
+@media (max-width: 760px) {
+	.mb-founder-hero { grid-template-columns: 1fr; min-height: 0; }
+	.mb-founder-hero__photo { margin-right: 0; aspect-ratio: 4 / 4.2; clip-path: polygon(0 0, 100% 0, 100% calc(100% - 44px), 0 100%); }
+	.mb-founder-hero__body { padding: 8px var(--pad) 40px; }
+	.mb-founder-hero__body .mb-crumbs { order: 9; margin: 28px 0 0; }
+	.mb-founder-hero__name::before { display: none; }
+	.mb-founder-hero__name { font-size: 2.6rem; margin-bottom: 20px; }
 }

@@ -4,7 +4,7 @@
  */
 defined( 'ABSPATH' ) || exit;
 
-define( 'MAXBIT_THEME_VERSION', '0.10.2' );
+define( 'MAXBIT_THEME_VERSION', '0.10.3' );
 
 /**
  * Тема работает и без модуля maxbit-core (без формы, типов и допуска). Обёртки с префиксом maxbit_theme_
@@ -443,3 +443,63 @@ function maxbit_theme_services_link(): void {
 	}
 	echo '<p class="mb-svc-cta"><span>Битрикс24, 1С, ЭДО, телефония и мессенджеры — как связываем сервисы компании.</span> <a class="mb-btn mb-btn--link" href="' . esc_url( home_url( '/tekhnologii/' ) ) . '">Сервисы и интеграции</a></p>';
 }
+
+
+/* ---------- Страница основателя (/osnovatel/): первый экран с портретом (материалы владельца 03.11) ---------- */
+
+/** Страница основателя с загруженным портретом (изображение записи). Без фото — обычная страница. */
+function maxbit_theme_is_founder_page(): bool {
+	return is_page( 'osnovatel' ) && has_post_thumbnail();
+}
+
+/** Якоря разделов страницы основателя: заголовок h2 → id. */
+function maxbit_theme_founder_anchors(): array {
+	return array( 'Роль в проектах' => 'rol', 'Принципы' => 'principy', 'Материалы MAXBIT' => 'materialy' );
+}
+
+function maxbit_theme_founder_hero(): void {
+	$name  = function_exists( 'maxbit_get_settings' ) ? ( maxbit_get_settings()['founder'] ?: 'Максим Кизимов' ) : 'Максим Кизимов';
+	$parts = preg_split( '/\s+/u', trim( $name ), 2 );
+	$lead  = 'Участвует в определении задач, выборе подхода и контроле результата в работе с производственными компаниями.';
+	if ( preg_match( '~<p class="mb-lead">(.*?)</p>~su', get_the_content(), $m ) ) { // вводный абзац страницы, без повтора «Основатель MAXBIT.»
+		$lead = trim( preg_replace( '/^Основатель MAXBIT\.\s*/u', '', wp_strip_all_tags( $m[1] ) ) ) ?: $lead;
+	}
+	$links = array();
+	foreach ( maxbit_theme_founder_anchors() as $t => $id ) {
+		if ( false !== strpos( get_the_content(), '>' . $t . '</h2>' ) ) {
+			$links[] = '<a href="#' . esc_attr( $id ) . '">' . esc_html( 'Материалы MAXBIT' === $t ? 'Материалы' : $t ) . '</a>';
+		}
+	}
+	?>
+	<section class="mb-founder-hero" aria-labelledby="mb-founder-name">
+		<div class="mb-founder-hero__photo">
+			<?php the_post_thumbnail( 'full', array( 'alt' => esc_attr( $name . ', основатель MAXBIT' ), 'loading' => 'eager', 'fetchpriority' => 'high', 'sizes' => '(max-width: 760px) 100vw, 50vw' ) ); ?>
+		</div>
+		<div class="mb-founder-hero__body">
+			<?php maxbit_the_breadcrumbs(); ?>
+			<p class="mb-founder-hero__label">Основатель MAXBIT</p>
+			<h1 class="mb-founder-hero__name" id="mb-founder-name"><?php echo esc_html( $parts[0] ); ?><?php if ( isset( $parts[1] ) ) : ?> <span><?php echo esc_html( $parts[1] ); ?></span><?php endif; ?></h1>
+			<p class="mb-founder-hero__lead"><?php echo esc_html( $lead ); ?></p>
+			<div class="mb-founder-hero__role">
+				<p class="mb-founder-hero__label">Роль в проектах</p>
+				<p>Ключевые задачи и границы проекта, выбор подхода и технологий, проверка результата.</p>
+			</div>
+		</div>
+	</section>
+	<?php if ( $links ) : ?>
+	<nav class="mb-container mb-founder-nav" aria-label="Разделы страницы"><span>Дальше на странице</span><?php echo implode( ' · ', $links ); // phpcs:ignore ?></nav>
+	<?php endif; ?>
+	<?php
+}
+
+/** Якоря у заголовков разделов и без повтора вводного абзаца (он уже на первом экране). */
+add_filter( 'the_content', function ( $c ) {
+	if ( ! maxbit_theme_is_founder_page() || get_the_ID() !== get_queried_object_id() ) {
+		return $c;
+	}
+	$c = preg_replace( '~<p class="mb-lead">.*?</p>~su', '', $c, 1 );
+	foreach ( maxbit_theme_founder_anchors() as $t => $id ) {
+		$c = str_replace( '<h2 class="wp-block-heading">' . $t . '</h2>', '<h2 class="wp-block-heading" id="' . $id . '">' . $t . '</h2>', $c );
+	}
+	return $c;
+}, 20 );
