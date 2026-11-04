@@ -4,7 +4,7 @@
  */
 defined( 'ABSPATH' ) || exit;
 
-define( 'MAXBIT_THEME_VERSION', '0.11.4' );
+define( 'MAXBIT_THEME_VERSION', '0.11.5' );
 
 /**
  * Тема работает и без модуля maxbit-core (без формы, типов и допуска). Обёртки с префиксом maxbit_theme_
@@ -255,7 +255,13 @@ add_filter( 'maxbit_messengers_html', function ( $html, array $links, string $ki
 	if ( 'inline' === $style ) {
 		$a = array();
 		foreach ( $links as $l ) {
+			if ( str_starts_with( $l['url'], 'mailto:' ) ) {
+				continue; // 04.11: в строке «Написать:» первого экрана — только мессенджеры; почта остаётся в остальных местах
+			}
 			$a[] = '<a href="' . esc_url( $l['url'] ) . '" data-event="' . esc_attr( $l['event'] ) . '" target="_blank" rel="noopener">' . esc_html( $l['short'] ) . '</a>';
+		}
+		if ( ! $a ) {
+			return '';
 		}
 		return '<p class="mb-msg-inline">' . ( $label ? '<span class="mb-msg-inline__label">' . esc_html( $label ) . '</span>' : '' ) . '<span class="mb-msg-inline__links">Написать: ' . implode( ' · ', $a ) . '</span></p>';
 	}
