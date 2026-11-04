@@ -182,7 +182,8 @@ function maxbit_show_updated_date(): bool {
 
 /** Строка «Обновлено: 16.10.2026» для темы. */
 function maxbit_updated_line(): string {
-	if ( ! maxbit_show_updated_date() ) {
+	// 04.11 (решение владельца): видимая строка «Обновлено» убрана со всех страниц; dateModified в разметке остаётся.
+	if ( ! apply_filters( 'maxbit_show_updated_line', false ) || ! maxbit_show_updated_date() ) {
 		return '';
 	}
 	$id = get_queried_object_id();
